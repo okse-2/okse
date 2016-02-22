@@ -24,11 +24,6 @@
 
 package no.ntnu.okse.core.event;
 
-/**
- * Created by Aleksander Skraastad (myth) on 3/3/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public abstract class Event {
 
     protected Object data;

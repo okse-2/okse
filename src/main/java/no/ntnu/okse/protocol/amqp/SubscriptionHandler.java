@@ -42,10 +42,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * This code is a heavily modified version of the qpid-proton-demo (https://github.com/rhs/qpid-proton-demo) by Rafael Schloming
- * Created by kradalby on 24/04/15.
- */
 public class SubscriptionHandler extends BaseHandler implements SubscriptionChangeListener {
 
     /**

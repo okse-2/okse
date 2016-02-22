@@ -26,11 +26,6 @@ package no.ntnu.okse.core;
 
 import org.apache.log4j.Logger;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/18/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public abstract class AbstractCoreService {
 
     // Instance-specific fields

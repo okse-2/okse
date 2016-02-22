@@ -22,10 +22,6 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by Fredrik Tørnvall and Håkon Ødegård Løvdal on 27/02/15.
- */
-
 var Topics = (function($) {
 
     // Private variable holding the topics object returned upon the ajax-request.

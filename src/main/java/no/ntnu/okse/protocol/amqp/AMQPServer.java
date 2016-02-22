@@ -36,11 +36,6 @@ import org.apache.qpid.proton.messenger.impl.Address;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
-
-/**
- * This code is a heavily modified version of the qpid-proton-demo (https://github.com/rhs/qpid-proton-demo) by Rafael Schloming
- * Created by kradalby on 24/04/15.
- */
 public class AMQPServer extends BaseHandler {
 
     /**

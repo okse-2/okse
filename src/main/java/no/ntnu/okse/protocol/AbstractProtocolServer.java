@@ -28,11 +28,6 @@ import org.apache.log4j.Logger;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by Aleksander Skraastad (myth) on 3/13/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public abstract class AbstractProtocolServer implements ProtocolServer {
 
     // Holder fields for hostname and port

@@ -46,11 +46,6 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/19/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class DummyProtocolServer extends AbstractProtocolServer {
 
     // Needed statics

@@ -38,10 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * Created by Fredrik on 13/03/15.
- */
-
 @RestController
 @RequestMapping(value = "/api/statistics")
 public class StatsController {

@@ -34,11 +34,6 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/17/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class Message {
 
     // Immutable fields

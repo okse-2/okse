@@ -42,11 +42,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 
-/**
- * Created by Aleksander Skraastad (myth) on 3/19/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class WSNRequestParser implements Hub {
 
     private static Logger log;

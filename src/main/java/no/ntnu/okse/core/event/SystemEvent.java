@@ -24,11 +24,6 @@
 
 package no.ntnu.okse.core.event;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/18/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class SystemEvent extends Event {
 
     public static enum Type {

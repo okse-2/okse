@@ -42,11 +42,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**
- * Created by Aleksander Skraastad (myth) on 2/25/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class CoreService extends AbstractCoreService {
 
     // Common service fields

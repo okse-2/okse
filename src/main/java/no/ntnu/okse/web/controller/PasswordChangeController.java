@@ -11,11 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/**
- * Created by Håkon Ødegård Løvdal (hakloev) on 08/05/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 @Controller
 public class PasswordChangeController {
 

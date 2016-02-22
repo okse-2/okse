@@ -40,11 +40,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/17/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class MessageService extends AbstractCoreService implements TopicChangeListener {
 
     private static boolean _invoked = false;

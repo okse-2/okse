@@ -11,11 +11,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.TimeZone;
 
-/**
- * Created by Håkon Ødegård Løvdal (hakloev) on 29/04/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class Utilities {
 
     public static Logger log = Logger.getLogger(Utilities.class.getName());

@@ -1,6 +1,3 @@
-/**
- * Created by hakloev on 01/05/15.
- */
 (function ($) {
 
     var pluginName = 'okseDebug';

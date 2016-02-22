@@ -28,11 +28,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.PropertySource;
 
-/**
- * Created by Håkon Ødegård Løvdal (hakloev) on 25/02/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 @SpringBootApplication
 @PropertySource(value = {"file:config/okse.properties"}, ignoreResourceNotFound = true)
 public class Server {

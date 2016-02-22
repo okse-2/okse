@@ -33,11 +33,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/5/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 @JsonIgnoreProperties({"timeout"})
 public class Subscriber {
 

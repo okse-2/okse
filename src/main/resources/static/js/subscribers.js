@@ -1,6 +1,3 @@
-/**
- * Created by Håkon Ødegård Løvdal on 30/04/15.
- */
 
 var Subscribers = (function($) {
 

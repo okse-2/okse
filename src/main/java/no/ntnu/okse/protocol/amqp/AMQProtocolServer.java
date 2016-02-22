@@ -34,9 +34,6 @@ import org.apache.qpid.proton.engine.Collector;
 import java.io.IOException;
 import java.util.Properties;
 
-/**
- * Created by kradalby on 21/04/15.
- */
 public class AMQProtocolServer extends AbstractProtocolServer {
 
     private static Logger log;

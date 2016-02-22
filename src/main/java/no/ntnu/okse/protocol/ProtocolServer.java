@@ -26,11 +26,6 @@ package no.ntnu.okse.protocol;
 
 import no.ntnu.okse.core.messaging.Message;
 
-/**
- * Created by Aleksander Skraastad (myth) on 3/13/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public interface ProtocolServer {
 
     public String getHost();

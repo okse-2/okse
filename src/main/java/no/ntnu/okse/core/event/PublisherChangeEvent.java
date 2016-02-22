@@ -26,11 +26,6 @@ package no.ntnu.okse.core.event;
 
 import no.ntnu.okse.core.subscription.Publisher;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/6/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class PublisherChangeEvent extends Event {
 
     public enum Type {

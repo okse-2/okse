@@ -22,10 +22,6 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by Håkon Ødegård Løvdal (hakloev) on 02/03/15.
- */
-
 var Stats = (function($) {
 
     /*
