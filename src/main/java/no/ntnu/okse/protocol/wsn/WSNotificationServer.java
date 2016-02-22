@@ -65,11 +65,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by Aleksander Skraastad (myth) on 3/12/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class WSNotificationServer extends AbstractProtocolServer {
 
     // Runstate variables

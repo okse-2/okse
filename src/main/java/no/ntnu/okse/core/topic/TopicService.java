@@ -35,11 +35,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/11/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class TopicService extends AbstractCoreService {
 
     private static boolean _invoked = false;

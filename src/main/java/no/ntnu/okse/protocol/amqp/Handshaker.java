@@ -26,10 +26,6 @@ package no.ntnu.okse.protocol.amqp;
 
 import org.apache.qpid.proton.engine.*;
 
-/**
- * This code is a heavily modified version of the qpid-proton-demo (https://github.com/rhs/qpid-proton-demo) by Rafael Schloming
- * Created by kradalby on 24/04/15.
- */
 public class Handshaker extends BaseHandler {
 
 

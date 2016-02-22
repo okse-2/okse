@@ -40,11 +40,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
-/**
- * Created by Håkon Ødegård Løvdal (hakloev) on 26/02/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 @Configuration
 @EnableWebMvcSecurity
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)

@@ -68,12 +68,6 @@ import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-/**
- * Created by Aleksander Skraastad (myth) on 4/21/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class WSNTools {
 
     // Intialize the logger

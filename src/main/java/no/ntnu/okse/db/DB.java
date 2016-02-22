@@ -24,12 +24,6 @@
 
 package no.ntnu.okse.db;
 
-/**
- * Created by Trond Walleraunet on 2/25/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
-
 import java.io.File;
 import java.sql.*;
 

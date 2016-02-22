@@ -39,11 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * Created by Håkon Ødegård Løvdal (hakloev) on 25/02/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 @RestController
 @RequestMapping(value = "/api/main")
 public class MainController {

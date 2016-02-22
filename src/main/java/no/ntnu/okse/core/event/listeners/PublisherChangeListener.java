@@ -26,11 +26,6 @@ package no.ntnu.okse.core.event.listeners;
 
 import no.ntnu.okse.core.event.PublisherChangeEvent;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/6/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public interface PublisherChangeListener {
     public void publisherChanged(PublisherChangeEvent e);
 }

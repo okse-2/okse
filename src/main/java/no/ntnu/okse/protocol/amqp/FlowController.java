@@ -29,10 +29,6 @@ import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.engine.Link;
 import org.apache.qpid.proton.engine.Receiver;
 
-/**
- * This code is a heavily modified version of the qpid-proton-demo (https://github.com/rhs/qpid-proton-demo) by Rafael Schloming
- * Created by kradalby on 24/04/15.
- */
 public class FlowController extends BaseHandler {
 
     final private int window;

@@ -22,10 +22,6 @@
  * SOFTWARE.
  */
 
-/**
- * Created by Kristoffer Dalby (kradalby) on 02/03/15.
- */
-
 var Logs = (function($) {
 
     var url = "log?logLevel=DEBUG&logID=0"

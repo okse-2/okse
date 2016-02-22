@@ -42,11 +42,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 
-/**
- * Created by Håkon Ødegård Løvdal (hakloev) on 25/02/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 @Controller
 public class IndexViewController {
 

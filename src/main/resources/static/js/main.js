@@ -22,9 +22,6 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by Fredrik Tørnvall and Håkon Ødegård Løvdal on 26/02/15.
- */
 var Main = (function($) {
 
     // Private variable for error messages

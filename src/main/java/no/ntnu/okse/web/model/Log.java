@@ -26,9 +26,6 @@ package no.ntnu.okse.web.model;
 
 import java.util.List;
 
-/**
- * Created by kradalby on 17/04/15.
- */
 public class Log {
 
     private String name;

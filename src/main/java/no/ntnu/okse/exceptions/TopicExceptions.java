@@ -24,11 +24,6 @@
 
 package no.ntnu.okse.exceptions;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/11/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class TopicExceptions {
 
     /**

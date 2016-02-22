@@ -34,11 +34,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Iterator;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/5/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 @JsonIgnoreProperties({"parent", "children", "type"})
 public class Topic {
 

@@ -24,9 +24,6 @@
 
 package no.ntnu.okse.web.model;
 
-/**
- * Created by Fredrik Borgen Tørnvall on 25/03/15.
- */
 public class ProtocolStats {
 
     private final String protocolServer;

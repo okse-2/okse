@@ -44,11 +44,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/5/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class SubscriptionService extends AbstractCoreService implements TopicChangeListener {
 
     private static SubscriptionService _singleton;

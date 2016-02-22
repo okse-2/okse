@@ -42,12 +42,6 @@ import java.io.File;
 import java.time.Duration;
 import java.util.Properties;
 
-
-/**
- * Created by Håkon Ødegård Løvdal (hakloev) on 25/02/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class Application {
 
     // Version

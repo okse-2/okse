@@ -39,10 +39,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Created by kradalby on 17/04/15.
- */
-
 @RestController
 @RequestMapping(value = "/api/log")
 public class LogController {

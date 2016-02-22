@@ -24,10 +24,6 @@
 
 package no.ntnu.okse.examples.amqp;
 
-/**
- * Created by kradalby on 22/04/15.
- */
-
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.messenger.Messenger;

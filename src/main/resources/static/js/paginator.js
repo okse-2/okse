@@ -1,6 +1,3 @@
-/**
- * Created by Håkon Ødegård Løvdal on 05/05/15.
- */
 
 /*
     This module holds logic for the paginator used by topic.js and subscribers.js

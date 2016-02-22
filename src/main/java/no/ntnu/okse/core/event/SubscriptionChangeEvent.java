@@ -26,11 +26,6 @@ package no.ntnu.okse.core.event;
 
 import no.ntnu.okse.core.subscription.Subscriber;
 
-/**
- * Created by Aleksander Skraastad (myth) on 4/5/15.
- * <p>
- * okse is licenced under the MIT licence.
- */
 public class SubscriptionChangeEvent extends Event {
 
     // The different types of subscription changes that might occur
