@@ -14,9 +14,10 @@ Extending with additional protocols is also possible, by extending the appropria
 
 # Development Team
 
-* [Aleksander Skraastad](https://github.com/myth)
-* [Håkon Ødegård Løvdal](https://github.com/hakloev)
-* [Fredrik Christoffer Berg](https://github.com/Bergalerga)
-* [Trond Walleraunet](https://github.com/trondwalleraunet)
-* [Fredrik Borgen Tørnvall](https://github.com/freboto)
-* [Kristoffer Andreas Breiland Dalby](https://github.com/kradalby)
+* [Gabriel Berthling-Hansen](https://github.com/ogdans3)
+* [Einar Hov](https://github.com/einhov)
+* [Christian Duvholt](https://github.com/cXhristian)
+* [Eirik Bertelsen](https://github.com/xecor)
+* [Andreas Høgetveit Weisethaunet](https://github.com/fenriz1988)
+* [Eivind Morch](https://github.com/Eivinmor)
+
