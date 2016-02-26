@@ -188,9 +188,9 @@ public class WSNSubscriptionManagerTest {
     @Test
     public void testRenew() throws Exception {
         Renew renew = new Renew();
-        renew.setTerminationTime("2016-01-01T00:00:00");
+        renew.setTerminationTime("9999-01-01T00:00:00");
         RenewResponse response = sm.renew(renew);
-        assertEquals(response.getTerminationTime().getYear(), 2016);
+        assertEquals(response.getTerminationTime().getYear(), 9999);
         assertEquals(response.getTerminationTime().getMonth(), 1);
         assertEquals(response.getTerminationTime().getDay(), 1);
         assertEquals(response.getTerminationTime().getHour(), 0);
