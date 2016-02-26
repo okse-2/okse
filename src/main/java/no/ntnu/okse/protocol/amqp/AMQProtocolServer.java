@@ -109,6 +109,19 @@ public class AMQProtocolServer extends AbstractProtocolServer {
     public void boot() {
         if (!_running) {
             _running = true;
+            Collector collector = Collector.Factory.create();
+            this.sh = new SubscriptionHandler();
+            SubscriptionService.getInstance().addSubscriptionChangeListener(sh);
+            server = new AMQPServer(sh, false);
+            try {
+                driver = new Driver(collector, new Handshaker(),
+						new FlowController(1024), sh,
+						server);
+                driver.listen(this.host, this.port);
+            } catch (IOException e) {
+                totalErrors.incrementAndGet();
+                log.error("I/O exception during accept(): " + e.getMessage());
+            }
             _serverThread = new Thread(() -> this.run());
             _serverThread.setName("AMQProtocolServer");
             _serverThread.start();
@@ -120,16 +133,6 @@ public class AMQProtocolServer extends AbstractProtocolServer {
     @Override
     public void run() {
         try {
-            Collector collector = Collector.Factory.create();
-            //Router router = new Router();
-            //SubscriptionHandler sh = new SubscriptionHandler();
-            this.sh = new SubscriptionHandler();
-            SubscriptionService.getInstance().addSubscriptionChangeListener(sh);
-            server = new AMQPServer(sh, false);
-            driver = new Driver(collector, new Handshaker(),
-                    new FlowController(1024), sh,
-                    server);
-            driver.listen(this.host, this.port);
             driver.run();
         } catch (IOException e) {
             totalErrors.incrementAndGet();
