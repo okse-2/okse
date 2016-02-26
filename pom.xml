@@ -83,16 +83,6 @@
             <artifactId>thymeleaf-extras-springsecurity3</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.ntnunotif.wsnu</groupId>
-            <artifactId>wsnu-base</artifactId>
-            <version>0.4-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ntnunotif.wsnu</groupId>
-            <artifactId>wsnu-services</artifactId>
-            <version>0.4-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.7.2</version>
@@ -143,7 +133,11 @@
             <artifactId>bcpkix-jdk15on</artifactId>
             <version>1.52</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.github.tOgg1</groupId>
+            <artifactId>WS-Nu</artifactId>
+            <version>master-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -176,9 +170,8 @@
 
     <repositories>
         <repository>
-            <id>wsnu</id>
-            <name>wsnu</name>
-            <url>http://ws-nu.net/repo</url>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
