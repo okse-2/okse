@@ -2,6 +2,7 @@ package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
+import org.apache.log4j.Logger;
 
 public class MQTTProtocolServer extends AbstractProtocolServer {
 	private static final String DEFAULT_HOST = "0.0.0.0";
@@ -19,6 +20,8 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 		this.host = host;
 		this.port = port;
 		_invoked = true;
+		protocolServerType = "MQTT";
+		log = Logger.getLogger(MQTTProtocolServer.class.getName());
 	}
 
 	public static MQTTProtocolServer getInstance() {
@@ -38,8 +41,13 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
 	@Override
 	public void boot() {
-		MQTTProtocolServer mqtt = MQTTProtocolServer.getInstance();
-
+		if(!_running) {
+			_running = true;
+			_serverThread = new Thread(this::run);
+			_serverThread.setName("MQTTProtocolServer");
+			_serverThread.start();
+			log.info("MQTTProtocolServer booted successfully");
+		}
 	}
 
 	@Override
@@ -49,16 +57,24 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
 	@Override
 	public void stopServer() {
-
+		log.info("Stopping MQTTProtocolServer");
+		_running = false;
+		_singleton = null;
+		_invoked = false;
+		log.info("MQTTProtocolServer is stopped");
 	}
 
 	@Override
 	public String getProtocolServerType() {
-		return null;
+		return protocolServerType;
 	}
 
 	@Override
 	public void sendMessage(Message message) {
 
+	}
+
+	public boolean isRunning() {
+		return _running;
 	}
 }
