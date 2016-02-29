@@ -355,6 +355,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
 
                     return true;
                 }
+            /*
             } else if (args[0].equalsIgnoreCase("relay")) {
                 if (Utilities.isValidInetAddress(args[1])) {
                     if (Utilities.isValidInetAddress(args[2])) {
@@ -370,6 +371,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
                 }
             } else if (args[0].equalsIgnoreCase("testuri")) {
                 log.debug(WSNotificationServer.getInstance().getURI());
+            */
             } else if (args[0].equalsIgnoreCase("shutdownprotocolservers")) {
                 log.debug("SHUTDOWN PROTOCOL SERVERS RECIEVED");
                 try {

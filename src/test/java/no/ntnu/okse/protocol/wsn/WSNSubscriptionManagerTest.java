@@ -56,11 +56,14 @@ public class WSNSubscriptionManagerTest {
     AbstractNotificationProducer.SubscriptionHandle sh;
     HelperClasses.EndpointTerminationTuple ett;
     FilterSupport.SubscriptionInfo si;
+    WSNotificationServer ps;
 
     @BeforeMethod
     public void setUp() throws Exception {
+        // Set up WSN server
+        ps = new WSNotificationServer();
         // Set up sub manager
-        sm = new WSNSubscriptionManager();
+        sm = new WSNSubscriptionManager(ps);
         // Set up dummy subscription service
         tss = new TestSubscriptionService();
         // Initialize sub manager with sub service

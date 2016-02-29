@@ -165,6 +165,7 @@ public class ConfigController {
     public
     @ResponseBody
     ResponseEntity<String> addRelay(@RequestParam(value = "from") String relay, @RequestParam(value = "topic", required = false) String topic) {
+        /*
         log.debug("Trying to add relay from: " + relay + " with topic:" + topic);
 
         String regex = "(?:http.*://)?(?<host>[^:/ ]+).?(?<port>[0-9]*).*";
@@ -221,6 +222,8 @@ public class ConfigController {
         relays.put(subscriptionReference.split("subscriberkey=")[1], subscriptionReference);
         log.debug("Relay got subscriptionReference: " + subscriptionReference);
         return new ResponseEntity<String>("{ \"message\" :\"Successfully added relay\" }", HttpStatus.OK);
+        */
+        return new ResponseEntity<String>("{ \"message\" :\"UNIMPLEMENTED\" }", HttpStatus.OK);
     }
 
     /**
@@ -235,6 +238,7 @@ public class ConfigController {
     ResponseEntity<String> deleteRelay(@RequestParam(value = "relayID") String relay) {
         log.debug("Trying to remove a relay: " + relay);
 
+        /*
         if (relays.containsKey(relay)) {
             WsnUtilities.sendUnsubscribeRequest(relays.get(relay), WSNotificationServer.getInstance().getRequestParser());
             relays.remove(relay);
@@ -244,6 +248,8 @@ public class ConfigController {
             log.debug("Unable to remove relay: " + relay);
             return new ResponseEntity<String>("{ \"message\" :\"Unable to remove the relay, can't find it.\" }", HttpStatus.OK);
         }
+        */
+        return new ResponseEntity<String>("{ \"message\" :\"NOT IMPLEMENTED\" }", HttpStatus.OK);
     }
 
     /**
@@ -256,6 +262,7 @@ public class ConfigController {
     @ResponseBody
     ResponseEntity<String> deleteAllRelays() {
         log.debug("Trying to delete all relays");
+        /*
         relays.forEach((k, v) -> {
             WsnUtilities.sendUnsubscribeRequest(relays.get(k), WSNotificationServer.getInstance().getRequestParser());
             relays.remove(k);
@@ -263,5 +270,7 @@ public class ConfigController {
         });
 
         return new ResponseEntity<String>("{ \"message\" :\"Deleted all relays\" }", HttpStatus.OK);
+        */
+        return new ResponseEntity<String>("{ \"message\" :\"NOT IMPLEMENTED\" }", HttpStatus.OK);
     }
 }

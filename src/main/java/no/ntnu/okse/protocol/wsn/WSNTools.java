@@ -290,7 +290,7 @@ public class WSNTools {
      * @param namespace : Notify namespace
      * @return a notify with its context
      */
-    public static NotifyWithContext buildNotifyWithContext(String content, String topic, String prefix, String namespace) {
+    public static NotifyWithContext buildNotifyWithContext(String wrapper_element_name, String content, String topic, String prefix, String namespace) {
 
         // Create a contextResolver, and fill it with the namespace bindings used in the notify
         NuNamespaceContextResolver contextResolver = new NuNamespaceContextResolver();
@@ -305,7 +305,7 @@ public class WSNTools {
         NotificationMessageHolderType.Message message = factory.createNotificationMessageHolderTypeMessage();
         NotificationMessageHolderType messageHolderType = factory.createNotificationMessageHolderType();
 
-        Element e = buildGenericContentElement(content);
+        Element e = buildGenericContentElement(wrapper_element_name, content);
         message.setAny(e);
 
         // Set holders message
@@ -344,13 +344,13 @@ public class WSNTools {
      * @param content The String text content
      * @return An XML Element containing the text argument
      */
-    public static Element buildGenericContentElement(String content) {
+    public static Element buildGenericContentElement(String wrapper_element_name, String content) {
 
         // create message content
         try {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             Document document = documentBuilderFactory.newDocumentBuilder().newDocument();
-            Element element = document.createElement(WSNotificationServer.getMessageContentWrapperElementName());
+            Element element = document.createElement(wrapper_element_name);
             element.setTextContent(content);
             return element;
         } catch (ParserConfigurationException e) {

@@ -59,15 +59,17 @@ public class WSNRegistrationManager extends AbstractPublisherRegistrationManager
     private SubscriptionService _subscriptionService = null;
     private HashMap<String, Publisher> localPublisherMap;
     private HashMap<String, AbstractNotificationBroker.PublisherHandle> localPublisherHandle;
+    private WSNotificationServer _protocolserver;
 
     /**
      * Empty constructor that initializes the log and local mappings
      */
-    public WSNRegistrationManager() {
+    public WSNRegistrationManager(WSNotificationServer protocolserver) {
         log = Logger.getLogger(WSNRegistrationManager.class.getName());
         _subscriptionService = null;
         localPublisherMap = new HashMap<>();
         localPublisherHandle = new HashMap<>();
+        _protocolserver = protocolserver;
     }
 
     /**
@@ -270,7 +272,7 @@ public class WSNRegistrationManager extends AbstractPublisherRegistrationManager
     @Override
     public void publisherChanged(PublisherChangeEvent e) {
         // Is this event on WSN publisher?
-        if (e.getData().getOriginProtocol().equals(WSNotificationServer.getInstance().getProtocolServerType())) {
+        if (e.getData().getOriginProtocol().equals(_protocolserver.getProtocolServerType())) {
             // Do we have an unregister?
             if (e.getType().equals(PublisherChangeEvent.Type.UNREGISTER)) {
                 // Remove the publisher from maps using its WSN_PUBLISHER_TOKEN hash
