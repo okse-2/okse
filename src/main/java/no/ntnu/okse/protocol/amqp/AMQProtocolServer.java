@@ -36,70 +36,53 @@ import java.util.Properties;
 
 public class AMQProtocolServer extends AbstractProtocolServer {
 
-    private static Logger log;
-    private static Thread _serverThread;
-    private static boolean _invoked;
+    private Logger log;
+    private Thread _serverThread;
 
-    private static AMQProtocolServer _singleton;
-
-    private static SubscriptionHandler sh;
-    private static boolean shuttingdown = false;
+    private SubscriptionHandler sh;
+    private boolean shuttingdown = false;
 
     // Internal default values
-    private static final String DEFAULT_HOST = "0.0.0.0";
-    private static final int DEFAULT_PORT = 5672;
-    private static final String DEFAULT_USE_QUEUE = "true";
-    private static final String DEFAULT_USE_SASL = "true";
+    private final String DEFAULT_HOST = "0.0.0.0";
+    private final int DEFAULT_PORT = 5672;
+    private final String DEFAULT_USE_QUEUE = "false";
+    private final String DEFAULT_USE_SASL = "true";
 
     public boolean useQueue;
     protected boolean useSASL;
 
     private Driver driver;
-    private static Properties config;
+    private Properties config;
 
-    private AMQProtocolServer(String host, Integer port) {
+    public AMQProtocolServer() {
+        // Read config
+        config = Application.readConfigurationFiles();
+
+        // Attempt to extract host and port from configuration file
+        String configHost = config.getProperty("AMQP_HOST", DEFAULT_HOST);
+        Integer configPort = null;
+        try {
+            configPort = Integer.parseInt(config.getProperty("AMQP_PORT", Integer.toString(DEFAULT_PORT)));
+        } catch (NumberFormatException e) {
+            log.error("Failed to parse AMQP Port, using default: " + DEFAULT_PORT);
+        }
+
+        this.init(configHost, configPort);
+    }
+
+    public AMQProtocolServer(String host, Integer port) {
+        // Read config
+        config = Application.readConfigurationFiles();
         this.init(host, port);
-    }
-
-    public static AMQProtocolServer getInstance() {
-        // If not invoked, create an instance and inject as _singleton
-        if (!_invoked) {
-            // Read config
-            config = Application.readConfigurationFiles();
-
-            // Attempt to extract host and port from configuration file
-            String configHost = config.getProperty("AMQP_HOST", DEFAULT_HOST);
-            Integer configPort = null;
-            try {
-                configPort = Integer.parseInt(config.getProperty("AMQP_PORT", Integer.toString(DEFAULT_PORT)));
-            } catch (NumberFormatException e) {
-                log.error("Failed to parse AMQP Port, using default: " + DEFAULT_PORT);
-            }
-
-            // Update singleton
-            _singleton = new AMQProtocolServer(configHost, configPort);
-            _singleton.useQueue = Boolean.parseBoolean(config.getProperty("AMQP_USE_QUEUE", DEFAULT_USE_QUEUE));
-            _singleton.useSASL = Boolean.parseBoolean(config.getProperty("AMQP_USE_SASL", DEFAULT_USE_SASL));
-        }
-
-        return _singleton;
-    }
-
-    public static AMQProtocolServer getInstance(String host, Integer port) {
-        if (!_invoked) {
-            // Read config
-            config = Application.readConfigurationFiles();
-            // Instantiate
-            _singleton = new AMQProtocolServer(host, port);
-        }
-        return _singleton;
     }
 
     @Override
     protected void init(String host, Integer port) {
+        useQueue = Boolean.parseBoolean(config.getProperty("AMQP_USE_QUEUE", DEFAULT_USE_QUEUE));
+        useSASL = Boolean.parseBoolean(config.getProperty("AMQP_USE_SASL", DEFAULT_USE_SASL));
+
         log = Logger.getLogger(AMQProtocolServer.class.getName());
         protocolServerType = "AMQP";
-        _invoked = true;
         // If we have host or port provided, set them, otherwise use internal defaults
         this.port = port == null ? DEFAULT_PORT : port;
         this.host = host == null ? DEFAULT_HOST : host;
@@ -110,11 +93,11 @@ public class AMQProtocolServer extends AbstractProtocolServer {
         if (!_running) {
             _running = true;
             Collector collector = Collector.Factory.create();
-            this.sh = new SubscriptionHandler();
+            this.sh = new SubscriptionHandler(this);
             SubscriptionService.getInstance().addSubscriptionChangeListener(sh);
-            server = new AMQPServer(sh, false);
+            server = new AMQPServer(this, sh, false);
             try {
-                driver = new Driver(collector, new Handshaker(),
+                driver = new Driver(this, collector, new Handshaker(),
 						new FlowController(1024), sh,
 						server);
                 driver.listen(this.host, this.port);
@@ -149,8 +132,6 @@ public class AMQProtocolServer extends AbstractProtocolServer {
         sh = null;
         _running = false;
         server = null;
-        _singleton = null;
-        _invoked = false;
         driver = null;
         log.info("AMQProtocolServer is stopped");
     }

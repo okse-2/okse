@@ -142,6 +142,7 @@ public class ConfigController {
      *
      * @return A message stating the new value of the useQueue variable
      */
+    /*
     @RequestMapping(method = RequestMethod.POST, value = CHANGE_AMQP)
     public
     @ResponseBody
@@ -151,6 +152,7 @@ public class ConfigController {
         return new ResponseEntity<String>("{ \"value\": " + AMQProtocolServer.getInstance().useQueue + ", " +
                 "\"message\" :\"Successfully changed the useQueue variable to " + AMQProtocolServer.getInstance().useQueue + "\"}", HttpStatus.OK);
     }
+    */
 
     /**
      * This method takes in a relay and a topic (not required) and sets up a relay

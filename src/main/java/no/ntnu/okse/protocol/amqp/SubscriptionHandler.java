@@ -98,19 +98,22 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
     }
 
 
-    private static final Routes<Sender> EMPTY_OUT = new Routes<Sender>();
-    private static final Routes<Receiver> EMPTY_IN = new Routes<Receiver>();
-    private static Logger log = Logger.getLogger(SubscriptionHandler.class.getName());
+    private final Routes<Sender> EMPTY_OUT = new Routes<Sender>();
+    private final Routes<Receiver> EMPTY_IN = new Routes<Receiver>();
+    private Logger log = Logger.getLogger(SubscriptionHandler.class.getName());
 
-    private static ConcurrentHashMap<Sender, Subscriber> localSenderSubscriberMap = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<Subscriber, Sender> localSubscriberSenderMap = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, Sender> localRemoteContainerSenderMap = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<Sender, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Sender, Subscriber> localSenderSubscriberMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Subscriber, Sender> localSubscriberSenderMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Sender> localRemoteContainerSenderMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Sender, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle = new ConcurrentHashMap<>();
 
     final private Map<String, Routes<Sender>> outgoing = new ConcurrentHashMap<String, Routes<Sender>>();
     final private Map<String, Routes<Receiver>> incoming = new ConcurrentHashMap<String, Routes<Receiver>>();
 
-    public SubscriptionHandler() {
+    AMQProtocolServer ps;
+
+    public SubscriptionHandler(AMQProtocolServer ps) {
+        this.ps = ps;
     }
 
     /**
@@ -205,7 +208,7 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
         Session session = sender.getSession();
         Connection connection = session.getConnection();
 
-        AMQProtocolServer server = AMQProtocolServer.getInstance();
+        AMQProtocolServer server = ps;
         Driver driver = server.getDriver();
         int clientPort = driver.getPort();
 
@@ -255,7 +258,7 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
         log.debug(outgoing.toString());
         log.debug("This is getAddress: " + getAddress(sender));
         routes.add(sender);
-        AMQProtocolServer.getInstance().incrementTotalRequests();
+        ps.incrementTotalRequests();
     }
 
     /**
@@ -269,8 +272,7 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
             Session session = sender.getSession();
             Connection connection = session.getConnection();
             String remoteHostName = connection.getRemoteHostname();
-            AMQProtocolServer server = AMQProtocolServer.getInstance();
-            Driver driver = server.getDriver();
+            Driver driver = ps.getDriver();
 
             Subscriber subscriber = localSenderSubscriberMap.get(sender);
             localSenderSubscriberMap.remove(sender);
@@ -279,7 +281,7 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
             String address = getAddress(sender);
             Routes<Sender> routes = outgoing.get(address);
             if (routes != null) {
-                if (!AMQProtocolServer.getInstance().isShuttingDown()) {
+                if (!ps.isShuttingDown()) {
                     log.debug("Removing sender: " + driver.getInetAddress() + " from route: " + address);
                 }
                 routes.remove(sender);
@@ -287,7 +289,7 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
                     outgoing.remove(address);
                 }
             }
-            if (!AMQProtocolServer.getInstance().isShuttingDown()) {
+            if (!ps.isShuttingDown()) {
                 log.debug("Detaching: " + driver.getInetAddress());
             }
             sender.abort();
@@ -387,7 +389,7 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
     @WebMethod(exclude = true)
     public void subscriptionChanged(SubscriptionChangeEvent e) {
         // If it is AMQP subscriber
-        if (e.getData().getOriginProtocol().equals(AMQProtocolServer.getInstance().getProtocolServerType())) {
+        if (e.getData().getOriginProtocol().equals(ps.getProtocolServerType())) {
             // If we are dealing with an Unsubscribe
             if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
                 log.debug("Unsubscribing " + localSubscriberSenderMap.get(e.getData()));

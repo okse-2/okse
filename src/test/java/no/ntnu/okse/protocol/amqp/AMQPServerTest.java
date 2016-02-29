@@ -54,7 +54,7 @@ public class AMQPServerTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        ps = AMQProtocolServer.getInstance();
+        ps = new AMQProtocolServer();
         ps.boot();
     }
 
@@ -137,6 +137,7 @@ public class AMQPServerTest {
         assertEquals((String) ((AmqpValue) AMQPMessage.getBody()).getValue(), (String) ((AmqpValue) AMQPMessageReconstruct.getBody()).getValue());
     }
 
+    /*
     @Test(groups = "amqp")
     public void testConvertOkseMessageToAMQP() throws Exception {
         System.out.println("testConvertOkseMessageToAMQP");
@@ -151,6 +152,7 @@ public class AMQPServerTest {
         assertEquals(okseMessage.getMessage(), (String) ((AmqpValue) AMQPMessage.getBody()).getValue());
         assertEquals(okseMessage.getTopic(), address.getName());
     }
+    */
 
     @Test(groups = "amqp")
     public void testCreateAddress() throws Exception {
@@ -472,6 +474,7 @@ public class AMQPServerTest {
         assertEquals(AMQPServer.createAddress(address6, dlv).getName(), topic);
     }
 
+    /*
     @Test(groups = "amqp")
     public void testConvertAMQPmessageToOkseMessage() throws Exception {
         String message = "Hei på test";
@@ -495,6 +498,7 @@ public class AMQPServerTest {
         assertEquals(okseMessage.getOriginProtocol(), "AMQP");
 
     }
+    */
 
     @Test(groups = "amqp")
     public void testMessageStore() throws Exception {

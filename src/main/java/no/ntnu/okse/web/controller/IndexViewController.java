@@ -94,7 +94,7 @@ public class IndexViewController {
         model.addAttribute("totalRam", totalRam / MainController.MB);
         model.addAttribute("freeRam", freeRam / MainController.MB);
         model.addAttribute("usedRam", (totalRam - freeRam) / MainController.MB);
-        model.addAttribute("useQueue", AMQProtocolServer.getInstance().useQueue);
+        //model.addAttribute("useQueue", AMQProtocolServer.getInstance().useQueue);
 
         ArrayList<HashMap<String, Object>> protocols = new ArrayList<>();
 
