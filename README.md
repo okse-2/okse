@@ -1,5 +1,5 @@
 # Okse
-[![Build Status](https://fap.no/jenkins/buildStatus/icon?job=okse)](https://fap.no/jenkins/job/okse/)
+[![Build Status](https://travis-ci.org/einhov/okse.svg?branch=master)](https://travis-ci.org/einhov/okse)
 [![Coverage Status](https://coveralls.io/repos/github/einhov/okse/badge.svg?branch=master)](https://coveralls.io/github/einhov/okse?branch=master)
 ## (Overordnet KommunikasjonsSystem for Etteretning)
 
