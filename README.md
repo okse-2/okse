@@ -1,5 +1,6 @@
 # Okse
 [![Build Status](https://fap.no/jenkins/buildStatus/icon?job=okse)](https://fap.no/jenkins/job/okse/)
+[![Coverage Status](https://coveralls.io/repos/github/einhov/okse/badge.svg?branch=master)](https://coveralls.io/github/einhov/okse?branch=master)
 ## (Overordnet KommunikasjonsSystem for Etteretning)
 
 Bachelors degree project for FFI (Norwegian Defence Research Establishment)
