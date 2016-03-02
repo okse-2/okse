@@ -143,7 +143,11 @@
             <artifactId>bcpkix-jdk15on</artifactId>
             <version>1.52</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.moquette</groupId>
+            <artifactId>moquette-broker</artifactId>
+            <version>0.8</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -179,6 +183,16 @@
             <id>wsnu</id>
             <name>wsnu</name>
             <url>http://ws-nu.net/repo</url>
+        </repository>
+        <repository>
+            <id>bintray</id>
+            <url>http://dl.bintray.com/andsel/maven/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
