@@ -1,5 +1,6 @@
 # Okse
-[![Build Status](https://fap.no/jenkins/buildStatus/icon?job=okse)](https://fap.no/jenkins/job/okse/)
+[![Build Status](https://travis-ci.org/einhov/okse.svg?branch=master)](https://travis-ci.org/einhov/okse)
+[![Coverage Status](https://coveralls.io/repos/github/einhov/okse/badge.svg?branch=master)](https://coveralls.io/github/einhov/okse?branch=master)
 ## (Overordnet KommunikasjonsSystem for Etteretning)
 
 Bachelors degree project for FFI (Norwegian Defence Research Establishment)
@@ -12,11 +13,3 @@ The main components of the OKSE brokering system are its CoreService, MessageSer
 
 Extending with additional protocols is also possible, by extending the appropriate abstract class and implementing the needed static fields and invocation methods. Then its just a matter of registering the new protocol in `Application.java`
 
-# Development Team
-
-* [Aleksander Skraastad](https://github.com/myth)
-* [Håkon Ødegård Løvdal](https://github.com/hakloev)
-* [Fredrik Christoffer Berg](https://github.com/Bergalerga)
-* [Trond Walleraunet](https://github.com/trondwalleraunet)
-* [Fredrik Borgen Tørnvall](https://github.com/freboto)
-* [Kristoffer Andreas Breiland Dalby](https://github.com/kradalby)

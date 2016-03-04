@@ -83,16 +83,6 @@
             <artifactId>thymeleaf-extras-springsecurity3</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.ntnunotif.wsnu</groupId>
-            <artifactId>wsnu-base</artifactId>
-            <version>0.4-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ntnunotif.wsnu</groupId>
-            <artifactId>wsnu-services</artifactId>
-            <version>0.4-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.7.2</version>
@@ -148,6 +138,11 @@
             <artifactId>moquette-broker</artifactId>
             <version>0.8</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.tOgg1</groupId>
+            <artifactId>WS-Nu</artifactId>
+            <version>master-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -174,15 +169,31 @@
                 <configuration>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.1.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.6.201602180812</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
     <repositories>
         <repository>
-            <id>wsnu</id>
-            <name>wsnu</name>
-            <url>http://ws-nu.net/repo</url>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
         <repository>
             <id>bintray</id>
