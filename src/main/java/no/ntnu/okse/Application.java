@@ -101,11 +101,6 @@ public class Application {
         cs.registerService(MessageService.getInstance());
         cs.registerService(SubscriptionService.getInstance());
 
-        /* REGISTER PROTOCOL SERVERS HERE */
-        //cs.addProtocolServer(DummyProtocolServer.getInstance());    // Example ProtocolServer
-        cs.addProtocolServer(new WSNotificationServer());
-        cs.addProtocolServer(new AMQProtocolServer());
-
         // Start the admin console
         webserver.run();
 
