@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 
 public class MQTTProtocolServer extends AbstractProtocolServer {
 	private static final String DEFAULT_HOST = "0.0.0.0";
-	private static final Integer DEFAULT_PORT = 1234; // TODO: Replace with actual default port
+	private static final Integer DEFAULT_PORT = 1883;
 
 	private static boolean _invoked = false;
 	private static MQTTProtocolServer _singleton = null;
@@ -14,6 +14,8 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 	private MQTTProtocolServer(String host, Integer port) {
 		init(host, port);
 	}
+
+	private MQTTServer server;
 
 	@Override
 	protected void init(String host, Integer port) {
@@ -52,7 +54,8 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
 	@Override
 	public void run() {
-
+		server = new MQTTServer();
+		server.init(host, port);
 	}
 
 	@Override
@@ -61,6 +64,8 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 		_running = false;
 		_singleton = null;
 		_invoked = false;
+		server.stopServer();
+		server = null;
 		log.info("MQTTProtocolServer is stopped");
 	}
 
