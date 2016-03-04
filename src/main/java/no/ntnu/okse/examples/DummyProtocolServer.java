@@ -108,8 +108,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
      *
      * @param port The port this server should bind to
      */
-    @Override
-    protected void init(String host, Integer port) {
+    private void init(String host, Integer port) {
         // Init logger
         log = Logger.getLogger(DummyProtocolServer.class.getName());
         // Set protocol name

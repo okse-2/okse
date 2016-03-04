@@ -24,8 +24,6 @@
 
 package no.ntnu.okse.protocol.amqp;
 
-import no.ntnu.okse.Application;
-
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
@@ -34,9 +32,10 @@ import org.apache.qpid.proton.engine.Collector;
 
 import java.io.IOException;
 import java.nio.channels.UnresolvedAddressException;
-import java.util.Properties;
 
 public class AMQProtocolServer extends AbstractProtocolServer {
+
+    protected static final String SERVERTYPE = "amqp";
 
     private Logger log;
     private Thread _serverThread;
@@ -44,58 +43,27 @@ public class AMQProtocolServer extends AbstractProtocolServer {
     private SubscriptionHandler sh;
     private boolean shuttingdown = false;
 
-    // Internal default values
-    private final String DEFAULT_HOST = "0.0.0.0";
-    private final int DEFAULT_PORT = 5672;
-    private final String DEFAULT_USE_QUEUE = "false";
-    private final String DEFAULT_USE_SASL = "true";
-
     public boolean useQueue;
     protected boolean useSASL;
 
     private Driver driver;
-    private Properties config;
 
-    public AMQProtocolServer() {
-        // Read config
-        config = Application.readConfigurationFiles();
-
-        // Attempt to extract host and port from configuration file
-        String configHost = config.getProperty("AMQP_HOST", DEFAULT_HOST);
-        Integer configPort = null;
-        try {
-            configPort = Integer.parseInt(config.getProperty("AMQP_PORT", Integer.toString(DEFAULT_PORT)));
-        } catch (NumberFormatException e) {
-            log.error("Failed to parse AMQP Port, using default: " + DEFAULT_PORT);
-        }
-
-        this.init(configHost, configPort);
-    }
-
-    public AMQProtocolServer(String host, Integer port) {
-        // Read config
-        config = Application.readConfigurationFiles();
-        this.init(host, port);
-    }
-
+    /**
+     * Constructor that takes in configuration options for the AMQProtocolServer
+     * server.
+     * <p>
+     *
+     * @param host A String representing the host the WSNServer should bind to
+     * @param port An int representing the port the WSNServer should bind to.
+     * @param queue A boolean specifying whether to use queueing behaviour
+     * @param sasl A boolean specifying whether to use SASL for its connections
+     */
     public AMQProtocolServer(String host, int port, boolean queue, boolean sasl) {
         useQueue = queue;
         useSASL = sasl;
         this.port = port;
         this.host = host;
         log = Logger.getLogger(AMQProtocolServer.class.getName());
-    }
-
-    @Override
-    protected void init(String host, Integer port) {
-        useQueue = Boolean.parseBoolean(config.getProperty("AMQP_USE_QUEUE", DEFAULT_USE_QUEUE));
-        useSASL = Boolean.parseBoolean(config.getProperty("AMQP_USE_SASL", DEFAULT_USE_SASL));
-
-        log = Logger.getLogger(AMQProtocolServer.class.getName());
-        protocolServerType = "AMQP";
-        // If we have host or port provided, set them, otherwise use internal defaults
-        this.port = port == null ? DEFAULT_PORT : port;
-        this.host = host == null ? DEFAULT_HOST : host;
     }
 
     @Override
@@ -149,7 +117,7 @@ public class AMQProtocolServer extends AbstractProtocolServer {
 
     @Override
     public String getProtocolServerType() {
-        return "amqp";
+        return SERVERTYPE;
     }
 
     @Override

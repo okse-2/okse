@@ -42,6 +42,8 @@ import org.oasis_open.docs.wsn.bw_2.UnacceptableTerminationTimeFault;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -61,7 +63,7 @@ public class WSNSubscriptionManagerTest {
     @BeforeMethod
     public void setUp() throws Exception {
         // Set up WSN server
-        ps = new WSNotificationServer();
+        ps = new WSNotificationServer("0.0.0.0", 61000, 5L, 50, "Content", false, "0.0.0.0", 61000);
         // Set up sub manager
         sm = new WSNSubscriptionManager(ps);
         // Set up dummy subscription service

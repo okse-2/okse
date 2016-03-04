@@ -189,7 +189,7 @@ public class AMQPServer extends BaseHandler {
      * @param message : OKSE internal message
      */
     public void addMessageToQueue(no.ntnu.okse.core.messaging.Message message) {
-        Message msg = convertOkseMessageToAMQP(message);
+        Message msg = convertOkseMessageToAMQP(message, ps.getHost());
 
         MessageBytes mb = convertAMQPMessageToMessageBytes(msg);
 
@@ -262,12 +262,12 @@ public class AMQPServer extends BaseHandler {
      * @param message : OKSE internal message
      * @return AMQP message
      */
-    public Message convertOkseMessageToAMQP(no.ntnu.okse.core.messaging.Message message) {
+    public static Message convertOkseMessageToAMQP(no.ntnu.okse.core.messaging.Message message, String host) {
         Message msg = Message.Factory.create();
 
         Section body = new AmqpValue(message.getMessage());
 
-        msg.setAddress(ps.getHost() + "/" + message.getTopic());
+        msg.setAddress(host + "/" + message.getTopic());
         msg.setSubject("OKSE translated message");
         msg.setBody(body);
         return msg;
@@ -357,7 +357,7 @@ public class AMQPServer extends BaseHandler {
         }
     }
 
-    public no.ntnu.okse.core.messaging.Message convertAMQPmessageToOkseMessage(Message AMQPMessage, Address address) {
+    public static no.ntnu.okse.core.messaging.Message convertAMQPmessageToOkseMessage(Message AMQPMessage, Address address) {
         AmqpValue amqpMessageBodyString = (AmqpValue) AMQPMessage.getBody();
 
         no.ntnu.okse.core.messaging.Message okseMessage =
@@ -365,10 +365,10 @@ public class AMQPServer extends BaseHandler {
                         (String) amqpMessageBodyString.getValue(),
                         address.getName(),
                         null,
-                        ps.getProtocolServerType()
+                        AMQProtocolServer.SERVERTYPE
                 );
 
-        okseMessage.setOriginProtocol(ps.getProtocolServerType());
+        okseMessage.setOriginProtocol(AMQProtocolServer.SERVERTYPE);
 
         return okseMessage;
     }

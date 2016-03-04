@@ -25,7 +25,6 @@
 package no.ntnu.okse.protocol.wsn;
 
 import com.google.common.io.ByteStreams;
-import no.ntnu.okse.Application;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
@@ -60,7 +59,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -76,21 +74,19 @@ public class WSNotificationServer extends AbstractProtocolServer {
     // Internal Default Values
     private static final String DEFAULT_HOST = "0.0.0.0";
     private static final int DEFAULT_PORT = 61000;
-    private static final Long DEFAULT_CONNECTION_TIMEOUT = 5L;
-    private static final Integer DEFAULT_HTTP_CLIENT_DISPATCHER_POOL_SIZE = 50;
     private static final String DEFAULT_MESSAGE_CONTENT_WRAPPER_NAME = "Content";
 
     // Flag and defaults for operation behind NAT
-    private boolean behindNAT = false;
-    private String publicWANHost = "0.0.0.0";
-    private Integer publicWANPort = 61000;
+    private boolean behindNAT;
+    private String publicWANHost;
+    private Integer publicWANPort;
 
     // HTTP Client fields
-    private Long connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
-    private Integer clientPoolSize = DEFAULT_HTTP_CLIENT_DISPATCHER_POOL_SIZE;
+    private Long connectionTimeout;
+    private Integer clientPoolSize;
 
     // Non-XMl Content Wrapper Name
-    private String contentWrapperElementName = DEFAULT_MESSAGE_CONTENT_WRAPPER_NAME;
+    private String contentWrapperElementName;
 
     // Instance fields
     private Server _server;
@@ -98,45 +94,23 @@ public class WSNotificationServer extends AbstractProtocolServer {
     private WSNCommandProxy _commandProxy;
     private final ArrayList<Connector> _connectors = new ArrayList();
     private HttpClient _client;
-    private HttpHandler _handler;
     private HashSet<ServiceConnection> _services;
     private ExecutorService clientPool;
-    private Properties config;
 
     /**
-     * Empty constructor, uses internal defaults or provided from config file
-     */
-    public WSNotificationServer() {
-        // Check config file
-        config = Application.readConfigurationFiles();
-        String configHost = config.getProperty("WSN_HOST", DEFAULT_HOST);
-        Integer configPort = null;
-        try {
-            configPort = Integer.parseInt(config.getProperty("WSN_PORT", Integer.toString(DEFAULT_PORT)));
-        } catch (NumberFormatException e) {
-            log.error("Failed to parse WSN Port from config file! Using default: " + DEFAULT_PORT);
-        }
-
-        // Call init with what the results were
-        this.init(configHost, configPort);
-
-        _running = false;
-    }
-
-    /**
-     * Constructor that takes in a port that the WSNServer jetty instance should
-     * listen to.
+     * Constructor that takes in configuration options for the WSNotification
+     * server.
      * <p>
      *
-     * @param host A string representing the host the WSNServer should bind to
-     * @param port An integer representing the port the WSNServer should bind to.
+     * @param host A String representing the host the WSNServer should bind to
+     * @param port An int representing the port the WSNServer should bind to.
+     * @param timeout A Long
+     * @param pool_size An int
+     * @param wrapper_name A String
+     * @param nat A boolean
+     * @param wan_host A string
+     * @param wan_port An int
      */
-    public WSNotificationServer(String host, Integer port) {
-        // Check config file
-        config = Application.readConfigurationFiles();
-        this.init(host, port);
-    }
-
     public WSNotificationServer(
             String host, int port, Long timeout,
             int pool_size, String wrapper_name,
@@ -153,7 +127,11 @@ public class WSNotificationServer extends AbstractProtocolServer {
         init();
     }
 
-    protected void init() {
+    /**
+     * Initialization method that reads the wsnserver.xml configuration file and constructs
+     * a jetty server instance.
+     */
+    private void init() {
         log.warn("Logging!");
 
         // Set the servertype
@@ -201,101 +179,6 @@ public class WSNotificationServer extends AbstractProtocolServer {
             log.error("Unable to start WSNotificationServer: " + e.getMessage());
         }
      }
-
-
-    /**
-     * Initialization method that reads the wsnserver.xml configuration file and constructs
-     * a jetty server instance.
-     *
-     * @param port: An integer representing the port WSNServer should bind to.
-     */
-    protected void init(String host, Integer port) {
-
-        log = Logger.getLogger(WSNotificationServer.class.getName());
-
-        // Set the servertype
-        protocolServerType = "WSNotification";
-
-        // Declare HttpClient field
-        _client = null;
-
-        // Attempt to fetch connection timeout from settings, otherwise use 5 seconds as default
-        try {
-            connectionTimeout = Long.parseLong(config.getProperty("WSN_CONNECTION_TIMEOUT",
-                    connectionTimeout.toString()));
-        } catch (NumberFormatException e) {
-            log.error("Failed to parse WSN Connection Timeout, using default: " + connectionTimeout);
-        }
-
-        // Attempt to fetch the HTTP Client pool size from settings, otherwise use default
-        try {
-            clientPoolSize = Integer.parseInt(config.getProperty("WSN_POOL_SIZE",
-                    Integer.toString(DEFAULT_HTTP_CLIENT_DISPATCHER_POOL_SIZE)));
-        } catch (NumberFormatException e) {
-            log.error("Failed to parse WSN Client pool size from config file! Using default: " +
-                    DEFAULT_HTTP_CLIENT_DISPATCHER_POOL_SIZE);
-        }
-        clientPool = Executors.newFixedThreadPool(clientPoolSize);
-
-        // If a default message content wrapper name is specified in config, set it, otherwise use default
-        contentWrapperElementName = config.getProperty("WSN_MESSAGE_CONTENT_ELEMENT_NAME",
-                DEFAULT_MESSAGE_CONTENT_WRAPPER_NAME);
-
-        if (contentWrapperElementName.contains("<") || contentWrapperElementName.contains(">")) {
-            log.warn("Non-XML message payload element wrapper name cannot contain XML element characters (< or >)," +
-                    " using default: " + DEFAULT_MESSAGE_CONTENT_WRAPPER_NAME);
-            contentWrapperElementName = DEFAULT_MESSAGE_CONTENT_WRAPPER_NAME;
-        }
-
-        // If we have host or port provided, set them, otherwise use internal defaults
-        this.port = port == null ? DEFAULT_PORT : port;
-        this.host = host == null ? DEFAULT_HOST : host;
-
-        /* Check if config file specifies that we are behind NAT, and update the provided WAN IP and PORT */
-        // Check for use NAT flag
-        if (config.getProperty("WSN_USES_NAT", "false").equalsIgnoreCase("true")) behindNAT = true;
-        else behindNAT = false;
-
-        // Check for WAN_HOST
-        publicWANHost = config.getProperty("WSN_WAN_HOST", publicWANHost);
-
-        // Check for WAN_PORT
-        try {
-            publicWANPort = Integer.parseInt(config.getProperty("WSN_WAN_PORT", publicWANPort.toString()));
-        } catch (NumberFormatException e) {
-            log.error("Failed to parse WSN WAN Port, using default: " + publicWANPort);
-        }
-
-        // Declare configResource (Fetched from classpath as a Resource from system)
-        Resource configResource;
-        try {
-            // Try to parse the configFile for WSNServer to set up the Server instance
-            configResource = Resource.newSystemResource(wsnInternalConfigFile);
-            XmlConfiguration config = new XmlConfiguration(configResource.getInputStream());
-            this._server = (Server) config.configure();
-            // Remove the xmlxonfig connector
-            this._server.removeConnector(this._server.getConnectors()[0]);
-
-            // Add a the serverconnector
-            log.debug("Adding WSNServer connector");
-            this.addStandardConnector(this.host, this.port);
-
-            // Initialize the RequestParser for WSNotification
-            this._requestParser = new WSNRequestParser(this);
-
-            // Initialize the collection of ServiceConnections
-            this._services = new HashSet<>();
-
-            // Initialize and set the HTTPHandler for the Server instance
-            HttpHandler handler = new WSNotificationServer.HttpHandler();
-            this._server.setHandler(handler);
-
-            log.debug("XMLConfig complete, server instanciated.");
-
-        } catch (Exception e) {
-            log.error("Unable to start WSNotificationServer: " + e.getMessage());
-        }
-    }
 
     /**
      * The primary boot method for starting a WSNServer instance. Will only perform actions if the

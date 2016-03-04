@@ -99,12 +99,6 @@ public class ProtocolServerFactoryTest {
     }
 
     @Test
-    public void testTest() {
-        WSNotificationServer ps = new WSNotificationServer();
-        Assert.assertNotNull(ps);
-    }
-
-    @Test
     public void testCreateInvalidType() {
         final String xml_cfg =
                 "<servers><server type=\"invalid\" /></servers>";
