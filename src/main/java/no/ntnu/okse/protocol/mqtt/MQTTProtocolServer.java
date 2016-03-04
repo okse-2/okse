@@ -1,6 +1,7 @@
 package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.messaging.Message;
+import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 
@@ -76,8 +77,11 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
 	@Override
 	public void sendMessage(Message message) {
+		log.info("Received message on topic " + message.getMessage() );
+		server.sendMessage( message );
 
 	}
+
 
 	public boolean isRunning() {
 		return _running;
