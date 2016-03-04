@@ -184,7 +184,6 @@
             <name>wsnu</name>
             <url>http://ws-nu.net/repo</url>
         </repository>
-
         <repository>
             <id>bintray</id>
             <url>http://dl.bintray.com/andsel/maven/</url>
