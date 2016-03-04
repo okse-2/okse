@@ -42,6 +42,7 @@ public class MQTTServer extends Server {
 			MessageService.getInstance().distributeMessage(
 					new Message( payload, topic, pub, protocolServerType )
 			);
+			MQTTProtocolServer.getInstance().incrementTotalMessagesReceived();
 		}
 
 		@Override
@@ -96,6 +97,7 @@ public class MQTTServer extends Server {
 
 				msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
 				internalPublish(msg);
+				MQTTProtocolServer.getInstance().incrementTotalMessagesSent();
 			}
 		}
 

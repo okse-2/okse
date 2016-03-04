@@ -82,6 +82,27 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
 	}
 
+	public void incrementTotalRequests() {
+		totalRequests.incrementAndGet();
+	}
+
+	public void incrementTotalBadRequests() {
+		totalBadRequests.incrementAndGet();
+	}
+
+	public void incrementTotalErrors() {
+		totalErrors.incrementAndGet();
+	}
+
+	public void incrementTotalMessagesReceived() {
+		totalMessagesReceived.incrementAndGet();
+	}
+
+	public void incrementTotalMessagesSent() {
+		totalMessagesSent.incrementAndGet();
+	}
+
+
 
 	public boolean isRunning() {
 		return _running;
