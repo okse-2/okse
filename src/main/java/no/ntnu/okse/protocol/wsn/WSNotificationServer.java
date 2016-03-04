@@ -137,6 +137,72 @@ public class WSNotificationServer extends AbstractProtocolServer {
         this.init(host, port);
     }
 
+    public WSNotificationServer(
+            String host, int port, Long timeout,
+            int pool_size, String wrapper_name,
+            boolean nat, String wan_host, int wan_port) {
+        this.host = host;
+        this.port = port;
+        connectionTimeout = timeout;
+        clientPoolSize = pool_size;
+        contentWrapperElementName = wrapper_name;
+        behindNAT = nat;
+        publicWANHost = wan_host;
+        publicWANPort = wan_port;
+        log = Logger.getLogger(WSNotificationServer.class.getName());
+        init();
+    }
+
+    protected void init() {
+        log.warn("Logging!");
+
+        // Set the servertype
+        protocolServerType = "WSNotification";
+
+        // Declare HttpClient field
+        _client = null;
+
+        clientPool = Executors.newFixedThreadPool(clientPoolSize);
+
+        if (contentWrapperElementName.contains("<") || contentWrapperElementName.contains(">")) {
+            log.warn("Non-XML message payload element wrapper name cannot contain XML element characters (< or >)," +
+                    " using default: " + DEFAULT_MESSAGE_CONTENT_WRAPPER_NAME);
+            contentWrapperElementName = DEFAULT_MESSAGE_CONTENT_WRAPPER_NAME;
+        }
+
+
+        // Declare configResource (Fetched from classpath as a Resource from system)
+        Resource configResource;
+        try {
+            // Try to parse the configFile for WSNServer to set up the Server instance
+            configResource = Resource.newSystemResource(wsnInternalConfigFile);
+            XmlConfiguration config = new XmlConfiguration(configResource.getInputStream());
+            this._server = (Server) config.configure();
+            // Remove the xmlxonfig connector
+            this._server.removeConnector(this._server.getConnectors()[0]);
+
+            // Add a the serverconnector
+            log.debug("Adding WSNServer connector");
+            this.addStandardConnector(this.host, this.port);
+
+            // Initialize the RequestParser for WSNotification
+            this._requestParser = new WSNRequestParser(this);
+
+            // Initialize the collection of ServiceConnections
+            this._services = new HashSet<>();
+
+            // Initialize and set the HTTPHandler for the Server instance
+            HttpHandler handler = new WSNotificationServer.HttpHandler();
+            this._server.setHandler(handler);
+
+            log.debug("XMLConfig complete, server instanciated.");
+
+        } catch (Exception e) {
+            log.error("Unable to start WSNotificationServer: " + e.getMessage());
+        }
+     }
+
+
     /**
      * Initialization method that reads the wsnserver.xml configuration file and constructs
      * a jetty server instance.
@@ -286,8 +352,15 @@ public class WSNotificationServer extends AbstractProtocolServer {
                 this._serverThread.setName("WSNServer");
                 // Start the Jetty Server
                 this._serverThread.start();
+                Connector c = _connectors.get(0);
+                while (!c.isStarted()) {
+                    if (c.isFailed())
+                        throw new BootErrorException("Unable to bind to " + host + ":" + port);
+                }
                 _running = true;
                 log.info("WSNServer Thread started successfully.");
+            } catch (BootErrorException e) {
+                throw e;
             } catch (Exception e) {
                 totalErrors.incrementAndGet();
                 log.trace(e.getStackTrace());

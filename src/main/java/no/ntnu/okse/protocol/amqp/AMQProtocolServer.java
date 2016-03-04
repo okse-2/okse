@@ -25,6 +25,7 @@
 package no.ntnu.okse.protocol.amqp;
 
 import no.ntnu.okse.Application;
+
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
@@ -32,6 +33,7 @@ import org.apache.log4j.Logger;
 import org.apache.qpid.proton.engine.Collector;
 
 import java.io.IOException;
+import java.nio.channels.UnresolvedAddressException;
 import java.util.Properties;
 
 public class AMQProtocolServer extends AbstractProtocolServer {
@@ -76,6 +78,14 @@ public class AMQProtocolServer extends AbstractProtocolServer {
         this.init(host, port);
     }
 
+    public AMQProtocolServer(String host, int port, boolean queue, boolean sasl) {
+        useQueue = queue;
+        useSASL = sasl;
+        this.port = port;
+        this.host = host;
+        log = Logger.getLogger(AMQProtocolServer.class.getName());
+    }
+
     @Override
     protected void init(String host, Integer port) {
         useQueue = Boolean.parseBoolean(config.getProperty("AMQP_USE_QUEUE", DEFAULT_USE_QUEUE));
@@ -98,12 +108,13 @@ public class AMQProtocolServer extends AbstractProtocolServer {
             server = new AMQPServer(this, sh, false);
             try {
                 driver = new Driver(this, collector, new Handshaker(),
-						new FlowController(1024), sh,
-						server);
+                        new FlowController(1024), sh,
+                        server);
                 driver.listen(this.host, this.port);
+            } catch(UnresolvedAddressException e) {
+                throw new BootErrorException("Unresolved address");
             } catch (IOException e) {
-                totalErrors.incrementAndGet();
-                log.error("I/O exception during accept(): " + e.getMessage());
+                throw new BootErrorException("Unable to bind to " + host + ":" + port);
             }
             _serverThread = new Thread(() -> this.run());
             _serverThread.setName("AMQProtocolServer");
@@ -138,7 +149,7 @@ public class AMQProtocolServer extends AbstractProtocolServer {
 
     @Override
     public String getProtocolServerType() {
-        return protocolServerType;
+        return "amqp";
     }
 
     @Override
