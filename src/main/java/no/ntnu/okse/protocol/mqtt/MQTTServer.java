@@ -34,6 +34,7 @@ public class MQTTServer extends Server {
 		@Override
 		public void onPublish(InterceptPublishMessage message) {
 			//TODO: We need to get the publisher that sent the message, somehow
+			//TODO: So that we get the host and can send the message to the correct address, same with the port
 			Publisher pub = new Publisher( message.getTopicName(), "127.0.0.1", 1883, protocolServerType);
 			ByteBuffer buffer = message.getPayload();
 			String payload = new String(buffer.array(), buffer.position(), buffer.limit());
@@ -47,6 +48,8 @@ public class MQTTServer extends Server {
 		public void onSubscribe(InterceptSubscribeMessage message) {
 			log.info("Client subscribed to: "  + message.getTopicFilter() + "   ID: " + message.getClientID());
 
+			//TODO: We need to get the publisher that sent the message, somehow
+			//TODO: So that we get the host and can send the message to the correct address, same with the port
 			TopicService.getInstance().addTopic( message.getTopicFilter() );
 			Subscriber sub = new Subscriber( "127.0.0.1", 1309, message.getTopicFilter(), protocolServerType );
 			SubscriptionService.getInstance().addSubscriber(sub);
@@ -83,15 +86,17 @@ public class MQTTServer extends Server {
 	public void sendMessage(Message message) {
 		HashSet<Subscriber> subscribers = SubscriptionService.getInstance().getAllSubscribersForTopic( message.getTopic() );
 		for(Subscriber subscriber : subscribers){
-			PublishMessage msg = new PublishMessage();
-			ByteBuffer payload = ByteBuffer.wrap( message.getMessage().getBytes() );
-			String topicName = message.getTopic();
+			if( subscriber.getOriginProtocol() == protocolServerType ){
+				PublishMessage msg = new PublishMessage();
+				ByteBuffer payload = ByteBuffer.wrap( message.getMessage().getBytes() );
+				String topicName = message.getTopic();
 
-			msg.setPayload( payload );
-			msg.setTopicName( topicName );
+				msg.setPayload( payload );
+				msg.setTopicName( topicName );
 
-			msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
-			internalPublish(msg);
+				msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
+				internalPublish(msg);
+			}
 		}
 
 	}
