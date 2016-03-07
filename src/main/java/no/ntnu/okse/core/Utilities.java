@@ -55,7 +55,8 @@ public class Utilities {
     protected static final String configFiles[] = {
             "config/okse.properties",
             "config/log4j.properties",
-            "config/topicmapping.properties"
+            "config/topicmapping.properties",
+            "config/protocolservers.xml"
     };
 
     /**
