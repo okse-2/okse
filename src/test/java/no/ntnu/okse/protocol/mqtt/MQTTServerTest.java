@@ -4,10 +4,10 @@ import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.messages.*;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Publisher;
-import no.ntnu.okse.core.topic.Topic;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import org.mockito.*;
 
 import static org.testng.Assert.*;
 
@@ -57,6 +57,8 @@ public class MQTTServerTest {
 	@BeforeTest
 	public void setUp() {
 		mqtt = new MQTTServer();
+		//TODO: Remove this when we test init and change the getinstance method
+		mqtt.init("localhost", 1234);
 	}
 
 	@AfterTest
@@ -68,7 +70,7 @@ public class MQTTServerTest {
 	@Test
 	public void init() {
 //		assertFalse(mqtt.isRunning());
-//		mqtt.init("localhost", 1234);
+		mqtt.init("localhost", 1234);
 //		assertTrue(mqtt.isRunning());
 	}
 
@@ -81,5 +83,9 @@ public class MQTTServerTest {
 	@Test
 	public void receiveMessage() {
 
+	}
+
+	private MQTTServer getInstance(){
+		return mqtt;
 	}
 }
