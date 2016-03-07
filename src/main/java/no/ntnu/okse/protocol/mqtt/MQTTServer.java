@@ -28,7 +28,9 @@ import java.util.*;
 public class MQTTServer extends Server {
 
 	private static Logger log = Logger.getLogger(Server.class);
-	private static String protocolServerType;
+	private MQTTProtocolServer ps;
+	private final IConfig config;
+	private List<InterceptHandler> interceptHandlers;
 
 	class MQTTListener extends AbstractInterceptHandler {
 		@Override
@@ -36,7 +38,7 @@ public class MQTTServer extends Server {
 			log.info("MQTT message received on topic: " + message.getTopicName() + " from ID: " + message.getClientID());
 
 			distributeMessage(message);
-			MQTTProtocolServer.getInstance().incrementTotalMessagesReceived();
+			ps.incrementTotalMessagesReceived();
 		}
 
 		@Override
@@ -47,22 +49,37 @@ public class MQTTServer extends Server {
 			int port = getPort(message.getClientID());
 			String host = getHost(message.getClientID());
 
-			Subscriber sub = new Subscriber(host, port, message.getTopicFilter(), protocolServerType);
+			Subscriber sub = new Subscriber(host, port, message.getTopicFilter(), ps.getProtocolServerType());
 			SubscriptionService.getInstance().addSubscriber(sub);
 		}
 
+	}
+
+	public MQTTServer(MQTTProtocolServer ps, String host, int port) {
+		this.ps = ps;
+		interceptHandlers = new ArrayList<>();
+		interceptHandlers.add(new MQTTListener());
+		config = new MemoryConfig(getConfig(host, port));
+	}
+
+	public void start() {
+		try {
+			startServer(config, interceptHandlers);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void distributeMessage(InterceptPublishMessage message) {
 		int port = getPort(message.getClientID());
 		String host = getHost(message.getClientID());
 
-		Publisher pub = new Publisher(message.getTopicName(), host, port, protocolServerType);
+		Publisher pub = new Publisher(message.getTopicName(), host, port, ps.getProtocolServerType());
 		String topic = message.getTopicName();
 		String payload = getPayload(message);
 
 		MessageService.getInstance().distributeMessage(
-				new Message(payload, topic, pub, protocolServerType)
+				new Message(payload, topic, pub, ps.getProtocolServerType())
 		);
 	}
 
@@ -86,20 +103,6 @@ public class MQTTServer extends Server {
 		if( host.indexOf('/') == 0)
 			host = host.substring(1);
 		return host;
-	}
-
-	public void init(String host, int port) {
-		List<InterceptHandler> interceptHandlers = new ArrayList<>();
-		interceptHandlers.add(new MQTTListener());
-
-		protocolServerType = "MQTT";
-
-		final IConfig config = new MemoryConfig(getConfig(host, port));
-		try {
-			startServer(config, interceptHandlers);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private Properties getConfig(String host, int port) {

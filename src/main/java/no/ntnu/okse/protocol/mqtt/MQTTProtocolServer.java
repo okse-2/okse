@@ -5,73 +5,45 @@ import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 
 public class MQTTProtocolServer extends AbstractProtocolServer {
-	private static final String DEFAULT_HOST = "0.0.0.0";
-	private static final Integer DEFAULT_PORT = 1883;
-
-	private static boolean _invoked = false;
-	private static MQTTProtocolServer _singleton = null;
-
-	private MQTTProtocolServer(String host, Integer port) {
-		init(host, port);
-	}
+	protected static final String SERVERTYPE = "mqtt";
 
 	private MQTTServer server;
 
-	@Override
-	protected void init(String host, Integer port) {
+	public MQTTProtocolServer(String host, Integer port) {
 		this.host = host;
 		this.port = port;
-		_invoked = true;
-		protocolServerType = "MQTT";
 		log = Logger.getLogger(MQTTProtocolServer.class.getName());
 	}
-
-	public static MQTTProtocolServer getInstance() {
-		if(!_invoked) {
-			_singleton = new MQTTProtocolServer(DEFAULT_HOST, DEFAULT_PORT);
-		}
-		return _singleton;
-	}
-
-	public static MQTTProtocolServer getInstance(String host, Integer port) {
-		if(!_invoked) {
-			_singleton = new MQTTProtocolServer(host, port);
-		}
-		return _singleton;
-	}
-
 
 	@Override
 	public void boot() {
 		if(!_running) {
-			_running = true;
+			server = new MQTTServer(this, host, port);
 			_serverThread = new Thread(this::run);
 			_serverThread.setName("MQTTProtocolServer");
 			_serverThread.start();
+			_running = true;
 			log.info("MQTTProtocolServer booted successfully");
 		}
 	}
 
 	@Override
 	public void run() {
-		server = new MQTTServer();
-		server.init(host, port);
+		server.start();
 	}
 
 	@Override
 	public void stopServer() {
 		log.info("Stopping MQTTProtocolServer");
-		_running = false;
-		_singleton = null;
-		_invoked = false;
 		server.stopServer();
+		_running = false;
 		server = null;
 		log.info("MQTTProtocolServer is stopped");
 	}
 
 	@Override
 	public String getProtocolServerType() {
-		return protocolServerType;
+		return SERVERTYPE;
 	}
 
 	@Override

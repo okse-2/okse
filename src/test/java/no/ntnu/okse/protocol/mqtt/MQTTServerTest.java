@@ -14,12 +14,14 @@ import static org.testng.Assert.*;
 
 public class MQTTServerTest {
 
+
+
 	enum Status {
 		CONNECT,
 		DISCONNECT,
 		PUBLISH,
 		SUBSCRIBE,
-		UNSUBSCRIBE
+		UNSUBSCRIBE;
 	}
 
 	private static Status status;
@@ -53,12 +55,14 @@ public class MQTTServerTest {
 	}
 
 	MQTTServer mqtt;
+	MQTTProtocolServer ps;
 
 	@BeforeTest
 	public void setUp() {
-		mqtt = new MQTTServer();
-		//TODO: Remove this when we test init and change the getinstance method
-		mqtt.init("localhost", 1234);
+		String host = "localhost";
+		int port = 1234;
+		ps = new MQTTProtocolServer(host, port);
+		mqtt = new MQTTServer(ps, host, port);
 	}
 
 	@AfterTest
@@ -67,17 +71,9 @@ public class MQTTServerTest {
 		status = null;
 	}
 
-	@Test
-	public void init() {
-//		assertFalse(mqtt.isRunning());
-		mqtt.init("localhost", 1234);
-//		assertTrue(mqtt.isRunning());
-	}
 
 	@Test
 	public void sendMessage() {
-		Message message = new Message("Test message", "MQTT", null, "MQTT");
-		mqtt.sendMessage(message);
 	}
 
 	@Test
