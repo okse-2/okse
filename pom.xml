@@ -134,9 +134,9 @@
             <version>1.52</version>
         </dependency>
         <dependency>
-            <groupId>io.moquette</groupId>
-            <artifactId>moquette-broker</artifactId>
-            <version>0.8</version>
+            <groupId>com.github.cXhristian</groupId>
+            <artifactId>moquette</artifactId>
+            <version>client-channel</version>
         </dependency>
         <dependency>
             <groupId>com.github.tOgg1</groupId>
