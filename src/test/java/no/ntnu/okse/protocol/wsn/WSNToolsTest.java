@@ -89,8 +89,8 @@ public class WSNToolsTest {
 
     @Test
     public void testExtractRawXmlContentFromDomNode() throws Exception {
-        assertTrue(WSNTools.buildGenericContentElement("data") instanceof org.w3c.dom.Element);
-        org.w3c.dom.Element genericContentElement = WSNTools.buildGenericContentElement("data");
+        assertTrue(WSNTools.buildGenericContentElement("Content", "data") instanceof org.w3c.dom.Element);
+        org.w3c.dom.Element genericContentElement = WSNTools.buildGenericContentElement("Content", "data");
         assertEquals(genericContentElement.getTextContent(), "data");
         assertEquals(genericContentElement.getTagName(), "Content");
     }
@@ -122,7 +122,7 @@ public class WSNToolsTest {
     @Test
     public void testInjectMessageContentIntoNotify() throws Exception {
         Notify msg = WSNTools.createNotify(message);
-        Element generatedContent = WSNTools.buildGenericContentElement("updated");
+        Element generatedContent = WSNTools.buildGenericContentElement("Content", "updated");
         WSNTools.injectMessageContentIntoNotify(generatedContent, msg);
         if (((Node) msg.getNotificationMessage().get(0).getMessage().getAny()).getTextContent().equals("test")) {
             fail("Message content should be 'updated', not 'test'");
@@ -154,7 +154,7 @@ public class WSNToolsTest {
 
     @Test
     public void testBuildNotifyWithContext() throws Exception {
-        WSNTools.NotifyWithContext notify = WSNTools.buildNotifyWithContext("test", "test/sub", "ox", "http://okse.default.message");
+        WSNTools.NotifyWithContext notify = WSNTools.buildNotifyWithContext("Content", "test", "test/sub", "ox", "http://okse.default.message");
         Notify n = notify.notify;
         NuNamespaceContextResolver ncr = notify.nuNamespaceContextResolver;
         assertTrue(ncr.resolveNamespaceContext(n.getNotificationMessage().get(0).getMessage()).getAllPrefixes().contains("ox"));
@@ -164,7 +164,7 @@ public class WSNToolsTest {
 
     @Test
     public void testBuildGenericContentElement() throws Exception {
-        Element result = WSNTools.buildGenericContentElement("elementtest");
+        Element result = WSNTools.buildGenericContentElement("Content","elementtest");
         assertTrue(result instanceof Element);
         assertEquals(result.getTextContent(), "elementtest");
         assertEquals(result.getTagName(), "Content");

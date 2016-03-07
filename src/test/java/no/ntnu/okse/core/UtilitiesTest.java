@@ -26,8 +26,9 @@ package no.ntnu.okse.core;
 
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.time.Duration;
-import java.util.Properties;
+import java.util.Arrays;
 
 import static org.testng.Assert.*;
 
@@ -49,10 +50,32 @@ public class UtilitiesTest {
         assertEquals(ISOstring, "00:00:00.001");
     }
 
+    // Test creation of configuration files from templates in resources.
+    // If the config directory already exists, move it away for the duration
+    // of the test. This code will not work correctly if subdirectories are
+    // in the temporarily created config directory.
     @Test
-    public void testReadConfigurationFromFile() throws Exception {
+    public void testCreateConfigurationFiles() {
+        File config = new File("config");
+        File configTmp = new File("configTmp");
+        if(config.exists()) config.renameTo(configTmp);
+
         Utilities.createConfigDirectoryAndFilesIfNotExists();
-        Properties one = Utilities.readConfigurationFromFile("config/okse.properties");
-        assertNotNull(one);
+        for(String filename : Utilities.configFiles) {
+            File file = new File(filename);
+            assertTrue(file.exists());
+        }
+
+        for(File f : config.listFiles()) f.delete();
+        config.delete();
+        if(configTmp.exists()) configTmp.renameTo(config);
+    }
+
+    @Test
+    public void testReadConfigurationsFromFile() throws Exception {
+        Utilities.createConfigDirectoryAndFilesIfNotExists();
+        Arrays.stream(Utilities.configFiles).filter(file -> file.endsWith(".properties")).forEach(file -> {
+            assertNotNull(Utilities.readConfigurationFromFile(file));
+        });
     }
 }

@@ -83,12 +83,14 @@ public class AMQPServer extends BaseHandler {
     private boolean quiet;
     private int tag = 0;
     private LinkedBlockingQueue<String> queue;
+    private AMQProtocolServer ps;
 
-    public AMQPServer(SubscriptionHandler subscriptionHandler, boolean quiet) {
+    public AMQPServer(AMQProtocolServer ps, SubscriptionHandler subscriptionHandler, boolean quiet) {
         this.subscriptionHandler = subscriptionHandler;
         this.quiet = quiet;
         log = Logger.getLogger(AMQPServer.class.getName());
         queue = new LinkedBlockingQueue<>();
+        this.ps = ps;
     }
 
     /**
@@ -118,7 +120,7 @@ public class AMQPServer extends BaseHandler {
             }
             // Queue based sending will have an initial snd == null, meaning that it is not a sub
             // and it is a message that is to be sent. Incrementing total sent here.
-            AMQProtocolServer.getInstance().incrementTotalMessagesSent();
+            ps.incrementTotalMessagesSent();
         }
         log.debug("Fetched this sender: " + snd.toString());
 
@@ -151,11 +153,11 @@ public class AMQPServer extends BaseHandler {
     private int send(String address) {
         int count = 0;
 
-        if (AMQProtocolServer.getInstance().useQueue) {
-            log.debug(String.format("Use Queue is set to: %b, using queue mode", AMQProtocolServer.getInstance().useQueue));
+        if (ps.useQueue) {
+            log.debug(String.format("Use Queue is set to: %b, using queue mode", ps.useQueue));
             return send(address, null);
         } else {
-            log.debug(String.format("Use Queue is set to: %b, using topic mode", AMQProtocolServer.getInstance().useQueue));
+            log.debug(String.format("Use Queue is set to: %b, using topic mode", ps.useQueue));
             List<Sender> sendersOnTopic = subscriptionHandler.getOutgoing(address).getRoutes();
 
             MessageBytes mb = messages.get(address);
@@ -168,7 +170,7 @@ public class AMQPServer extends BaseHandler {
 
                 byte[] bytes = mb.getBytes();
                 snd.send(bytes, 0, bytes.length);
-                AMQProtocolServer.getInstance().incrementTotalMessagesSent();
+                ps.incrementTotalMessagesSent();
 
                 dlv.disposition(Accepted.getInstance());
                 dlv.settle();
@@ -187,7 +189,7 @@ public class AMQPServer extends BaseHandler {
      * @param message : OKSE internal message
      */
     public void addMessageToQueue(no.ntnu.okse.core.messaging.Message message) {
-        Message msg = convertOkseMessageToAMQP(message);
+        Message msg = convertOkseMessageToAMQP(message, ps.getHost());
 
         MessageBytes mb = convertAMQPMessageToMessageBytes(msg);
 
@@ -199,7 +201,7 @@ public class AMQPServer extends BaseHandler {
 
         log.debug("The first message in the queue is currently: " + queue.peek());
 
-        AMQProtocolServer.getInstance().getDriver().wakeUp();
+        ps.getDriver().wakeUp();
     }
 
     /**
@@ -260,12 +262,12 @@ public class AMQPServer extends BaseHandler {
      * @param message : OKSE internal message
      * @return AMQP message
      */
-    public static Message convertOkseMessageToAMQP(no.ntnu.okse.core.messaging.Message message) {
+    public static Message convertOkseMessageToAMQP(no.ntnu.okse.core.messaging.Message message, String host) {
         Message msg = Message.Factory.create();
 
         Section body = new AmqpValue(message.getMessage());
 
-        msg.setAddress(AMQProtocolServer.getInstance().getHost() + "/" + message.getTopic());
+        msg.setAddress(host + "/" + message.getTopic());
         msg.setSubject("OKSE translated message");
         msg.setBody(body);
         return msg;
@@ -284,7 +286,7 @@ public class AMQPServer extends BaseHandler {
                 }
             }
         } catch (InterruptedException e) {
-            AMQProtocolServer.getInstance().incrementTotalErrors();
+            ps.incrementTotalErrors();
             log.error("Got interrupted: " + e.getMessage());
         }
     }
@@ -338,7 +340,7 @@ public class AMQPServer extends BaseHandler {
                     messages.put(address.getName(), mb);
                     queue.put(address.getName());
                 } catch (InterruptedException e) {
-                    AMQProtocolServer.getInstance().incrementTotalErrors();
+                    ps.incrementTotalErrors();
                     log.error("Got interrupted: " + e.getMessage());
                 }
 
@@ -348,8 +350,8 @@ public class AMQPServer extends BaseHandler {
 
                 log.debug(String.format("Got and distributed message(%s): %s from %s", address.getName(), message, rcv.toString()));
 
-                AMQProtocolServer.getInstance().incrementTotalMessagesReceived();
-                AMQProtocolServer.getInstance().incrementTotalRequests();
+                ps.incrementTotalMessagesReceived();
+                ps.incrementTotalRequests();
 
             }
         }
@@ -363,10 +365,10 @@ public class AMQPServer extends BaseHandler {
                         (String) amqpMessageBodyString.getValue(),
                         address.getName(),
                         null,
-                        AMQProtocolServer.getInstance().getProtocolServerType()
+                        AMQProtocolServer.SERVERTYPE
                 );
 
-        okseMessage.setOriginProtocol(AMQProtocolServer.getInstance().getProtocolServerType());
+        okseMessage.setOriginProtocol(AMQProtocolServer.SERVERTYPE);
 
         return okseMessage;
     }
