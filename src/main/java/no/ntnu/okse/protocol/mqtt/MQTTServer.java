@@ -44,47 +44,47 @@ public class MQTTServer extends Server {
 		public void onSubscribe(InterceptSubscribeMessage message) {
 			log.info("Client subscribed to: "  + message.getTopicFilter() + "   ID: " + message.getClientID());
 
-			TopicService.getInstance().addTopic( message.getTopicFilter() );
+			TopicService.getInstance().addTopic(message.getTopicFilter());
 			int port = getPort(message.getClientID());
 			String host = getHost(message.getClientID());
 
-			Subscriber sub = new Subscriber( host, port, message.getTopicFilter(), protocolServerType );
+			Subscriber sub = new Subscriber(host, port, message.getTopicFilter(), protocolServerType);
 			SubscriptionService.getInstance().addSubscriber(sub);
 		}
 
 	}
 
-	private void distributeMessage(InterceptPublishMessage message){
+	private void distributeMessage(InterceptPublishMessage message) {
 		int port = getPort(message.getClientID());
 		String host = getHost(message.getClientID());
 
-		Publisher pub = new Publisher( message.getTopicName(), host, port, protocolServerType);
+		Publisher pub = new Publisher(message.getTopicName(), host, port, protocolServerType);
 		String topic = message.getTopicName();
 		String payload = getPayload(message);
 
 		MessageService.getInstance().distributeMessage(
-				new Message( payload, topic, pub, protocolServerType )
+				new Message(payload, topic, pub, protocolServerType)
 		);
 	}
 
-	private String getPayload(InterceptPublishMessage message){
+	private String getPayload(InterceptPublishMessage message) {
 		ByteBuffer buffer = message.getPayload();
 		String payload = new String(buffer.array(), buffer.position(), buffer.limit());
 		return payload;
 	}
 
-	private int getPort(String clientID){
+	private int getPort(String clientID) {
 		Channel channel = getChannelByClientId(clientID);
 		String remote = channel.remoteAddress().toString();
 		int port = Integer.parseInt(remote.split(":")[1]);
 		return port;
 	}
-	private String getHost(String clientID){
+	private String getHost(String clientID) {
 		Channel channel = getChannelByClientId(clientID);
 		String remote = channel.remoteAddress().toString();
 		String host = remote.split(":")[0];
-		//Moquette has a wierd address format, example: /127.0.0.1:1883
-		if( host.indexOf('/') == 0 )
+		// Moquette has a weird address format, example: /127.0.0.1:1883
+		if( host.indexOf('/') == 0)
 			host = host.substring(1);
 		return host;
 	}
@@ -125,12 +125,12 @@ public class MQTTServer extends Server {
 	 * */
 	private PublishMessage createMQTTMessage(@NotNull Message message){
 		PublishMessage msg = new PublishMessage();
-		ByteBuffer payload = ByteBuffer.wrap( message.getMessage().getBytes() );
+		ByteBuffer payload = ByteBuffer.wrap(message.getMessage().getBytes());
 
 		String topicName = message.getTopic();
 
-		msg.setPayload( payload );
-		msg.setTopicName( topicName );7
+		msg.setPayload(payload);
+		msg.setTopicName(topicName);
 		msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
 		return msg;
 	}
