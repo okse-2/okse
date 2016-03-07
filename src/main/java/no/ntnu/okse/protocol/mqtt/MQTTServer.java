@@ -1,13 +1,14 @@
 package no.ntnu.okse.protocol.mqtt;
 
 import com.sun.istack.internal.NotNull;
+import io.moquette.interception.messages.InterceptDisconnectMessage;
+import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import io.netty.channel.Channel;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
-import no.ntnu.okse.core.topic.Topic;
 import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
 
@@ -45,18 +46,82 @@ public class MQTTServer extends Server {
 			log.info("Client subscribed to: "  + message.getTopicFilter() + "   ID: " + message.getClientID());
 
 			TopicService.getInstance().addTopic( message.getTopicFilter() );
-			int port = getPort(message.getClientID());
-			String host = getHost(message.getClientID());
+			Channel channel = getChannelByClientId(message.getClientID());
+			if(channel == null)
+				return;
+			int port = getPort(channel);
+			String host = getHost(channel);
 
 			Subscriber sub = new Subscriber( host, port, message.getTopicFilter(), protocolServerType );
+
+			log.info(sub.getSubscriberID());
+			log.info(sub.getSubscriberID());
+			log.info(sub.getSubscriberID());
+			log.info(sub.getSubscriberID());
+			log.info(sub.getSubscriberID());
+
 			SubscriptionService.getInstance().addSubscriber(sub);
 		}
 
+		@Override
+		public void onUnsubscribe(InterceptUnsubscribeMessage message) {
+			log.info("Client unsubscribed from: "  + message.getTopicFilter() + "   ID: " + message.getClientID());
+
+			String clientID = message.getClientID();
+			Channel channel = getChannelByClientId(message.getClientID());
+			if(channel == null)
+				return;
+			Subscriber subscriber = getSububscriberFromChannel(channel);
+			SubscriptionService.getInstance().removeSubscriber( subscriber );
+		}
+
+		@Override
+		public void onDisconnect(InterceptDisconnectMessage message) {
+			log.info("Client disconnected ID: " + message.getClientID());
+
+			String clientID = message.getClientID();
+
+			log.info( SubscriptionService.getInstance().getAllSubscribers().toArray().length + SubscriptionService.getInstance().getAllPublishers().toArray().length );
+			Channel channel = getChannelByClientId(clientID);
+			if(channel == null)
+				return;
+
+			Subscriber subscriber = getSububscriberFromChannel(channel);
+			//Remove if the ID links to a subscriber
+			if(subscriber != null)
+				SubscriptionService.getInstance().removeSubscriber( subscriber );
+
+			Publisher publisher = getPublisherFromChannel(channel);
+			//Remove if the ID links to a publisher
+			if(publisher != null)
+				SubscriptionService.getInstance().removePublisher( publisher );
+			log.info( SubscriptionService.getInstance().getAllSubscribers().toArray().length + SubscriptionService.getInstance().getAllPublishers().toArray().length );
+		}
+	}
+
+	private Subscriber getSububscriberFromChannel(Channel channel){
+		HashSet<Subscriber> subscribers = SubscriptionService.getInstance().getAllSubscribers();
+		for(Subscriber sub : subscribers) {
+			if(sub.getHost().equals(getHost(channel)) && sub.getPort().equals(getPort(channel)))
+				return sub;
+		}
+		return null;
+	}
+	private Publisher getPublisherFromChannel(Channel channel){
+		HashSet<Publisher> publishers = SubscriptionService.getInstance().getAllPublishers();
+		for(Publisher pub: publishers) {
+			if(pub.getHost().equals(getHost(channel)) && pub.getPort().equals(getPort(channel)))
+				return pub;
+		}
+		return null;
 	}
 
 	private void distributeMessage(InterceptPublishMessage message){
-		int port = getPort(message.getClientID());
-		String host = getHost(message.getClientID());
+		Channel channel = getChannelByClientId(message.getClientID());
+		if(channel == null)
+			return;
+		int port = getPort(channel);
+		String host = getHost(channel);
 
 		Publisher pub = new Publisher( message.getTopicName(), host, port, protocolServerType);
 		String topic = message.getTopicName();
@@ -73,14 +138,12 @@ public class MQTTServer extends Server {
 		return payload;
 	}
 
-	private int getPort(String clientID){
-		Channel channel = getChannelByClientId(clientID);
+	private int getPort(Channel channel){
 		String remote = channel.remoteAddress().toString();
 		int port = Integer.parseInt(remote.split(":")[1]);
 		return port;
 	}
-	private String getHost(String clientID){
-		Channel channel = getChannelByClientId(clientID);
+	private String getHost(Channel channel){
 		String remote = channel.remoteAddress().toString();
 		String host = remote.split(":")[0];
 		//Moquette has a wierd address format, example: /127.0.0.1:1883
@@ -113,7 +176,7 @@ public class MQTTServer extends Server {
 	 * Sends the message to any subscriber that is subscribed to the topic that the message was sent to
 	 * @param message is the message that is sent from OKSE core
 	 * */
-	public void sendMessage(Message message) {
+	public void sendMessage(@NotNull  Message message) {
 		PublishMessage msg = createMQTTMessage(message);
 		internalPublish(msg);
 	}
@@ -123,14 +186,14 @@ public class MQTTServer extends Server {
 	 *
 	 * @param message The OKSE message to use when creating MQTT message
 	 * */
-	private PublishMessage createMQTTMessage(@NotNull Message message){
+	protected PublishMessage createMQTTMessage(@NotNull Message message){
 		PublishMessage msg = new PublishMessage();
 		ByteBuffer payload = ByteBuffer.wrap( message.getMessage().getBytes() );
 
 		String topicName = message.getTopic();
 
 		msg.setPayload( payload );
-		msg.setTopicName( topicName );7
+		msg.setTopicName( topicName );
 		msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
 		return msg;
 	}
