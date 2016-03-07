@@ -7,7 +7,6 @@ import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
-import no.ntnu.okse.core.topic.Topic;
 import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
 
@@ -95,18 +94,23 @@ public class MQTTServer extends Server {
 
 		protocolServerType = "MQTT";
 
-		Properties properties = new Properties();
-		properties.setProperty(BrokerConstants.HOST_PROPERTY_NAME, host);
-		properties.setProperty(BrokerConstants.PORT_PROPERTY_NAME, "" + port);
-		properties.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, "25342");
-
-		final IConfig config = new MemoryConfig(properties);
+		final IConfig config = new MemoryConfig(getConfig(host, port));
 		try {
 			startServer(config, interceptHandlers);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
 
+	private Properties getConfig(String host, int port) {
+		Properties properties = new Properties();
+		properties.setProperty(BrokerConstants.HOST_PROPERTY_NAME, host);
+		properties.setProperty(BrokerConstants.PORT_PROPERTY_NAME, "" + port);
+		// Set random port for websockets instead of 8080
+		properties.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, "25342");
+		// Disable automatic publishing (handled by the broker instead)
+		properties.setProperty(BrokerConstants.PUBLISH_TO_CONSUMERS, "false");
+		return properties;
 	}
 
 	/**
