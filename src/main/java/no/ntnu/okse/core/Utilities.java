@@ -51,6 +51,13 @@ public class Utilities {
         return null;
     }
 
+    // Declare the config files
+    protected static final String configFiles[] = {
+            "config/okse.properties",
+            "config/log4j.properties",
+            "config/topicmapping.properties"
+    };
+
     /**
      * Helper method that creates a config file directory and checks for presence of the default properties files
      * If directory does not exist, it creates it, and then proceeds to copy the default properties files
@@ -61,29 +68,18 @@ public class Utilities {
         File configDir = new File("config");
         if (!configDir.exists()) configDir.mkdirs();
 
-        // Declare the config files
-        File okseConfig = new File("config/okse.properties");
-        File log4jConfig = new File("config/log4j.properties");
-        File topicConfig = new File("config/topicmapping.properties");
-
-        try {
-            // If okse.properties does not exist, copy it from the classpath resources folder
-            if (!okseConfig.exists()) {
-                InputStream baseOkseConfig = Utilities.class.getResourceAsStream("/config/okse.properties");
-                Files.copy(baseOkseConfig, okseConfig.toPath());
+        for(String filename : configFiles) {
+            try {
+                File configFile = new File(filename);
+                // If configuration file does not exist, copy it from the classpath resources folder
+                if (!configFile.exists()) {
+                    InputStream baseConfig = Utilities.class.getResourceAsStream("/" + filename);
+                    Files.copy(baseConfig, configFile.toPath());
+                }
+            } catch (IOException e) {
+                log.error("Could not create configuration file " + filename);
+                e.printStackTrace();
             }
-            // If log4j.properties does not exist, copy it from the classpath resources folder
-            if (!log4jConfig.exists()) {
-                InputStream baseLog4jConfig = Utilities.class.getResourceAsStream("/config/log4j.properties");
-                Files.copy(baseLog4jConfig, log4jConfig.toPath());
-            }
-            // If topicmapping.properties does not exist, copy it from the classpath resources folder
-            if (!topicConfig.exists()) {
-                InputStream baseTopicConfig = Utilities.class.getResourceAsStream("/config/topicmapping.properties");
-                Files.copy(baseTopicConfig, topicConfig.toPath());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
