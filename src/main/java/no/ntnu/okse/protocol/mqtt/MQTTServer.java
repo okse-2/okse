@@ -1,6 +1,5 @@
 package no.ntnu.okse.protocol.mqtt;
 
-import com.sun.istack.internal.NotNull;
 import io.netty.channel.Channel;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
@@ -21,6 +20,7 @@ import io.moquette.server.config.MemoryConfig;
 import io.moquette.parser.proto.messages.AbstractMessage;
 import io.moquette.parser.proto.messages.PublishMessage;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;

@@ -1,7 +1,6 @@
 package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.messaging.Message;
-import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 
