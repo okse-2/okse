@@ -1,11 +1,7 @@
 package no.ntnu.okse.web.controller;
 
 import no.ntnu.okse.core.topic.TopicService;
-import no.ntnu.okse.protocol.amqp.AMQProtocolServer;
-import no.ntnu.okse.protocol.wsn.WSNTools;
-import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.apache.log4j.Logger;
-import org.ntnunotif.wsnu.services.general.WsnUtilities;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/config")
@@ -143,6 +137,7 @@ public class ConfigController {
      * @return A message stating the new value of the useQueue variable
      */
     /*
+    //TODO: Do this per instance
     @RequestMapping(method = RequestMethod.POST, value = CHANGE_AMQP)
     public
     @ResponseBody
@@ -161,6 +156,7 @@ public class ConfigController {
      * @param topic String with topic to relay (not required)
      * @return A message telling the outcome of the subscription request.
      */
+    //TODO: Do this per instance
     @RequestMapping(method = RequestMethod.POST, value = ADD_RELAY)
     public
     @ResponseBody
@@ -232,6 +228,7 @@ public class ConfigController {
      * @param relay The relay to delete
      * @return A message telling if the removal were successful.
      */
+    //TODO: Do this per instance
     @RequestMapping(method = RequestMethod.DELETE, value = DELETE_RELAY)
     public
     @ResponseBody
@@ -257,6 +254,7 @@ public class ConfigController {
      *
      * @return A response message
      */
+    //TODO: Do this per instance
     @RequestMapping(method = RequestMethod.DELETE, value = DELETE_ALL_RELAYS)
     public
     @ResponseBody
