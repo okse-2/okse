@@ -2,12 +2,16 @@ package no.ntnu.okse.protocol.mqtt;
 
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.messages.*;
+import io.moquette.parser.proto.messages.AbstractMessage;
+import io.moquette.parser.proto.messages.PublishMessage;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Publisher;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.mockito.*;
+import org.mockito.Mockito;
+
+import java.nio.ByteBuffer;
 
 import static org.testng.Assert.*;
 
@@ -74,6 +78,17 @@ public class MQTTServerTest {
 
 	@Test
 	public void sendMessage() {
+		MQTTServer mqtt = getInstance();
+		Message message = new Message("Test message", "MQTT", null, "MQTT");
+		PublishMessage msg = createMQTTMessage();
+
+		MQTTServer spy = Mockito.spy(mqtt);
+
+		//Test that internalPublish is called with the correct parameter
+		Mockito.doReturn(msg).when(spy).createMQTTMessage(message);
+		Mockito.doNothing().when(spy).internalPublish(msg);
+		spy.sendMessage(message);
+		Mockito.verify(spy, Mockito.atLeastOnce()).internalPublish(msg);
 	}
 
 	@Test
@@ -83,5 +98,17 @@ public class MQTTServerTest {
 
 	private MQTTServer getInstance(){
 		return mqtt;
+	}
+	private PublishMessage createMQTTMessage(){
+		PublishMessage msg = new PublishMessage();
+		ByteBuffer payload = ByteBuffer.wrap( "This is a test".getBytes() );
+
+		String topicName = "Test";
+
+		msg.setPayload( payload );
+		msg.setTopicName( topicName );
+		msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
+		return msg;
+
 	}
 }
