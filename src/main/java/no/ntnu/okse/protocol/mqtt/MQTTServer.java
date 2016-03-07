@@ -23,7 +23,6 @@ import io.moquette.parser.proto.messages.AbstractMessage;
 import io.moquette.parser.proto.messages.PublishMessage;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -131,8 +130,7 @@ public class MQTTServer extends Server {
 		String topicName = message.getTopic();
 
 		msg.setPayload( payload );
-		msg.setTopicName( topicName );
-
+		msg.setTopicName( topicName );7
 		msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
 		return msg;
 	}
