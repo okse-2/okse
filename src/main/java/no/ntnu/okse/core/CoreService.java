@@ -32,11 +32,19 @@ import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.core.topic.TopicService;
 import no.ntnu.okse.protocol.ProtocolServer;
+import no.ntnu.okse.protocol.ProtocolServerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -138,7 +146,7 @@ public class CoreService extends AbstractCoreService {
         log.info("Booting ProtocolServers");
         // Since this is CoreService bootup, we iterate directly, avoiding unnecessary overhead caused
         // by the bootProtocolServers() method, that is used during live start / stop of protocol servers.
-        protocolServers.forEach(ps -> ps.boot());
+        bootProtocolServers();
         protocolServersBooted = true;
         log.info("Completed booting ProtocolServers");
 
@@ -382,6 +390,7 @@ public class CoreService extends AbstractCoreService {
 
         // Iterate over all protocol servers and initiate shutdown process
         getAllProtocolServers().forEach(ps -> ps.stopServer());
+        getAllProtocolServers().clear();
         protocolServersBooted = false;
 
         // Let the thread wait a bit, for tasks to be completed.
@@ -431,32 +440,51 @@ public class CoreService extends AbstractCoreService {
         // If they are already booted, return.
         if (protocolServersBooted) return;
 
-        // Fetch the protocolserver Classes registered
-        ArrayList<Class> protocolServerClasses = new ArrayList<>();
-        protocolServers.forEach(ps -> protocolServerClasses.add(ps.getClass()));
-        // Clear the cached protocol servers from core service registry
-        protocolServers.clear();
-        // For each of the fetched classes that was in cache
-        protocolServerClasses.forEach(clazz -> {
-            try {
-                // Fetch the getInstance method from the class
-                Method instanceMethod = clazz.getMethod("getInstance", null);
-                // Cast the returned instance as a ProtocolServer
-                ProtocolServer ps = (ProtocolServer) instanceMethod.invoke(null, null);
-                // Add the invoked instance to the ProtocolServer registry again
-                addProtocolServer(ps);
-            } catch (NoSuchMethodException e) {
-                log.error("Failed to locate getInstance method on " + clazz + ". Is it implemented properly?");
-            } catch (InvocationTargetException e) {
-                log.error("Failed to invoke getInstance method on " + clazz + ". Is it implemented properly?");
-            } catch (IllegalAccessException e) {
-                log.error("Failed to invoke getInstance method on " + clazz + ". It needs to be public access.");
+        // Load servers from configuration file
+        NodeList servers;
+        try {
+            Document cfg;
+            FileInputStream is = new FileInputStream("config/protocolservers.xml");
+            cfg = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+            servers = cfg.getElementsByTagName("server");
+            if(servers == null) {
+                log.error("No server tags in protocolservers.xml");
+                return;
             }
-        });
-        // At this point, previously cached registered protocol servers have been removed, temporarily
-        // retaining the Class from each protocol server. They have been reinvoked and the new instances
-        // have been reinserted into the registry. Time to boot.
-        protocolServers.forEach(ps -> ps.boot());
+        } catch (FileNotFoundException e) {
+            log.error("protocolservers.xml not found");
+            e.printStackTrace();
+            return;
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            log.error("protocolservers.xml parsing error, message: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+
+        // Instantiate all servers in configuration file
+        for(int i = 0; i < servers.getLength(); i++) {
+            ProtocolServer ps = ProtocolServerFactory.create(servers.item(i));
+            if(ps != null) {
+                protocolServers.add(ps);
+            } else {
+                log.error("Could not create ProtocolServer from tag " + servers.item(i).toString());
+            }
+
+        }
+
+        // Iterate through and boot all instantiated servers
+        // If a protocol server fails to boot, remove it
+        Iterator<ProtocolServer> it = protocolServers.iterator();
+        while(it.hasNext()) {
+            ProtocolServer ps = it.next();
+            try {
+                ps.boot();
+            } catch (ProtocolServer.BootErrorException e) {
+                log.error("Error while booting a " + ps.getProtocolServerType() +
+                        " server(" + e.getMessage() + ")");
+                it.remove();
+            }
+        }
         protocolServersBooted = true;
     }
 

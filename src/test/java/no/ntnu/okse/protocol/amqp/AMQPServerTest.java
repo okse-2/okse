@@ -24,22 +24,17 @@
 
 package no.ntnu.okse.protocol.amqp;
 
-import no.ntnu.okse.Application;
-import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.messaging.Message;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.amqp.transport.*;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.engine.impl.DeliveryImpl;
 import org.apache.qpid.proton.messenger.Messenger;
 import org.apache.qpid.proton.messenger.impl.Address;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
@@ -52,9 +47,13 @@ public class AMQPServerTest {
 
     AMQProtocolServer ps;
 
+    // port for AMQP server. Incremented every test to prevent tests failing
+    // because the port hasn't been freed in time from an earlier test
+    int port = 5673;
+
     @BeforeMethod
     public void setUp() throws Exception {
-        ps = AMQProtocolServer.getInstance();
+        ps = new AMQProtocolServer("0.0.0.0", port++, false, true);
         ps.boot();
     }
 
@@ -143,7 +142,7 @@ public class AMQPServerTest {
         String topic = "test";
         Message okseMessage = new Message("Hei", topic, null, "AMQP");
 
-        org.apache.qpid.proton.message.Message AMQPMessage = AMQPServer.convertOkseMessageToAMQP(okseMessage);
+        org.apache.qpid.proton.message.Message AMQPMessage = AMQPServer.convertOkseMessageToAMQP(okseMessage, "0.0.0.0");
 
         Address address = new Address(AMQPMessage.getAddress());
 
@@ -492,7 +491,7 @@ public class AMQPServerTest {
         assertEquals(okseMessage.getMessage(), message);
         assertEquals(okseMessage.getMessage(), (String) ((AmqpValue) AMQPMessage.getBody()).getValue());
         assertEquals(okseMessage.getTopic(), topic);
-        assertEquals(okseMessage.getOriginProtocol(), "AMQP");
+        assertEquals(okseMessage.getOriginProtocol(), "amqp");
 
     }
 

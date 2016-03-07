@@ -129,7 +129,4 @@ public abstract class AbstractProtocolServer implements ProtocolServer {
         return this.host;
     }
 
-    // Initializer
-    protected abstract void init(String host, Integer port);
-
 }

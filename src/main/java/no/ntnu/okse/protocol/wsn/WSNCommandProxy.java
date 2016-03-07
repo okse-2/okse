@@ -76,20 +76,23 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
     private FilterSupport filterSupport;
     private WSNSubscriptionManager _subscriptionManager;
     private WSNRegistrationManager _registrationManager;
+    private WSNotificationServer _protocolserver;
 
-    public WSNCommandProxy(Hub hub) {
+    public WSNCommandProxy(WSNotificationServer protocolserver, Hub hub) {
         this.log = Logger.getLogger(WSNCommandProxy.class.getName());
         this.setHub(hub);
         this.filterSupport = FilterSupport.createDefaultFilterSupport();
         this._subscriptionManager = null;
         this._registrationManager = null;
+        _protocolserver = protocolserver;
     }
 
-    public WSNCommandProxy() {
+    public WSNCommandProxy(WSNotificationServer protocolserver) {
         this.log = Logger.getLogger(WSNCommandProxy.class.getName());
         this.filterSupport = FilterSupport.createDefaultFilterSupport();
         this._subscriptionManager = null;
         this._registrationManager = null;
+        _protocolserver = protocolserver;
     }
 
     // For now, set both WS-Nu submanager and OKSE submanager fields.
@@ -135,8 +138,8 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         // Strip off protocol
         reference = reference.replace("http://", "").replace("https://", "");
         // Fetch WAN host and port from config
-        String pubWanHost = WSNotificationServer.getInstance().getPublicWANHost();
-        Integer pubWanPort = WSNotificationServer.getInstance().getPublicWANPort();
+        String pubWanHost = _protocolserver.getPublicWANHost();
+        Integer pubWanPort = _protocolserver.getPublicWANPort();
         // List the illegal hosts
         HashSet<String> illegal = new HashSet<>(Arrays.asList("0.0.0.0", "localhost", "127.0.0.1", pubWanHost));
         // Split at host port intersection
@@ -150,7 +153,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                     isLegal = false;
                 } else {
                     // Check for defaultport at regular port
-                    if (WSNotificationServer.getInstance().getPort() == 80) {
+                    if (_protocolserver.getPort() == 80) {
                         isLegal = false;
                     }
                 }
@@ -165,7 +168,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                     }
                 } else {
                     // If we had match with regular illegals, check regular port correlation
-                    if (refPort.equals(WSNotificationServer.getInstance().getPort())) {
+                    if (refPort.equals(_protocolserver.getPort())) {
                         isLegal = false;
                     }
                 }
@@ -338,7 +341,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
                         log.debug("Message content: " + content);
 
                         // Generate the message
-                        message = new Message(content, topicName, null, WSNotificationServer.getInstance().getProtocolServerType());
+                        message = new Message(content, topicName, null, _protocolserver.getProtocolServerType());
                         log.debug("OKSE Message generated");
                         // Extract the endpoint reference from publisher
                         W3CEndpointReference publisherReference = messageHolderType.getProducerReference();
@@ -380,7 +383,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         log.debug("Processing valid recipients...");
 
         // Update statistics
-        WSNotificationServer.getInstance().incrementTotalMessagesReceived();
+        _protocolserver.incrementTotalMessagesReceived();
 
         // Remember current message with context
         currentMessage = notify;
@@ -674,7 +677,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
 
         log.debug("Initializing OKSE subscriber object");
         // Instanciate new OKSE Subscriber object
-        Subscriber subscriber = new Subscriber(requestAddress, port, rawTopicContent, WSNotificationServer.getInstance().getProtocolServerType());
+        Subscriber subscriber = new Subscriber(requestAddress, port, rawTopicContent, _protocolserver.getProtocolServerType());
         // Set the wsn-subscriber hash key in attributes
         subscriber.setAttribute(WSNSubscriptionManager.WSN_SUBSCRIBER_TOKEN, newSubscriptionKey);
         subscriber.setAttribute(WSNSubscriptionManager.WSN_DIALECT_TOKEN, requestDialect);
@@ -777,8 +780,8 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         // Send subscriptionRequest back if isDemand isRequested
         if (registerPublisherRequest.isDemand()) {
             log.info("Demand registration is TRUE, sending subrequest back");
-            WSNotificationServer.getInstance().sendMessage(WSNTools.generateSubscriptionRequestWithTopic(
-               endpointReference, null, WSNotificationServer.getInstance().getURI(), null
+            _protocolserver.sendMessage(WSNTools.generateSubscriptionRequestWithTopic(
+               endpointReference, null, _protocolserver.getURI(), null
             ));
         }
 
@@ -787,7 +790,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         PublisherHandle pubHandle = new PublisherHandle(endpointTerminationTuple, topics, registerPublisherRequest.isDemand());
 
         // Set up OKSE publisher object
-        Publisher publisher = new Publisher(rawTopicString, requestAddress, port, WSNotificationServer.getInstance().getProtocolServerType());
+        Publisher publisher = new Publisher(rawTopicString, requestAddress, port, _protocolserver.getProtocolServerType());
         publisher.setTimeout(terminationTime);
         publisher.setAttribute(WSNRegistrationManager.WSN_PUBLISHER_TOKEN, newPublisherKey);
         publisher.setAttribute(WSNSubscriptionManager.WSN_DIALECT_TOKEN, rawDialect);
@@ -805,7 +808,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         W3CEndpointReferenceBuilder builder = new W3CEndpointReferenceBuilder();
         builder.address(registrationEndpoint);
         W3CEndpointReference publisherRegistrationReference = builder.build();
-        builder.address(WSNotificationServer.getInstance().getURI());
+        builder.address(_protocolserver.getURI());
         W3CEndpointReference consumerReference = builder.build();
 
         // Update the response with endpointreference
@@ -871,14 +874,16 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
             // Initialize the response object
             GetCurrentMessageResponse response = new GetCurrentMessageResponse();
 
-            WSNTools.NotifyWithContext notifywrapper = WSNTools.buildNotifyWithContext(currentMessage.getMessage(), currentMessage.getTopic(), null, null);
+            WSNTools.NotifyWithContext notifywrapper = WSNTools.buildNotifyWithContext
+                    (_protocolserver.getMessageContentWrapperElementName(), currentMessage.getMessage(), currentMessage.getTopic(), null, null);
             // If it contained XML, we need to create properly marshalled jaxb node structure
             if (currentMessage.getMessage().contains("<") || currentMessage.getMessage().contains(">")) {
                 // Unmarshal from raw XML
                 Notify notify = WSNTools.createNotify(currentMessage);
                 // If it was malformed, or maybe just a message containing < or >, build it as generic content element
                 if (notify == null) {
-                    WSNTools.injectMessageContentIntoNotify(WSNTools.buildGenericContentElement(currentMessage.getMessage()), notifywrapper.notify);
+                    WSNTools.injectMessageContentIntoNotify(WSNTools.buildGenericContentElement(
+                            _protocolserver.getMessageContentWrapperElementName(), currentMessage.getMessage()), notifywrapper.notify);
                     // Else inject the unmarshalled XML nodes into the Notify message attribute
                 } else {
                     WSNTools.injectMessageContentIntoNotify(WSNTools.extractMessageContentFromNotify(notify), notifywrapper.notify);

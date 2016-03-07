@@ -392,7 +392,7 @@ public class WSNRequestParser implements Hub {
 
             // Try to match the ip in one of two ways
             // Is this first one strictly necessary?
-            if (endpointReference.matches("^/?" + connection.getServiceEndpoint().replaceAll("^" + WSNotificationServer.getInstance().getURI(), "") + "(.*)?")) {
+            if (endpointReference.matches("^/?" + connection.getServiceEndpoint().replaceAll("^" + _protocolServer.getURI(), "") + "(.*)?")) {
                 return connection;
             }
 
@@ -420,7 +420,7 @@ public class WSNRequestParser implements Hub {
 
     @Override
     public String getInetAdress() {
-        return WSNotificationServer.getInstance().getURI();
+        return _protocolServer.getURI();
     }
 
     @Override

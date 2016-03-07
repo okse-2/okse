@@ -24,7 +24,6 @@
 
 package no.ntnu.okse.protocol.amqp;
 
-import no.ntnu.okse.Application;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
@@ -32,77 +31,39 @@ import org.apache.log4j.Logger;
 import org.apache.qpid.proton.engine.Collector;
 
 import java.io.IOException;
-import java.util.Properties;
+import java.nio.channels.UnresolvedAddressException;
 
 public class AMQProtocolServer extends AbstractProtocolServer {
 
-    private static Logger log;
-    private static Thread _serverThread;
-    private static boolean _invoked;
+    protected static final String SERVERTYPE = "amqp";
 
-    private static AMQProtocolServer _singleton;
+    private Logger log;
+    private Thread _serverThread;
 
-    private static SubscriptionHandler sh;
-    private static boolean shuttingdown = false;
-
-    // Internal default values
-    private static final String DEFAULT_HOST = "0.0.0.0";
-    private static final int DEFAULT_PORT = 5672;
-    private static final String DEFAULT_USE_QUEUE = "true";
-    private static final String DEFAULT_USE_SASL = "true";
+    private SubscriptionHandler sh;
+    private boolean shuttingdown = false;
 
     public boolean useQueue;
     protected boolean useSASL;
 
     private Driver driver;
-    private static Properties config;
 
-    private AMQProtocolServer(String host, Integer port) {
-        this.init(host, port);
-    }
-
-    public static AMQProtocolServer getInstance() {
-        // If not invoked, create an instance and inject as _singleton
-        if (!_invoked) {
-            // Read config
-            config = Application.readConfigurationFiles();
-
-            // Attempt to extract host and port from configuration file
-            String configHost = config.getProperty("AMQP_HOST", DEFAULT_HOST);
-            Integer configPort = null;
-            try {
-                configPort = Integer.parseInt(config.getProperty("AMQP_PORT", Integer.toString(DEFAULT_PORT)));
-            } catch (NumberFormatException e) {
-                log.error("Failed to parse AMQP Port, using default: " + DEFAULT_PORT);
-            }
-
-            // Update singleton
-            _singleton = new AMQProtocolServer(configHost, configPort);
-            _singleton.useQueue = Boolean.parseBoolean(config.getProperty("AMQP_USE_QUEUE", DEFAULT_USE_QUEUE));
-            _singleton.useSASL = Boolean.parseBoolean(config.getProperty("AMQP_USE_SASL", DEFAULT_USE_SASL));
-        }
-
-        return _singleton;
-    }
-
-    public static AMQProtocolServer getInstance(String host, Integer port) {
-        if (!_invoked) {
-            // Read config
-            config = Application.readConfigurationFiles();
-            // Instantiate
-            _singleton = new AMQProtocolServer(host, port);
-        }
-        return _singleton;
-    }
-
-    @Override
-    protected void init(String host, Integer port) {
+    /**
+     * Constructor that takes in configuration options for the AMQProtocolServer
+     * server.
+     * <p>
+     *
+     * @param host A String representing the host the WSNServer should bind to
+     * @param port An int representing the port the WSNServer should bind to.
+     * @param queue A boolean specifying whether to use queueing behaviour
+     * @param sasl A boolean specifying whether to use SASL for its connections
+     */
+    public AMQProtocolServer(String host, int port, boolean queue, boolean sasl) {
+        useQueue = queue;
+        useSASL = sasl;
+        this.port = port;
+        this.host = host;
         log = Logger.getLogger(AMQProtocolServer.class.getName());
-        protocolServerType = "AMQP";
-        _invoked = true;
-        // If we have host or port provided, set them, otherwise use internal defaults
-        this.port = port == null ? DEFAULT_PORT : port;
-        this.host = host == null ? DEFAULT_HOST : host;
     }
 
     @Override
@@ -110,17 +71,18 @@ public class AMQProtocolServer extends AbstractProtocolServer {
         if (!_running) {
             _running = true;
             Collector collector = Collector.Factory.create();
-            this.sh = new SubscriptionHandler();
+            this.sh = new SubscriptionHandler(this);
             SubscriptionService.getInstance().addSubscriptionChangeListener(sh);
-            server = new AMQPServer(sh, false);
+            server = new AMQPServer(this, sh, false);
             try {
-                driver = new Driver(collector, new Handshaker(),
-						new FlowController(1024), sh,
-						server);
+                driver = new Driver(this, collector, new Handshaker(),
+                        new FlowController(1024), sh,
+                        server);
                 driver.listen(this.host, this.port);
+            } catch(UnresolvedAddressException e) {
+                throw new BootErrorException("Unresolved address");
             } catch (IOException e) {
-                totalErrors.incrementAndGet();
-                log.error("I/O exception during accept(): " + e.getMessage());
+                throw new BootErrorException("Unable to bind to " + host + ":" + port);
             }
             _serverThread = new Thread(() -> this.run());
             _serverThread.setName("AMQProtocolServer");
@@ -149,15 +111,13 @@ public class AMQProtocolServer extends AbstractProtocolServer {
         sh = null;
         _running = false;
         server = null;
-        _singleton = null;
-        _invoked = false;
         driver = null;
         log.info("AMQProtocolServer is stopped");
     }
 
     @Override
     public String getProtocolServerType() {
-        return protocolServerType;
+        return SERVERTYPE;
     }
 
     @Override
