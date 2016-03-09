@@ -7,12 +7,13 @@ import org.apache.log4j.Logger;
 public class MQTTProtocolServer extends AbstractProtocolServer {
 	protected static final String SERVERTYPE = "mqtt";
 
+	private static Logger log = Logger.getLogger(MQTTProtocolServer.class.getName());
+
 	private MQTTServer server;
 
 	public MQTTProtocolServer(String host, Integer port) {
 		this.host = host;
 		this.port = port;
-		log = Logger.getLogger(MQTTProtocolServer.class.getName());
 	}
 
 	@Override
