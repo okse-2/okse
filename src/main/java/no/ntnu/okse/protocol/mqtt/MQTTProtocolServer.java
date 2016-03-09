@@ -18,7 +18,7 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
 	@Override
 	public void boot() {
-		if(!_running) {
+		if (!_running) {
 			server = new MQTTServer(this, host, port);
 			_serverThread = new Thread(this::run);
 			_serverThread.setName("MQTTProtocolServer");
@@ -49,8 +49,8 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
 	@Override
 	public void sendMessage(Message message) {
-		log.info("Received message on topic " + message.getMessage() );
-		server.sendMessage( message );
+		log.info("Received message on topic " + message.getMessage());
+		server.sendMessage(message);
 
 	}
 

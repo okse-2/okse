@@ -1,10 +1,10 @@
 package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.messaging.Message;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
