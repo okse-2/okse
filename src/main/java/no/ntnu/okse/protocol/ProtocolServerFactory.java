@@ -69,7 +69,7 @@ public class ProtocolServerFactory {
                 stringToBoolean(attr.getNamedItem("queue").getNodeValue(), DEFAULT_QUEUE) :
                 DEFAULT_QUEUE;
 
-        return new AMQProtocolServer(host, port, sasl, queue);
+        return new AMQProtocolServer(host, port, queue, sasl);
     }
 
     private static WSNotificationServer createWSN(NamedNodeMap attr) {
