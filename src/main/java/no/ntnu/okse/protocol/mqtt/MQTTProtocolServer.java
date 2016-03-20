@@ -1,6 +1,7 @@
 package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.messaging.Message;
+import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 
@@ -30,7 +31,10 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
 	@Override
 	public void run() {
+		MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
+		subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
 		server.start();
+		server.setSubscriptionManager(subscriptionManager);
 	}
 
 	@Override
