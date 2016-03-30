@@ -1,9 +1,12 @@
 package no.ntnu.okse.protocol;
 
 import no.ntnu.okse.protocol.amqp.AMQProtocolServer;
+import no.ntnu.okse.protocol.amqp091.AMQP091ProtocolServer;
 import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+
+import java.io.IOException;
 
 public class ProtocolServerFactory {
 
@@ -17,6 +20,8 @@ public class ProtocolServerFactory {
                 return createAMQP(attr);
             case "wsn":
                 return createWSN(attr);
+            case "amqp091":
+                return createAMQP091(attr);
             default:
                 return null;
         }
@@ -70,6 +75,36 @@ public class ProtocolServerFactory {
                 DEFAULT_QUEUE;
 
         return new AMQProtocolServer(host, port, queue, sasl);
+    }
+
+    private static AMQP091ProtocolServer createAMQP091(NamedNodeMap attr) {
+        final String DEFAULT_HOST = "0.0.0.0";
+        final int DEFAULT_PORT = 5672;
+        final boolean DEFAULT_SASL = true;
+        final boolean DEFAULT_QUEUE = false;
+
+        String host = attr.getNamedItem("host") != null ?
+                attr.getNamedItem("host").getNodeValue() :
+                DEFAULT_HOST;
+
+        int port = attr.getNamedItem("port") != null ?
+                stringToPort(attr.getNamedItem("port").getNodeValue(), DEFAULT_PORT):
+                DEFAULT_PORT;
+
+        boolean sasl = attr.getNamedItem("sasl") != null ?
+                stringToBoolean(attr.getNamedItem("sasl").getNodeValue(), DEFAULT_SASL) :
+                DEFAULT_SASL;
+
+        boolean queue = attr.getNamedItem("queue") != null ?
+                stringToBoolean(attr.getNamedItem("queue").getNodeValue(), DEFAULT_QUEUE) :
+                DEFAULT_QUEUE;
+
+        try {
+            return new AMQP091ProtocolServer(host, port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private static WSNotificationServer createWSN(NamedNodeMap attr) {
