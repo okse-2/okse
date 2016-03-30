@@ -371,7 +371,18 @@ public class SubscriptionHandler extends BaseHandler implements SubscriptionChan
         String senderRemoteContainer = "Unknown";
 
         //Get sender from localRemoteContainerSenderMap  with eventRemoteContainer as key
-        Sender sender = localRemoteContainerSenderMap.get(eventRemoteContainer);
+        Sender sender;
+        try {
+            sender = localRemoteContainerSenderMap.get(eventRemoteContainer);
+        }
+
+        catch (NullPointerException e){
+            sender = null;
+            log.debug("Receiver was terminated in an unexpected way");
+            ps.decrementTotalErrors();
+
+        }
+
         if (sender != null) {
             Session senderSession = sender.getSession();
             Connection senderConnection = senderSession.getConnection();
