@@ -1,12 +1,11 @@
 package no.ntnu.okse.protocol.amqp091;
+import fr.dyade.aaa.agent.AgentServer;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
+import org.ow2.joram.mom.amqp.AMQPService;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 
 /**
  * Created by Andreas the time lord on 30/03/2516
@@ -40,16 +39,10 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
     @Override
     public void run() {
         try {
-            //TODO change getLocalHost to host variable
-        ServerSocket serverSocket = new ServerSocket(port, 1000, InetAddress.getByName(host));
-        while(_running){
-            Socket sock = serverSocket.accept();
-            System.out.println("Inncomming AMQP-0091 connection: " + sock.getInetAddress().getHostAddress());
-            log.info("Inncomming AMQP-0091 connection: ");
-            sock.getInputStream();
-            }
-        }
-        catch (IOException e) {
+            AgentServer.init((short) 0, "./s0", null);
+            AMQPService.init("" + port, true);
+        } catch (Exception e) {
+            // TODO: Properly handle exception
             e.printStackTrace();
         }
     }

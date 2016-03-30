@@ -138,6 +138,11 @@
             <artifactId>WS-Nu</artifactId>
             <version>master-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.ow2.joram</groupId>
+            <artifactId>joram-mom-amqp</artifactId>
+            <version>5.9.0</version>
+        </dependency>
     </dependencies>
 
     <build>
