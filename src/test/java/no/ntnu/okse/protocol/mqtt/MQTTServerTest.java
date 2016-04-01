@@ -84,10 +84,12 @@ public class MQTTServerTest {
 		ps = new MQTTProtocolServer(host, port);
 		mqtt = new MQTTServer(ps, host, port);
         mqtt.setSubscriptionManager(subManagerMock);
+        mqtt.start();
 	}
 
 	@AfterTest
 	public void tearDown() {
+        mqtt.stopServer();
 		mqtt = null;
 		status = null;
 	}
@@ -150,7 +152,6 @@ public class MQTTServerTest {
 
 
         InterceptPublishMessage msg = new InterceptPublishMessage( pubMsg, clientID);
-        System.out.println(msg);
         mqtt_spy.HandlePublish(msg);
         ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
 
