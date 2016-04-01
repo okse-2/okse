@@ -134,6 +134,11 @@
             <version>1.52</version>
         </dependency>
         <dependency>
+            <groupId>com.github.cXhristian</groupId>
+            <artifactId>moquette</artifactId>
+            <version>okse-1</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.tOgg1</groupId>
             <artifactId>WS-Nu</artifactId>
             <version>master-SNAPSHOT</version>
@@ -189,6 +194,16 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>bintray</id>
+            <url>http://dl.bintray.com/andsel/maven/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
