@@ -2,5 +2,6 @@
 <servers>
     <server type="amqp" />
     <server type="amqp091" port="5673" />
+    <server type="mqtt" />
     <server type="wsn" />
 </servers>
