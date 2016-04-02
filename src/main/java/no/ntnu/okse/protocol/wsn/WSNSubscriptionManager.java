@@ -45,14 +45,16 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
     private SubscriptionService _subscriptionService = null;
     private ConcurrentHashMap<String, Subscriber> localSubscriberMap;
     private ConcurrentHashMap<String, AbstractNotificationProducer.SubscriptionHandle> localSubscriberHandle;
+    private WSNotificationServer _protocolserver;
 
     /**
      * Empty constructor that initializes the log and local maps
      */
-    public WSNSubscriptionManager() {
+    public WSNSubscriptionManager(WSNotificationServer protocolserver) {
         log = Logger.getLogger(WSNSubscriptionManager.class.getName());
         localSubscriberMap = new ConcurrentHashMap<>();
         localSubscriberHandle = new ConcurrentHashMap<>();
+        _protocolserver = protocolserver;
     }
 
     /* Helper methods */
@@ -500,7 +502,7 @@ public class WSNSubscriptionManager extends AbstractSubscriptionManager implemen
     @WebMethod(exclude = true)
     public void subscriptionChanged(SubscriptionChangeEvent e) {
         // If it is WSNotification subscriber
-        if (e.getData().getOriginProtocol().equals(WSNotificationServer.getInstance().getProtocolServerType())) {
+        if (e.getData().getOriginProtocol().equals(_protocolserver.getProtocolServerType())) {
             // If we are dealing with an Unsubscribe
             if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
                 log.debug("Ubsubscribing " + localSubscriberHandle.get(e.getData().getAttribute(WSN_SUBSCRIBER_TOKEN)));

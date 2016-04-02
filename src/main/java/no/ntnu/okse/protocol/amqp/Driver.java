@@ -46,13 +46,14 @@ public class Driver extends BaseHandler {
     private static Logger log;
     private boolean _running;
     private Acceptor acceptor;
+    private AMQProtocolServer ps;
 
-
-    public Driver(Collector collector, Handler... handlers) throws IOException {
+    public Driver(AMQProtocolServer ps, Collector collector, Handler... handlers) throws IOException {
         this.collector = collector;
         this.handlers = handlers;
         this.selector = Selector.open();
         log = Logger.getLogger(Driver.class.getName());
+        this.ps = ps;
     }
 
     /**
@@ -152,10 +153,10 @@ public class Driver extends BaseHandler {
             Event ev = collector.peek();
             if (ev == null) break;
             if (ev.getType().name() == "CONNECTION_INIT") {
-                AMQProtocolServer.getInstance().incrementTotalErrors();
+                ps.incrementTotalErrors();
             }
             if (ev.getType().name() == "LINK_LOCAL_OPEN") {
-                AMQProtocolServer.getInstance().decrementTotalErrors();
+                ps.decrementTotalErrors();
             }
             log.debug("Dispatching event of type: " + ev.getType().name());
             ev.dispatch(this);
@@ -224,7 +225,7 @@ public class Driver extends BaseHandler {
             conn.collect(collector);
             log.debug("ACCEPTED: " + sock);
             Transport transport = Transport.Factory.create();
-            if (AMQProtocolServer.getInstance().useSASL) {
+            if (ps.useSASL) {
                 Sasl sasl = transport.sasl();
                 sasl.setMechanisms("ANONYMOUS");
                 sasl.server();
@@ -370,9 +371,9 @@ public class Driver extends BaseHandler {
      * @param conn : AMQP connection
      * @return Transport
      */
-    private static Transport makeTransport(Connection conn) {
+    private Transport makeTransport(Connection conn) {
         Transport transport = Transport.Factory.create();
-        if (AMQProtocolServer.getInstance().useSASL) {
+        if (ps.useSASL) {
             Sasl sasl = transport.sasl();
             sasl.setMechanisms("ANONYMOUS");
             sasl.client();

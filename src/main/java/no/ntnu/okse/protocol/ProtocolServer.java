@@ -28,6 +28,12 @@ import no.ntnu.okse.core.messaging.Message;
 
 public interface ProtocolServer {
 
+    class BootErrorException extends RuntimeException {
+        public BootErrorException(String message) {
+            super(message);
+        }
+    }
+
     public String getHost();
 
     public int getPort();

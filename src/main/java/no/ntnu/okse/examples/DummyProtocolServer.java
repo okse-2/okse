@@ -108,8 +108,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
      *
      * @param port The port this server should bind to
      */
-    @Override
-    protected void init(String host, Integer port) {
+    private void init(String host, Integer port) {
         // Init logger
         log = Logger.getLogger(DummyProtocolServer.class.getName());
         // Set protocol name
@@ -355,6 +354,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
 
                     return true;
                 }
+            /*
             } else if (args[0].equalsIgnoreCase("relay")) {
                 if (Utilities.isValidInetAddress(args[1])) {
                     if (Utilities.isValidInetAddress(args[2])) {
@@ -370,6 +370,7 @@ public class DummyProtocolServer extends AbstractProtocolServer {
                 }
             } else if (args[0].equalsIgnoreCase("testuri")) {
                 log.debug(WSNotificationServer.getInstance().getURI());
+            */
             } else if (args[0].equalsIgnoreCase("shutdownprotocolservers")) {
                 log.debug("SHUTDOWN PROTOCOL SERVERS RECIEVED");
                 try {

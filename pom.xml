@@ -148,6 +148,13 @@
             <artifactId>WS-Nu</artifactId>
             <version>master-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-core</artifactId>
+            <version>1.0-RELEASE</version>
+        </dependency>
+
     </dependencies>
 
     <build>
