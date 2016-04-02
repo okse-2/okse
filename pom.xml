@@ -141,7 +141,7 @@
         <dependency>
             <groupId>org.ow2.joram</groupId>
             <artifactId>joram-mom-amqp</artifactId>
-            <version>5.9.0</version>
+            <version>5.11.0-okse</version>
         </dependency>
     </dependencies>
 
