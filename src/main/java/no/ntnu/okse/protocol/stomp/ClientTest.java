@@ -95,6 +95,7 @@ public class ClientTest {
             @Override
             public void messageReceived(StampyMessage<?> message, HostPort hostPort) throws Exception {
                 ClientTest.this.hostPort = hostPort;
+                System.out.println("MESSAGE: " + message.toString());
                 switch (message.getMessageType()) {
                     case CONNECTED:
                         connected = true;
@@ -102,6 +103,7 @@ public class ClientTest {
                         break;
                     case ERROR:
                         setError((ErrorMessage) message);
+                        System.out.println("FUCK!");
                         System.out.println("Error message received: " + message);
                         wakeup();
                         break;

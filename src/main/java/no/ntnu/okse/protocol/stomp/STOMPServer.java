@@ -51,21 +51,6 @@ public class STOMPServer {
 
         gateway.addMessageListener(new VersionListener());
 
-        no.ntnu.okse.protocol.stomp.listeners.MessageListener temp = new MessageListener();
-        temp.setSubscriptionManager(subscriptionManager);
-        temp.setGateway(gateway);
-        gateway.addMessageListener(temp);
-
-        SubscriptionListener subListener = new SubscriptionListener();
-        subListener.setSubscriptionManager(subscriptionManager);
-        gateway.addMessageListener(subListener);
-
-
-        gateway.addMessageListener(new ConnectListener());
-        gateway.addMessageListener(new UnSubscriptionListener());
-        gateway.addMessageListener(new DisconnectListener());
-
-
 
         NettyLoginMessageListener login = new NettyLoginMessageListener();
         login.setGateway(gateway);
@@ -103,6 +88,23 @@ public class STOMPServer {
         gateway.addMessageListener(connectResponse);
 
         gateway.setHandler(channelHandler);
+
+        no.ntnu.okse.protocol.stomp.listeners.MessageListener temp = new MessageListener();
+        temp.setSubscriptionManager(subscriptionManager);
+        temp.setGateway(gateway);
+        gateway.addMessageListener(temp);
+
+        SubscriptionListener subListener = new SubscriptionListener();
+        subListener.setSubscriptionManager(subscriptionManager);
+        gateway.addMessageListener(subListener);
+
+
+        gateway.addMessageListener(new ConnectListener());
+        gateway.addMessageListener(new UnSubscriptionListener());
+        gateway.addMessageListener(new DisconnectListener());
+
+        gateway.addOutgoingMessageInterceptor(new OutgoingListener());
+
 
         return gateway;
     }

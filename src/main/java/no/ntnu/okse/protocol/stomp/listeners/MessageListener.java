@@ -1,5 +1,6 @@
 package no.ntnu.okse.protocol.stomp.listeners;
 
+import asia.stampy.client.message.ack.AckMessage;
 import asia.stampy.client.message.send.SendMessage;
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.gateway.StampyMessageListener;
@@ -49,7 +50,8 @@ public class MessageListener implements StampyMessageListener {
     private void sendMessage(StampyMessage<?> stampyMessage, HostPort hostPort) throws InterceptException {
         Subscriber sub = subscriptionManager.getSubscriber("Test");
 //        gateway.sendMessage("Test", new HostPort(sub.getHost(), sub.getPort()));
-        gateway.broadcastMessage("Fuckers");
+        gateway.broadcastMessage(stampyMessage);
+//        gateway.broadcastMessage("Fuckers");
         System.out.println("Meesage sent to: " + sub.getHost() + " : " + sub.getPort());
     }
 
