@@ -1,7 +1,7 @@
 package no.ntnu.okse.protocol;
 
 import no.ntnu.okse.protocol.amqp.AMQProtocolServer;
-import no.ntnu.okse.protocol.stomp.StompProtocolServer;
+import no.ntnu.okse.protocol.mqtt.MQTTProtocolServer;
 import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -16,6 +16,8 @@ public class ProtocolServerFactory {
         switch(attr.getNamedItem("type").getNodeValue()) {
             case "amqp":
                 return createAMQP(attr);
+            case "mqtt":
+                return createMQTT(attr);
             case "wsn":
                 return createWSN(attr);
             case "stomp":
@@ -75,38 +77,19 @@ public class ProtocolServerFactory {
         return new AMQProtocolServer(host, port, queue, sasl);
     }
 
-
-    private static ProtocolServer createStomp(NamedNodeMap attr) {
+    private static MQTTProtocolServer createMQTT(NamedNodeMap attr) {
         final String DEFAULT_HOST = "0.0.0.0";
-        final int DEFAULT_PORT = 58061;
+        final int DEFAULT_PORT = 1883;
 
         String host = attr.getNamedItem("host") != null ?
                 attr.getNamedItem("host").getNodeValue() :
                 DEFAULT_HOST;
 
         int port = attr.getNamedItem("port") != null ?
-                stringToPort(attr.getNamedItem("port").getNodeValue(), DEFAULT_PORT) :
+                stringToPort(attr.getNamedItem("port").getNodeValue(), DEFAULT_PORT):
                 DEFAULT_PORT;
 
-        StompProtocolServer temp = new StompProtocolServer(host, port);
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        System.out.println("Port: " + temp.getPort());
-        return temp;
+        return new MQTTProtocolServer(host, port);
     }
 
 

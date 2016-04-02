@@ -30,10 +30,13 @@ import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.core.topic.TopicService;
 import no.ntnu.okse.db.DB;
+<<<<<<< HEAD
 import no.ntnu.okse.examples.DummyProtocolServer;
 import no.ntnu.okse.protocol.amqp.AMQProtocolServer;
 import no.ntnu.okse.protocol.mqtt.MQTTProtocolServer;
 import no.ntnu.okse.protocol.wsn.WSNotificationServer;
+=======
+>>>>>>> origin/master
 import no.ntnu.okse.web.Server;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;

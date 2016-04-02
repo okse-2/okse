@@ -1,51 +1,57 @@
 package no.ntnu.okse.protocol.mqtt;
 
+import no.ntnu.okse.core.messaging.Message;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-
 public class MQTTProtocolServerTest {
 
-	@Test
-	public void getInstance_singleTonTest() {
-		MQTTProtocolServer mqtt = MQTTProtocolServer.getInstance();
-		assertSame(MQTTProtocolServer.getInstance(), mqtt, "getInstance should always return the same object");
-	}
+	@InjectMocks
+	MQTTProtocolServer mqtt = new MQTTProtocolServer("localhost", 1234);
+	@Mock(name = "server")
+	private MQTTServer mqttServerSpy;
 
-	@Test
-	public void getInstance_withParameters() {
-		MQTTProtocolServer mqtt = MQTTProtocolServer.getInstance("localhost", 7000);
-		assertSame(MQTTProtocolServer.getInstance(), mqtt, "getInstance should always return the same object");
+	@BeforeMethod
+	public void initMocks() {
+		MockitoAnnotations.initMocks(this);
 	}
 
 	@Test
 	public void boot_changeState() {
-		MQTTProtocolServer mqtt = getInstance();
 		assertFalse(mqtt.isRunning());
 		mqtt.boot();
-		assertTrue(mqtt.isRunning());
 		assertTrue(mqtt.isRunning());
 	}
 
 	@Test
-	public void stopServer_startAndStop() {
-		MQTTProtocolServer mqtt = getInstance();
+	public void stopServer_startAndStop() throws InterruptedException {
 		mqtt.boot();
+		// Wait for server to boot
+		Thread.sleep(1000);
 		assertTrue(mqtt.isRunning());
 		mqtt.stopServer();
 		assertFalse(mqtt.isRunning());
-
 	}
 
 	@Test
 	public void getProtocolServerType() {
-		assertNotNull(getInstance().getProtocolServerType());
+		assertNotNull(mqtt.getProtocolServerType());
 	}
 
-	private MQTTProtocolServer getInstance() {
-		return MQTTProtocolServer.getInstance();
+	@Test
+	public void sendMessage() {
+		Message message = createMessage();
+		mqtt.sendMessage(message);
+		Mockito.verify(mqttServerSpy).sendMessage(message);
 	}
 
-
+	private Message createMessage() {
+		return new Message("Message", "Topic", null, "mqtt");
+	}
 }

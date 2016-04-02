@@ -127,30 +127,6 @@ public class AMQProtocolServer extends AbstractProtocolServer {
         }
     }
 
-    public void incrementTotalMessagesSent() {
-        totalMessagesSent.incrementAndGet();
-    }
-
-    public void incrementTotalMessagesReceived() {
-        totalMessagesReceived.incrementAndGet();
-    }
-
-    public void incrementTotalRequests() {
-        totalRequests.incrementAndGet();
-    }
-
-    public void incrementTotalBadRequest() {
-        totalBadRequests.incrementAndGet();
-    }
-
-    public void incrementTotalErrors() {
-        totalErrors.incrementAndGet();
-    }
-
-    public void decrementTotalErrors() {
-        totalErrors.decrementAndGet();
-    }
-
     private AMQPServer server;
 
     public Driver getDriver() {

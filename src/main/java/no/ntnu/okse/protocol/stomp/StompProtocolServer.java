@@ -1,76 +1,101 @@
 package no.ntnu.okse.protocol.stomp;
 
 import no.ntnu.okse.core.messaging.Message;
+import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
-
-import no.ntnu.okse.protocol.amqp.AMQPServer;
-import no.ntnu.okse.protocol.amqp.Driver;
-import no.ntnu.okse.protocol.amqp.SubscriptionHandler;
+import no.ntnu.okse.protocol.mqtt.MQTTServer;
+import no.ntnu.okse.protocol.mqtt.MQTTSubscriptionManager;
 import org.apache.log4j.Logger;
 
-import static org.bouncycastle.crypto.tls.ConnectionEnd.server;
+/**
+ * Created by ogdans3 on 3/30/16.
+ */
+public class STOMPProtocolServer extends AbstractProtocolServer {
 
-public class StompProtocolServer extends AbstractProtocolServer {
+    private static final String DEFAULT_HOST = "0.0.0.0";
+    private static final Integer DEFAULT_PORT = 1883;
 
-    protected static final String SERVERTYPE = "stomp";
+    private static boolean _invoked = false;
+    private static STOMPProtocolServer _singleton = null;
 
-    private Logger log;
-    private Thread _serverThread;
+    private STOMPProtocolServer(String host, Integer port) {
+        init(host, port);
+    }
 
-    public StompProtocolServer(String host, int port) {
+    private MQTTServer server;
+
+    @Override
+    protected void init(String host, Integer port) {
         this.host = host;
         this.port = port;
-        log = Logger.getLogger(StompProtocolServer.class.getName());
+        _invoked = true;
+        protocolServerType = "MQTT";
+        log = Logger.getLogger(STOMPProtocolServer.class.getName());
     }
+
+    public static STOMPProtocolServer getInstance() {
+        if(!_invoked) {
+            _singleton = new STOMPProtocolServer(DEFAULT_HOST, DEFAULT_PORT);
+        }
+        return _singleton;
+    }
+
+    public static STOMPProtocolServer getInstance(String host, Integer port) {
+        if(!_invoked) {
+            _singleton = new STOMPProtocolServer(host, port);
+        }
+        return _singleton;
+    }
+
 
     @Override
     public void boot() {
-        if (!_running) {
-            _serverThread = new Thread(this::run);
-            _serverThread.setName("StompProtocolServer");
-            _serverThread.start();
+        if(!_running) {
             _running = true;
-            log.info("StompProtocolServer booted successfully");
+            _serverThread = new Thread(this::run);
+            _serverThread.setName("MQTTProtocolServer");
+            _serverThread.start();
+            log.info("MQTTProtocolServer booted successfully");
         }
     }
 
     @Override
     public void run() {
-        System.out.println("stomp thread is running");
-        while(true){
-
-        }
+        server = new MQTTServer();
+        MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
+        subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
+        server.init(host, port);
+        server.setSubscriptionManager(subscriptionManager);
     }
 
     @Override
     public void stopServer() {
         log.info("Stopping MQTTProtocolServer");
         _running = false;
+        _singleton = null;
+        _invoked = false;
+        server.stopServer();
+        server = null;
         log.info("MQTTProtocolServer is stopped");
     }
 
     @Override
     public String getProtocolServerType() {
-        return SERVERTYPE;
+        return protocolServerType;
     }
 
     @Override
     public void sendMessage(Message message) {
-    }
+        log.info("Received message on topic " + message.getMessage() );
+        server.sendMessage( message );
 
-    public void incrementTotalMessagesSent() {
-        totalMessagesSent.incrementAndGet();
-    }
-
-    public void incrementTotalMessagesReceived() {
-        totalMessagesReceived.incrementAndGet();
     }
 
     public void incrementTotalRequests() {
         totalRequests.incrementAndGet();
     }
 
-    public void incrementTotalBadRequest() {
+    public void incrementTotalBadRequests() {
         totalBadRequests.incrementAndGet();
     }
 
@@ -78,11 +103,18 @@ public class StompProtocolServer extends AbstractProtocolServer {
         totalErrors.incrementAndGet();
     }
 
-    public void decrementTotalErrors() {
-        totalErrors.decrementAndGet();
+    public void incrementTotalMessagesReceived() {
+        totalMessagesReceived.incrementAndGet();
     }
+
+    public void incrementTotalMessagesSent() {
+        totalMessagesSent.incrementAndGet();
+    }
+
+
 
     public boolean isRunning() {
         return _running;
     }
+
 }

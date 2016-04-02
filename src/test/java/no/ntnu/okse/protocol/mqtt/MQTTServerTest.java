@@ -32,12 +32,14 @@ import static org.testng.AssertJUnit.*;
 
 public class MQTTServerTest {
 
+
+
 	enum Status {
 		CONNECT,
 		DISCONNECT,
 		PUBLISH,
 		SUBSCRIBE,
-		UNSUBSCRIBE
+		UNSUBSCRIBE;
 	}
 
 	private static Status status;
@@ -71,29 +73,27 @@ public class MQTTServerTest {
 	}
 
 	MQTTServer mqtt;
+	MQTTProtocolServer ps;
     MQTTSubscriptionManager subManagerMock;
 
 	@BeforeTest
 	public void setUp() {
+		String host = "localhost";
+		int port = 1234;
         subManagerMock = Mockito.mock(MQTTSubscriptionManager.class);
-        mqtt = new MQTTServer();
-		//TODO: Remove this when we test init and change the getinstance method
-		mqtt.init("localhost", 1234);
+		ps = new MQTTProtocolServer(host, port);
+		mqtt = new MQTTServer(ps, host, port);
         mqtt.setSubscriptionManager(subManagerMock);
-    }
+        mqtt.start();
+	}
 
 	@AfterTest
 	public void tearDown() {
+        mqtt.stopServer();
 		mqtt = null;
 		status = null;
 	}
 
-	@Test
-	public void init() {
-//		assertFalse(mqtt.isRunning());
-		mqtt.init("localhost", 1234);
-//		assertTrue(mqtt.isRunning());
-	}
 
 	@Test
 	public void sendMessage() {
@@ -105,6 +105,7 @@ public class MQTTServerTest {
 
 		//Test that internalPublish is called with the correct parameter
 		Mockito.doReturn(msg).when(spy).createMQTTMessage(message);
+		Mockito.doNothing().when(spy).internalPublish(msg);
 		spy.sendMessage(message);
 		Mockito.verify(spy, Mockito.atLeastOnce()).internalPublish(msg);
         Mockito.reset(spy);
@@ -151,7 +152,6 @@ public class MQTTServerTest {
 
 
         InterceptPublishMessage msg = new InterceptPublishMessage( pubMsg, clientID);
-        System.out.println(msg);
         mqtt_spy.HandlePublish(msg);
         ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
 

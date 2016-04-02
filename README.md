@@ -1,6 +1,6 @@
 # Okse
-[![Build Status](https://travis-ci.org/einhov/okse.svg?branch=master)](https://travis-ci.org/einhov/okse)
-[![Coverage Status](https://coveralls.io/repos/github/einhov/okse/badge.svg?branch=master)](https://coveralls.io/github/einhov/okse?branch=master)
+[![Build Status](https://travis-ci.org/okse-2/okse.svg?branch=master)](https://travis-ci.org/okse-2/okse)
+[![Coverage Status](https://coveralls.io/repos/github/okse-2/okse/badge.svg?branch=master)](https://coveralls.io/github/okse-2/okse?branch=master)
 ## (Overordnet KommunikasjonsSystem for Etteretning)
 
 Bachelors degree project for FFI (Norwegian Defence Research Establishment)

@@ -136,7 +136,7 @@
         <dependency>
             <groupId>com.github.cXhristian</groupId>
             <artifactId>moquette</artifactId>
-            <version>client-channel</version>
+            <version>okse-1</version>
         </dependency>
         <dependency>
             <groupId>asia.stampy</groupId>
