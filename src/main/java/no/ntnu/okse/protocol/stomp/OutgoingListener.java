@@ -23,16 +23,16 @@ public class OutgoingListener implements StampyOutgoingMessageInterceptor {
 
     @Override
     public boolean isForMessage(StampyMessage<?> stampyMessage) {
-        return false;
+        return true;
     }
 
     @Override
     public void interceptMessage(StampyMessage<?> stampyMessage) throws InterceptException {
-        System.out.println("Outgoing message: " + stampyMessage.toString() + "\n\n\n");
+//        System.out.println("\n-------------Outgoing: " + stampyMessage.toString() + "\n\n\n");
     }
 
     @Override
     public void interceptMessage(StampyMessage<?> stampyMessage, HostPort hostPort) throws InterceptException {
-        System.out.println("Outgoing message: " + stampyMessage.toString() + "\n\n\n");
+//        System.out.println("\n-------------Outgoing: " + stampyMessage.toString() + "\n\n\n");
     }
 }

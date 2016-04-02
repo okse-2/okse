@@ -51,6 +51,8 @@ import asia.stampy.server.message.error.ErrorMessage;
 import asia.stampy.server.message.message.MessageMessage;
 import asia.stampy.server.message.receipt.ReceiptMessage;
 
+import java.util.Random;
+
 public class ClientTest {
 
     private static final String CANNOT_BE_LOGGED_IN = "cannot be logged in";
@@ -90,29 +92,25 @@ public class ClientTest {
         setGateway(SystemNettyClientInitializer.initialize());
         getGateway().setPort(5551);
 
-        gateway.addMessageListener(new StampyMessageListener() {
+        gateway.addMessageListener(new MessageListener());
+/*        gateway.addMessageListener(new StampyMessageListener() {
 
             @Override
             public void messageReceived(StampyMessage<?> message, HostPort hostPort) throws Exception {
-                ClientTest.this.hostPort = hostPort;
-                System.out.println("MESSAGE: " + message.toString());
+//                ClientTest.this.hostPort = hostPort;
                 switch (message.getMessageType()) {
                     case CONNECTED:
                         connected = true;
-                        wakeup();
                         break;
                     case ERROR:
-                        setError((ErrorMessage) message);
-                        System.out.println("FUCK!");
-                        System.out.println("Error message received: " + message);
-                        wakeup();
+                        System.out.println("=======Error: " + message);
                         break;
                     case MESSAGE:
-                        onMessage((MessageMessage) message);
+//                        onMessage((MessageMessage) message);
+                        System.out.println("=======Message: " + message);
                         break;
                     case RECEIPT:
-                        setReceipt((ReceiptMessage) message);
-                        wakeup();
+                        System.out.println("=======Receipt: " + message);
                         break;
                     default:
                         break;
@@ -130,6 +128,7 @@ public class ClientTest {
                 return StompMessageType.values();
             }
         });
+*/
 
         gateway.connect();
     }
@@ -172,7 +171,6 @@ public class ClientTest {
     public void testSubscription() throws Exception {
         SubscribeMessage message = new SubscribeMessage("test", "subscription");
         message.getHeader().setAck(Ack.clientIndividual);
-        gateway.addMessageListener(new MessageListener());
         gateway.broadcastMessage(message);
     }
 
@@ -192,15 +190,6 @@ public class ClientTest {
         } else if (messageCount > 100) {
             throw new IllegalArgumentException("Extra message received");
         }
-    }
-
-    private void evaluateReceipt(String id) {
-        String receiptId = receipt.getHeader().getReceiptId();
-        boolean expected = id.equals(receiptId);
-
-        System.out.println("Expected receipt id ? " + expected);
-        System.out.println();
-        receipt = null;
     }
 
     private void goodConnect(String user) throws InterceptException {
@@ -313,18 +302,6 @@ public class ClientTest {
         getGateway().broadcastMessage(message);
     }
 
-    private void sleep() throws InterruptedException {
-        synchronized (waiter) {
-            waiter.wait();
-        }
-    }
-
-    private void wakeup() {
-        synchronized (waiter) {
-            waiter.notifyAll();
-        }
-    }
-
     /**
      * Gets the error.
      *
@@ -382,4 +359,11 @@ public class ClientTest {
         this.receipt = receipt;
     }
 
+    public static void main(String[] args) throws Exception {
+        ClientTest client = new ClientTest();
+        client.init();
+        client.testConnect(String.valueOf(0 + (int)(Math.random() * 500)));
+        client.testSubscription();
+
+    }
 }

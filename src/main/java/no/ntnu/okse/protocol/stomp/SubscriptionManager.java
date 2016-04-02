@@ -5,6 +5,7 @@ import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
 
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -59,6 +60,10 @@ public class SubscriptionManager {
         subscriptionService.addPublisher(p);
         log.debug("Adding Subscriber to local mappings: " + clientID);
         localPublisherMap.put(clientID, p);
+    }
+
+    public HashSet<Subscriber> getAllSubscribersForTopic(String topic){
+        return subscriptionService.getInstance().getAllSubscribersForTopic(topic);
     }
 
 

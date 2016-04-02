@@ -7,7 +7,11 @@ import asia.stampy.common.gateway.StampyMessageListener;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
 import asia.stampy.common.message.interceptor.InterceptException;
+import asia.stampy.server.message.message.MessageMessage;
 import asia.stampy.server.netty.ServerNettyMessageGateway;
+import no.ntnu.okse.core.messaging.Message;
+import no.ntnu.okse.core.messaging.MessageService;
+import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.protocol.stomp.SubscriptionManager;
 import org.slf4j.Logger;
@@ -23,12 +27,15 @@ public class MessageListener implements StampyMessageListener {
     private static StompMessageType[] TYPES;
     private ServerNettyMessageGateway gateway;
     private SubscriptionManager subscriptionManager;
+    private String protocol;
 
     static {
         TYPES = new StompMessageType[]{StompMessageType.SEND};
     }
 
-    private static final String VERSION = "1.2";
+    public MessageListener(){
+        this.protocol = "stomp";
+    }
 
     @Override
     public StompMessageType[] getMessageTypes() {
@@ -50,15 +57,39 @@ public class MessageListener implements StampyMessageListener {
     private void sendMessage(StampyMessage<?> stampyMessage, HostPort hostPort) throws InterceptException {
         Subscriber sub = subscriptionManager.getSubscriber("Test");
 //        gateway.sendMessage("Test", new HostPort(sub.getHost(), sub.getPort()));
-        gateway.broadcastMessage(stampyMessage);
-//        gateway.broadcastMessage("Fuckers");
-        System.out.println("Meesage sent to: " + sub.getHost() + " : " + sub.getPort());
+        HostPort subHostPort = new HostPort(sub.getHost(), sub.getPort());
+
+        SendMessage sendMessage = (SendMessage) stampyMessage;
+        String destination = sendMessage.getHeader().getDestination();
+
+
+        Publisher pub = new Publisher(destination, hostPort.getHost(), hostPort.getPort(), protocol);
+        //TODO: Need to check if this will work, I think that stomp also uses binary data
+        Message okseMsg = new Message((String)sendMessage.getBody(), sendMessage.getHeader().getDestination(), pub, protocol);
+        sendMessageToOKSE(okseMsg);
+        System.out.println("Meesage sent to OKSE \n");
     }
 
-    public void setGateway(ServerNettyMessageGateway gateway){
-        this.gateway = gateway;
+/*    private void sendMessageToSomeone(){
+        String msgId = "Some message ID";
+        MessageMessage message = new MessageMessage("destination", msgId, "gabrielb");
+        new MessageMessage();
+
+
+        message.setBody(sendMessage.getBody());
+        message.getHeader().setAck(msgId);
+        gateway.sendMessage(message, hostPort);
+    }*/
+
+    public void sendMessageToOKSE(Message msg){
+        MessageService.getInstance().distributeMessage(msg);
     }
+
     public void setSubscriptionManager(SubscriptionManager subscriptionManager){
         this.subscriptionManager = subscriptionManager;
+    }
+
+    public void setGateway(ServerNettyMessageGateway gateway) {
+        this.gateway = gateway;
     }
 }
