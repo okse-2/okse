@@ -5,7 +5,7 @@ import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SubscriptionManager {
     private static Logger log;
     private SubscriptionService subscriptionService = null;
-    private ConcurrentHashMap<String, Subscriber> localSubscriberMap;
+    public ConcurrentHashMap<String, Subscriber> localSubscriberMap;
     private ConcurrentHashMap<String, Publisher> localPublisherMap;
 
     public SubscriptionManager () {
@@ -34,10 +34,15 @@ public class SubscriptionManager {
         }
         subscriptionService.addSubscriber(s);
         log.debug("Adding Subscriber to local mappings: " + clientID);
+        System.out.println("Subscriber added: " + clientID + " : " + s);
+        System.out.println("\n\n======\n======\n\n");
         localSubscriberMap.put(clientID, s);
+        System.out.println(localSubscriberMap);
     }
 
     public void removeSubscriber(String clientID){
+        System.out.println("Remove subscriber, id: " + clientID);
+        System.out.println("\n\n======\n======\n\n");
         if(containsSubscriber(clientID)){
             subscriptionService.removeSubscriber(getSubscriber(clientID));
             localSubscriberMap.remove(clientID);
@@ -62,8 +67,19 @@ public class SubscriptionManager {
         localPublisherMap.put(clientID, p);
     }
 
-    public HashSet<Subscriber> getAllSubscribersForTopic(String topic){
-        return subscriptionService.getInstance().getAllSubscribersForTopic(topic);
+    public HashMap<String, Subscriber> getAllSubscribersForTopic(String topic){
+        localSubscriberMap.size();
+        HashMap<String, Subscriber> newHashMap = new HashMap<String, Subscriber>();
+        Object[] keyArr = localSubscriberMap.keySet().toArray();
+        for(int i = 0; i < localSubscriberMap.size(); i++){
+            String key = (String)keyArr[i];
+            Subscriber sub = localSubscriberMap.get(key);
+            if(sub.getTopic().equals(topic)){
+                newHashMap.put(key, sub);
+            }
+        }
+        return newHashMap;
+//        return subscriptionService.getAllSubscribersForTopic(topic);
     }
 
 

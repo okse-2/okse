@@ -15,6 +15,11 @@ import java.lang.invoke.MethodHandles;
  */
 public class MessageListener implements StampyMessageListener {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private String id;
+
+    MessageListener(String id){
+        this.id = id;
+    }
 
     @Override
     public boolean isForMessage(StampyMessage<?> message) {
@@ -27,10 +32,10 @@ public class MessageListener implements StampyMessageListener {
     }
     @Override
     public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) throws Exception {
-        System.out.println("Message: " + stampyMessage.toString() + "\n");
-        System.out.println("\n\n\n\n");
-        System.out.println("Message says: " + ((MessageMessage)stampyMessage).getBody());
-        System.out.println("\n\n\n\n");
+//        System.out.println("Message: " + stampyMessage.toString() + "\n");
+//        System.out.println("\n\n\n\n");
+        System.out.println("Subscriber: " + id + "\n" + "Message says: " + ((MessageMessage)stampyMessage).getBody() + "\n");
+//        System.out.println("\n\n\n\n");
     }
 
 }

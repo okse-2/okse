@@ -4,29 +4,33 @@ import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.gateway.StampyMessageListener;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
+import no.ntnu.okse.protocol.stomp.SubscriptionManager;
 
 /**
  * Created by ogdans3 on 4/1/16.
  */
 public class DisconnectListener implements StampyMessageListener {
-    private static StompMessageType[] TYPES;
+    private SubscriptionManager subscriptionManager;
 
     @Override
     public StompMessageType[] getMessageTypes() {
-        return new StompMessageType[0];
+        return new StompMessageType[]{StompMessageType.DISCONNECT};
     }
 
     @Override
     public boolean isForMessage(StampyMessage<?> stampyMessage) {
-        return false;
+        return true;
     }
 
     @Override
     public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) throws Exception {
-
+        //TODO: Handle
+        System.out.println("\n====================");
+        System.out.println("Someone disconnected");
+        System.out.println("====================\n");
     }
 
-    static {
-        TYPES = new StompMessageType[]{StompMessageType.DISCONNECT};
+    public void setSubscriptionManager(SubscriptionManager subscriptionManager) {
+        this.subscriptionManager = subscriptionManager;
     }
 }

@@ -49,37 +49,19 @@ public class MessageListener implements StampyMessageListener {
 
     @Override
     public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) throws Exception {
-        System.out.println("Server: Message type: " + stampyMessage.getMessageType().toString());
-        System.out.println(stampyMessage.toString() + "\n");
         sendMessage(stampyMessage, hostPort);
     }
 
     private void sendMessage(StampyMessage<?> stampyMessage, HostPort hostPort) throws InterceptException {
-        Subscriber sub = subscriptionManager.getSubscriber("Test");
-//        gateway.sendMessage("Test", new HostPort(sub.getHost(), sub.getPort()));
-        HostPort subHostPort = new HostPort(sub.getHost(), sub.getPort());
-
         SendMessage sendMessage = (SendMessage) stampyMessage;
         String destination = sendMessage.getHeader().getDestination();
-
 
         Publisher pub = new Publisher(destination, hostPort.getHost(), hostPort.getPort(), protocol);
         //TODO: Need to check if this will work, I think that stomp also uses binary data
         Message okseMsg = new Message((String)sendMessage.getBody(), sendMessage.getHeader().getDestination(), pub, protocol);
         sendMessageToOKSE(okseMsg);
-        System.out.println("Meesage sent to OKSE \n");
     }
 
-/*    private void sendMessageToSomeone(){
-        String msgId = "Some message ID";
-        MessageMessage message = new MessageMessage("destination", msgId, "gabrielb");
-        new MessageMessage();
-
-
-        message.setBody(sendMessage.getBody());
-        message.getHeader().setAck(msgId);
-        gateway.sendMessage(message, hostPort);
-    }*/
 
     public void sendMessageToOKSE(Message msg){
         MessageService.getInstance().distributeMessage(msg);

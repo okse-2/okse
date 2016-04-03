@@ -22,14 +22,10 @@ import io.moquette.server.Server;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
-import no.ntnu.okse.protocol.mqtt.MQTTProtocolServer;
 import no.ntnu.okse.protocol.stomp.listeners.*;
 import no.ntnu.okse.protocol.stomp.listeners.MessageListener;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by ogdans3 on 3/30/16.
@@ -38,11 +34,15 @@ public class STOMPServer extends Server {
     private static SubscriptionManager subscriptionManager;
     private static AbstractStampyMessageGateway gateway;
 
+    public void setSubscriptionManager(SubscriptionManager subscriptionManager) {
+        this.subscriptionManager = subscriptionManager;
+    }
+
     public AbstractStampyMessageGateway initialize() {
         HeartbeatContainer heartbeatContainer = new HeartbeatContainer();
 
         ServerNettyMessageGateway gateway = new ServerNettyMessageGateway();
-        gateway.setPort(5551);
+        gateway.setPort(61613);
         gateway.setHeartbeat(1000);
         gateway.setAutoShutdown(true);
 
@@ -105,57 +105,27 @@ public class STOMPServer extends Server {
     private void addGatewayListeners(ServerNettyMessageGateway gateway){
         no.ntnu.okse.protocol.stomp.listeners.MessageListener messageListener = new MessageListener();
         SubscriptionListener subListener = new SubscriptionListener();
+        UnSubscriptionListener unsubListener = new UnSubscriptionListener();
+        ConnectListener connectListener = new ConnectListener();
+        DisconnectListener disconnectListener = new DisconnectListener();
 
         messageListener.setSubscriptionManager(subscriptionManager);
         subListener.setSubscriptionManager(subscriptionManager);
+        unsubListener.setSubscriptionManager(subscriptionManager);
+        disconnectListener.setSubscriptionManager(subscriptionManager);
 
         messageListener.setGateway(gateway);
 
         gateway.addMessageListener(messageListener);
-        gateway.addMessageListener(new ConnectListener());
+        gateway.addMessageListener(connectListener);
         gateway.addMessageListener(subListener);
-        gateway.addMessageListener(new UnSubscriptionListener());
-        gateway.addMessageListener(new DisconnectListener());
+        gateway.addMessageListener(unsubListener);
+        gateway.addMessageListener(disconnectListener);
     }
 
-    public void init() throws Exception {
-        subscriptionManager = new SubscriptionManager();
-        subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
-
-
+    public void init(String host, int port) throws Exception {
         gateway = initialize();
         gateway.connect();
-        System.out.println("STOMP server started correctly, port: " + gateway.getPort());
-
-        ClientTest publisherClient = new ClientTest();
-        ClientTest subscriberClient = new ClientTest();
-        publisherClient.init();
-        publisherClient.testConnect("publisher");
-
-        subscriberClient.init();
-        subscriberClient.testConnect("subscriber");
-        subscriberClient.testSubscription();
-
-        Thread.sleep(1000);
-        System.out.println("\n\n");
-        publisherClient.testMessage();
-
-
-        while(true){
-            System.out.println("Send message");
-            publisherClient.testMessage();
-            Thread.sleep(3000);
-        }
-
-    }
-
-    public static void main(String[] args) {
-        STOMPServer test = new STOMPServer();
-        try {
-            test.init();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -167,19 +137,18 @@ public class STOMPServer extends Server {
 
         MessageMessage msg = createSTOMPMessage(message);
 
-        HashSet<Subscriber> subs = subscriptionManager.getAllSubscribersForTopic(message.getTopic());
-        Map<String, Subscriber> map = (Map<String, Subscriber>) subs;
-        Set<String> keyset = map.keySet();
-        Iterator it = keyset.iterator();
+        HashMap<String, Subscriber> subs = subscriptionManager.getAllSubscribersForTopic(message.getTopic());
 
-        while(it.hasNext()){
-            String key = (String) it.next();
-            Subscriber sub = map.get(key);
+        Object[] keys = subs.keySet().toArray();
+        for(int i = 0; i < subs.size(); i++){
+            String key = (String)keys[i];
+            Subscriber sub = subs.get(key);
 
             //Its more correct to recreate the message, however we only have to change the subscription id. So we simply replace it!
             //TODO: Do we also have to change the message id?
+            //TODO: This does not work, does not actually replace the header field it seems
             msg.getHeader().setSubscription(key);
-            gateway.sendMessage((StampyMessage<?>) message, new HostPort(sub.getHost(), sub.getPort()));
+            gateway.sendMessage((StampyMessage<?>) msg, new HostPort(sub.getHost(), sub.getPort()));
 
             //TODO: Need to increment the number of messages sent
         }
