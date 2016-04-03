@@ -143,7 +143,7 @@ public class ProtocolServerFactory {
 
     private static ProtocolServer createStomp(NamedNodeMap attr) {
         final String DEFAULT_HOST = "0.0.0.0";
-        final int DEFAULT_PORT = 58061;
+        final int DEFAULT_PORT = 61613;
 
         String host = attr.getNamedItem("host") != null ?
                 attr.getNamedItem("host").getNodeValue() :

@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 public class STOMPProtocolServer extends AbstractProtocolServer {
 
     private static final String DEFAULT_HOST = "0.0.0.0";
-    private static final Integer DEFAULT_PORT = 1883;
+    private static final Integer DEFAULT_PORT = 61613;
 
     private static boolean _invoked = false;
     private static STOMPProtocolServer _singleton = null;
@@ -64,7 +64,7 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         try {
             server.setSubscriptionManager(subscriptionManager);
-            server.init(host, port);
+            server.init(this, host, port);
         } catch (Exception e) {
             e.printStackTrace();
         }

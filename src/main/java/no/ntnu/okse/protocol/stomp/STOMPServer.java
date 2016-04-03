@@ -33,6 +33,7 @@ import java.util.*;
 public class STOMPServer extends Server {
     private static SubscriptionManager subscriptionManager;
     private static AbstractStampyMessageGateway gateway;
+    private static STOMPProtocolServer ps;
 
     public void setSubscriptionManager(SubscriptionManager subscriptionManager) {
         this.subscriptionManager = subscriptionManager;
@@ -42,7 +43,6 @@ public class STOMPServer extends Server {
         HeartbeatContainer heartbeatContainer = new HeartbeatContainer();
 
         ServerNettyMessageGateway gateway = new ServerNettyMessageGateway();
-        gateway.setPort(61613);
         gateway.setHeartbeat(1000);
         gateway.setAutoShutdown(true);
 
@@ -96,9 +96,6 @@ public class STOMPServer extends Server {
 
         addGatewayListeners(gateway);
 
-        gateway.addOutgoingMessageInterceptor(new OutgoingListener());
-
-
         return gateway;
     }
 
@@ -108,6 +105,7 @@ public class STOMPServer extends Server {
         UnSubscriptionListener unsubListener = new UnSubscriptionListener();
         ConnectListener connectListener = new ConnectListener();
         DisconnectListener disconnectListener = new DisconnectListener();
+        IncrementTotalRequestsListener incrementTotalRequestsListener = new IncrementTotalRequestsListener();
 
         messageListener.setSubscriptionManager(subscriptionManager);
         subListener.setSubscriptionManager(subscriptionManager);
@@ -116,15 +114,20 @@ public class STOMPServer extends Server {
 
         messageListener.setGateway(gateway);
 
-        gateway.addMessageListener(messageListener);
+        messageListener.setProtocolServer(ps);
+        incrementTotalRequestsListener.setProtocolServer(ps);
+
         gateway.addMessageListener(connectListener);
         gateway.addMessageListener(subListener);
         gateway.addMessageListener(unsubListener);
         gateway.addMessageListener(disconnectListener);
+        gateway.addMessageListener(messageListener);
     }
 
-    public void init(String host, int port) throws Exception {
+    public void init(STOMPProtocolServer stompProtocolServer, String host, int port) throws Exception {
+        ps = stompProtocolServer;
         gateway = initialize();
+        gateway.setPort(port);
         gateway.connect();
     }
 
@@ -135,8 +138,6 @@ public class STOMPServer extends Server {
     public void sendMessage(@NotNull Message message) throws InterceptException {
         System.out.println("OKSE has received a message, please redistribute!");
 
-        MessageMessage msg = createSTOMPMessage(message);
-
         HashMap<String, Subscriber> subs = subscriptionManager.getAllSubscribersForTopic(message.getTopic());
 
         Object[] keys = subs.keySet().toArray();
@@ -144,19 +145,17 @@ public class STOMPServer extends Server {
             String key = (String)keys[i];
             Subscriber sub = subs.get(key);
 
-            //Its more correct to recreate the message, however we only have to change the subscription id. So we simply replace it!
             //TODO: Do we also have to change the message id?
-            //TODO: This does not work, does not actually replace the header field it seems
-            msg.getHeader().setSubscription(key);
+            MessageMessage msg = createSTOMPMessage(message, key);
             gateway.sendMessage((StampyMessage<?>) msg, new HostPort(sub.getHost(), sub.getPort()));
 
-            //TODO: Need to increment the number of messages sent
+            ps.incrementTotalMessagesSent();
         }
     }
 
-    private MessageMessage createSTOMPMessage(Message msg){
+    private MessageMessage createSTOMPMessage(Message msg, String id){
         String msgId = msg.getMessageID();
-        MessageMessage message = new MessageMessage(msg.getTopic(), msgId, "MUST_BE_REPLACED");
+        MessageMessage message = new MessageMessage(msg.getTopic(), msgId, id);
 
         message.setBody(msg.getMessage());
         message.getHeader().setAck(msgId);

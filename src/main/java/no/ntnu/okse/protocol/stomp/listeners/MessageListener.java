@@ -13,6 +13,7 @@ import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
+import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 import no.ntnu.okse.protocol.stomp.SubscriptionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +25,10 @@ import java.lang.invoke.MethodHandles;
  */
 public class MessageListener implements StampyMessageListener {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private static StompMessageType[] TYPES;
     private ServerNettyMessageGateway gateway;
     private SubscriptionManager subscriptionManager;
     private String protocol;
-
-    static {
-        TYPES = new StompMessageType[]{StompMessageType.SEND};
-    }
+    private STOMPProtocolServer protocolServer;
 
     public MessageListener(){
         this.protocol = "stomp";
@@ -39,7 +36,7 @@ public class MessageListener implements StampyMessageListener {
 
     @Override
     public StompMessageType[] getMessageTypes() {
-        return TYPES;
+        return new StompMessageType[]{StompMessageType.SEND};
     }
 
     @Override
@@ -60,6 +57,7 @@ public class MessageListener implements StampyMessageListener {
         //TODO: Need to check if this will work, I think that stomp also uses binary data
         Message okseMsg = new Message((String)sendMessage.getBody(), sendMessage.getHeader().getDestination(), pub, protocol);
         sendMessageToOKSE(okseMsg);
+        protocolServer.incrementTotalMessagesReceived();
     }
 
 
@@ -73,5 +71,9 @@ public class MessageListener implements StampyMessageListener {
 
     public void setGateway(ServerNettyMessageGateway gateway) {
         this.gateway = gateway;
+    }
+
+    public void setProtocolServer(STOMPProtocolServer protocolServer) {
+        this.protocolServer = protocolServer;
     }
 }

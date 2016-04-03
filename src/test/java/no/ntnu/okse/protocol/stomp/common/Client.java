@@ -163,13 +163,13 @@ public class Client {
         this.receipt = receipt;
     }
 
-    public void testMessage() throws Exception{
+    public void testMessage(String text) throws Exception{
 //        sendMessage(StompMessageType.SEND, "Gabrielb");
         String id = "gabrielb";
         SendMessage message = new SendMessage("test", id);
         message.getHeader().setReceipt(id);
         message.getHeader().setDestination("test");
-        message.setBody("Test");
+        message.setBody(text);
         getGateway().broadcastMessage(message);
     }
 

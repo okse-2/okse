@@ -27,10 +27,9 @@ public class PublisherTest {
         client.init(null);
         client.testConnect(String.valueOf(0 + (int)(Math.random() * 500)));
 
-        while(true){
-            System.out.println("Send message");
-            client.testMessage();
-            Thread.sleep(3000);
+        for(int i = 0; i < 1000000; i++){
+            System.out.println("Send message #" + i);
+            client.testMessage(String.valueOf(i));
         }
     }
 }

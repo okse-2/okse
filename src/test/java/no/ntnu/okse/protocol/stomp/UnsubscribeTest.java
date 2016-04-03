@@ -17,6 +17,9 @@ public class UnsubscribeTest {
         Thread.sleep(1000);
         System.out.println("UnSubscribe");
         client.testUnsubscribe("gabrielb");
+        Thread.sleep(1000);
+        System.out.println("Subscribe");
+        client.testSubscription("gabrielb", "test");
 
         System.out.println("Set up complete");
     }

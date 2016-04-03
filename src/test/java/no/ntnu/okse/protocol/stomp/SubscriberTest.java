@@ -35,8 +35,10 @@ public class SubscriberTest {
         Thread.sleep(1000);
         client2.testConnect(String.valueOf(0 + (int)(Math.random() * 500)));
 
+
         Thread.sleep(1000);
         client.testSubscription("subscribtion", "test");
+
         Thread.sleep(1000);
         client2.testSubscription("ogdans3", "test");
 
