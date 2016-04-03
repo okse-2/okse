@@ -26,6 +26,7 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
     protected void init(String host, Integer port) {
         this.host = host;
         this.port = port;
+
         _invoked = true;
         protocolServerType = "STOMP";
         log = Logger.getLogger(STOMPProtocolServer.class.getName());
