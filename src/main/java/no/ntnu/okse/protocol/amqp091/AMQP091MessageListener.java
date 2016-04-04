@@ -28,7 +28,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
     @Override
     public void onMessageReceived(MessageReceived messageReceived) {
         String message = new String(messageReceived.getBody());
-        String topic = messageReceived.getTopic();
+        String topic = messageReceived.getExchange();
         String host = messageReceived.getHost();
         int port = messageReceived.getPort();
 
