@@ -94,8 +94,10 @@ public class ProtocolServerFactoryTest {
         Document cfg = parse(xml_cfg);
 
         NodeList servers = cfg.getElementsByTagName("server");
-        ProtocolServer ps = ProtocolServerFactory.create(servers.item(0));
-        Assert.assertTrue(ps.getClass().toString().equals(WSN_CLASS_NAME));
+        for(int i = 0; i < servers.getLength(); i++) {
+            ProtocolServer ps = ProtocolServerFactory.create(servers.item(i));
+            Assert.assertTrue(ps.getClass().toString().equals(WSN_CLASS_NAME));
+        }
     }
 
     @Test
