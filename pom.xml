@@ -148,6 +148,16 @@
             <artifactId>joram-mom-amqp</artifactId>
             <version>5.11.0-okse</version>
         </dependency>
+        <dependency>
+            <groupId>org.ow2.joram</groupId>
+            <artifactId>joram-mom-core</artifactId>
+            <version>5.11.0-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.joram</groupId>
+            <artifactId>jndi-server</artifactId>
+            <version>5.11.0-okse</version>
+        </dependency>
     </dependencies>
 
     <build>
