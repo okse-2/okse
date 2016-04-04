@@ -42,6 +42,7 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
             AgentServer.init((short) 0, "./s0", null);
             AMQPService.init("" + port, true);
             AMQPService.addMessageListener(new AMQP091MessageListener(this));
+            AMQPService.setPublishing(false);
         } catch (Exception e) {
             // TODO: Properly handle exception
             e.printStackTrace();
