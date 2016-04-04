@@ -89,20 +89,41 @@ public class MQTTServer extends Server {
 		String host = getHost(channel);
 
 		Subscriber sub = new Subscriber( host, port, message.getTopicFilter(), protocolServerType );
-		subscriptionManager.addSubscriber(sub, message.getClientID());
+		System.out.println(message.getClientID());
+		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
+		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
+		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
+		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
+		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
+		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
+		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
+		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
+		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
+		subscriptionManager.addSubscriber(sub, host + ":" + port + ";" + message.getTopicFilter());
 	}
 
 	void HandleUnsubscribe(InterceptUnsubscribeMessage message) {
 		log.info("Client unsubscribed from: "  + message.getTopicFilter() + "   ID: " + message.getClientID());
+		Channel channel = getChannelByClientId(message.getClientID());
 
-		String clientID = message.getClientID();
-		subscriptionManager.removeSubscriber(clientID);
+		int port = getPort(channel);
+		String host = getHost(channel);
+
+		String clientID = host + ":" + port + message.getTopicFilter();
+		if(clientID != null)
+			subscriptionManager.removeSubscriber(clientID);
 	}
 
 	void HandleDisconnect(InterceptDisconnectMessage message) {
 		log.info("Client disconnected ID: " + message.getClientID());
 
-		String clientID = message.getClientID();
+		Channel channel = getChannelByClientId(message.getClientID());
+		int port = getPort(channel);
+		String host = getHost(channel);
+
+		String clientID = host + ":" + port + message.g;
+		if(clientID == null)
+			return;
 
 		subscriptionManager.removeSubscriber(clientID);
 		subscriptionManager.removePublisher(clientID);
@@ -157,8 +178,8 @@ public class MQTTServer extends Server {
 		PublishMessage msg = createMQTTMessage(message);
 		HashMap<String, Subscriber> subscribers = subscriptionManager.getAllSubscribersFromTopic(message.getTopic());
 		if(subscribers.size() > 0){
-			internalPublish(msg);
 			MQTTProtocolServer.getInstance().incrementTotalMessagesSent();
+			internalPublish(msg);
 		}
 	}
 
