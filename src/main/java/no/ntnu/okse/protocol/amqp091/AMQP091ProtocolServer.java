@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.ow2.joram.mom.amqp.AMQPService;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by Andreas the time lord on 30/03/2516
@@ -61,6 +62,6 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void sendMessage(Message message) {
-        System.out.println("Send message in AMQP091 is not implemented");
+        AMQPService.internalPublish(message.getTopic(), "", message.getMessage().getBytes(StandardCharsets.UTF_8));
     }
 }
