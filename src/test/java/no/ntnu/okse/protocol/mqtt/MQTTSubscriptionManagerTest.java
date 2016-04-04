@@ -8,6 +8,8 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
+
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
@@ -95,6 +97,20 @@ public class MQTTSubscriptionManagerTest {
         Subscriber sub = new Subscriber( "127.0.0.1", 1883, "testing", "mqtt");
         subscriptionHandler_spy.addSubscriber(sub, clientID);
         assertEquals(sub, subscriptionHandler_spy.getSubscriber(clientID));
+    }
+
+    @Test
+    public void getAllSubscribersFromTopic(){
+        MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
+        subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
+        MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
+
+        String clientID = "testClientID";
+        Subscriber sub = new Subscriber( "127.0.0.1", 1883, "testing", "mqtt");
+        subscriptionHandler_spy.addSubscriber(sub, clientID);
+        HashMap<String, Subscriber> subs = new HashMap<String, Subscriber>();
+        subs.put(clientID, sub);
+        assertEquals(subs, subscriptionHandler_spy.getAllSubscribersFromTopic("testing"));
     }
 
     @Test

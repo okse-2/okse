@@ -155,8 +155,11 @@ public class MQTTServer extends Server {
 	 * */
 	public void sendMessage(@NotNull  Message message) {
 		PublishMessage msg = createMQTTMessage(message);
-		internalPublish(msg);
-		MQTTProtocolServer.getInstance().incrementTotalMessagesSent();
+		HashMap<String, Subscriber> subscribers = subscriptionManager.getAllSubscribersFromTopic(message.getTopic());
+		if(subscribers.size() > 0){
+			internalPublish(msg);
+			MQTTProtocolServer.getInstance().incrementTotalMessagesSent();
+		}
 	}
 
 	/**

@@ -5,6 +5,7 @@ import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
 
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -49,6 +50,20 @@ public class MQTTSubscriptionManager {
 
     public Subscriber getSubscriber(String clientID){
         return localSubscriberMap.get(clientID);
+    }
+
+    public HashMap<String, Subscriber> getAllSubscribersFromTopic(String topic){
+        localSubscriberMap.size();
+        HashMap<String, Subscriber> newHashMap = new HashMap<String, Subscriber>();
+        Object[] keyArr = localSubscriberMap.keySet().toArray();
+        for(int i = 0; i < localSubscriberMap.size(); i++){
+            String key = (String)keyArr[i];
+            Subscriber sub = localSubscriberMap.get(key);
+            if(sub.getTopic().equals(topic)){
+                newHashMap.put(key, sub);
+            }
+        }
+        return newHashMap;
     }
 
     public void addPublisher(Publisher p, String clientID) {
