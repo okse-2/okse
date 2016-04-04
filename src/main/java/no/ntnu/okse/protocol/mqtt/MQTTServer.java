@@ -65,15 +65,16 @@ public class MQTTServer extends Server {
 		int port = getPort(channel);
 		String host = getHost(channel);
 
-		Publisher pub = new Publisher( message.getTopicName(), host, port, protocolServerType);
+        //TODO: Finish discussing if we are going to pass in null instead of the publisher!
+		//Publisher pub = new Publisher( message.getTopicName(), host, port, protocolServerType);
 
 		//Adds the publisher to the subscriptionManager, if it is already added the subscription manager will not add it
-		subscriptionManager.addPublisher(pub, message.getClientID());
+		//subscriptionManager.addPublisher(pub, message.getClientID());
 
 		String topic = message.getTopicName();
 		String payload = getPayload(message);
 
-		sendMessageToOKSE(new Message( payload, topic, pub, protocolServerType ));
+		sendMessageToOKSE(new Message( payload, topic, null, protocolServerType ));
 		MQTTProtocolServer.getInstance().incrementTotalMessagesReceived();
 	}
 
@@ -87,6 +88,8 @@ public class MQTTServer extends Server {
 
 		int port = getPort(channel);
 		String host = getHost(channel);
+		String topic = message.getTopicFilter();
+		String clientID = message.getClientID();
 
 		Subscriber sub = new Subscriber( host, port, message.getTopicFilter(), protocolServerType );
 		System.out.println(message.getClientID());
@@ -99,7 +102,8 @@ public class MQTTServer extends Server {
 		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
 		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
 		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
-		subscriptionManager.addSubscriber(sub, host + ":" + port + ";" + message.getTopicFilter());
+//		subscriptionManager.addSubscriber(sub, host + ":" + port + ";" + message.getTopicFilter());
+		subscriptionManager.addSubscriber(host, port, topic, clientID);
 	}
 
 	void HandleUnsubscribe(InterceptUnsubscribeMessage message) {
@@ -108,25 +112,15 @@ public class MQTTServer extends Server {
 
 		int port = getPort(channel);
 		String host = getHost(channel);
-
-		String clientID = host + ":" + port + message.getTopicFilter();
-		if(clientID != null)
-			subscriptionManager.removeSubscriber(clientID);
+        String topic = message.getTopicFilter();
+        subscriptionManager.removeSubscriber(host, port, topic);
 	}
 
 	void HandleDisconnect(InterceptDisconnectMessage message) {
 		log.info("Client disconnected ID: " + message.getClientID());
+        String clientID = message.getClientID();
 
-		Channel channel = getChannelByClientId(message.getClientID());
-		int port = getPort(channel);
-		String host = getHost(channel);
-
-		String clientID = host + ":" + port + message.g;
-		if(clientID == null)
-			return;
-
-		subscriptionManager.removeSubscriber(clientID);
-		subscriptionManager.removePublisher(clientID);
+		subscriptionManager.removeSubscribers(clientID);
 	}
 
 	public void sendMessageToOKSE(Message msg){
@@ -176,9 +170,13 @@ public class MQTTServer extends Server {
 	 * */
 	public void sendMessage(@NotNull  Message message) {
 		PublishMessage msg = createMQTTMessage(message);
-		HashMap<String, Subscriber> subscribers = subscriptionManager.getAllSubscribersFromTopic(message.getTopic());
+		ArrayList<MQTTSubscriber> subscribers = subscriptionManager.getAllSubscribersFromTopic(message.getTopic());
 		if(subscribers.size() > 0){
-			MQTTProtocolServer.getInstance().incrementTotalMessagesSent();
+            //This will incremenet the total messages sent for each of the subscribers that the subscription manager found.
+            //We should never send fewer or more messages than the number of subscriptions.
+            for(int i = 0; i < subscribers.size(); i++){
+                MQTTProtocolServer.getInstance().incrementTotalMessagesSent();
+            }
 			internalPublish(msg);
 		}
 	}

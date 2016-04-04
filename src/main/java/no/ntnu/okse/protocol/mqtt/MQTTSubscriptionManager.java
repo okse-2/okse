@@ -5,7 +5,7 @@ import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -16,54 +16,88 @@ public class MQTTSubscriptionManager {
     private SubscriptionService subscriptionService = null;
     private ConcurrentHashMap<String, Subscriber> localSubscriberMap;
     private ConcurrentHashMap<String, Publisher> localPublisherMap;
+    private ArrayList<MQTTSubscriber> subscriberList;
 
     public MQTTSubscriptionManager () {
         log = Logger.getLogger(MQTTSubscriptionManager.class.getName());
         localSubscriberMap = new ConcurrentHashMap<>();
         localPublisherMap= new ConcurrentHashMap<>();
+        subscriberList = new ArrayList<MQTTSubscriber>();
     }
 
     public void initCoreSubscriptionService(SubscriptionService subService) {
         this.subscriptionService = subService;
     }
 
-    public void addSubscriber(Subscriber s, String clientID) {
-        if(containsSubscriber(clientID)){
+    public void addSubscriber(String host, int port, String topic, String clientID) {
+        if(getSubscriberIndex(host, port, topic) != -1){
             log.warn("This subscriber is already added");
             return;
         }
-        subscriptionService.addSubscriber(s);
-        log.debug("Adding Subscriber to local mappings: " + clientID);
-        localSubscriberMap.put(clientID, s);
+        Subscriber sub = new Subscriber( host, port, topic, "mqtt");
+        MQTTSubscriber mqttSub = new MQTTSubscriber(host, port, topic, clientID, sub);
+
+        subscriptionService.addSubscriber(sub);
+        subscriberList.add(mqttSub);
     }
 
-    public void removeSubscriber(String clientID){
-        if(containsSubscriber(clientID)){
-            subscriptionService.removeSubscriber(getSubscriber(clientID));
-            localSubscriberMap.remove(clientID);
+    public void removeSubscriber(String host, int port, String topic){
+        int index = getSubscriberIndex(host, port, topic);
+        if(index > -1){
+            subscriptionService.removeSubscriber(subscriberList.get(index).getSubscriber());
+            subscriberList.remove(index);
         }
     }
 
-    public boolean containsSubscriber(String clientID){
-        return localSubscriberMap.containsKey(clientID);
+    public void removeSubscribers(String clientID){
+        ArrayList<Integer> indexes = getSubscriberIndexes(clientID);
+        for(int i = indexes.size() - 1; i >= 0; i--){
+            int index = indexes.get(i);
+            subscriptionService.removeSubscriber(subscriberList.get(index).getSubscriber());
+            subscriberList.remove(index);
+        }
     }
 
-    public Subscriber getSubscriber(String clientID){
-        return localSubscriberMap.get(clientID);
+    public int getSubscriberIndex(String host, int port, String topic){
+        for(int i = 0; i < subscriberList.size(); i++){
+            MQTTSubscriber sub = subscriberList.get(i);
+            if(sub.getHost().equals(host) && sub.getPort() == port && sub.getTopic().equals(topic))
+                return i;
+        }
+        return -1;
+    }
+    public ArrayList<Integer> getSubscriberIndexes(String clientID){
+        ArrayList<Integer> indexes = new ArrayList<Integer>();
+        for(int i = 0; i < subscriberList.size(); i++){
+            MQTTSubscriber sub = subscriberList.get(i);
+            if(sub.getClientID().equals(clientID))
+                indexes.add(i);
+        }
+        return indexes;
     }
 
-    public HashMap<String, Subscriber> getAllSubscribersFromTopic(String topic){
-        localSubscriberMap.size();
-        HashMap<String, Subscriber> newHashMap = new HashMap<String, Subscriber>();
-        Object[] keyArr = localSubscriberMap.keySet().toArray();
-        for(int i = 0; i < localSubscriberMap.size(); i++){
-            String key = (String)keyArr[i];
-            Subscriber sub = localSubscriberMap.get(key);
+    public boolean containsSubscriber(String host, int port, String topic){
+        if(getSubscriberIndex(host, port, topic) == -1)
+            return false;
+        return true;
+    }
+
+    public MQTTSubscriber getSubscriber(String host, int port, String topic){
+        int index = getSubscriberIndex(host, port, topic);
+        if(index == -1)
+            return null;
+        return subscriberList.get(index);
+    }
+
+    public ArrayList<MQTTSubscriber> getAllSubscribersFromTopic(String topic){
+        ArrayList<MQTTSubscriber> subscribers = new ArrayList<MQTTSubscriber>();
+        for(int i = 0; i < subscriberList.size(); i++){
+            MQTTSubscriber sub = subscriberList.get(i);
             if(sub.getTopic().equals(topic)){
-                newHashMap.put(key, sub);
+                subscribers.add(sub);
             }
         }
-        return newHashMap;
+        return subscribers;
     }
 
     public void addPublisher(Publisher p, String clientID) {
