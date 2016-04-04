@@ -1,10 +1,9 @@
 package no.ntnu.okse.protocol.stomp;
 
+import asia.stampy.common.message.interceptor.InterceptException;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
-import no.ntnu.okse.protocol.mqtt.MQTTServer;
-import no.ntnu.okse.protocol.mqtt.MQTTSubscriptionManager;
 import org.apache.log4j.Logger;
 
 /**
@@ -13,23 +12,23 @@ import org.apache.log4j.Logger;
 public class STOMPProtocolServer extends AbstractProtocolServer {
 
     private static final String DEFAULT_HOST = "0.0.0.0";
-    private static final Integer DEFAULT_PORT = 1883;
+    private static final Integer DEFAULT_PORT = 61613;
 
     private static boolean _invoked = false;
     private static STOMPProtocolServer _singleton = null;
 
-    private STOMPProtocolServer(String host, Integer port) {
+    public STOMPProtocolServer(String host, Integer port) {
         init(host, port);
     }
 
-    private MQTTServer server;
+    private STOMPServer server;
 
-    @Override
     protected void init(String host, Integer port) {
         this.host = host;
         this.port = port;
+
         _invoked = true;
-        protocolServerType = "MQTT";
+        protocolServerType = "STOMP";
         log = Logger.getLogger(STOMPProtocolServer.class.getName());
     }
 
@@ -53,30 +52,34 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
         if(!_running) {
             _running = true;
             _serverThread = new Thread(this::run);
-            _serverThread.setName("MQTTProtocolServer");
+            _serverThread.setName("STOMPProtocolServer");
             _serverThread.start();
-            log.info("MQTTProtocolServer booted successfully");
+            log.info("STOMPProtocolServer booted successfully");
         }
     }
 
     @Override
     public void run() {
-        server = new MQTTServer();
-        MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
+        server = new STOMPServer();
+        SubscriptionManager subscriptionManager = new SubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
-        server.init(host, port);
-        server.setSubscriptionManager(subscriptionManager);
+        try {
+            server.setSubscriptionManager(subscriptionManager);
+            server.init(this, host, port);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void stopServer() {
-        log.info("Stopping MQTTProtocolServer");
+        log.info("Stopping STOMPProtocolServer");
         _running = false;
         _singleton = null;
         _invoked = false;
         server.stopServer();
         server = null;
-        log.info("MQTTProtocolServer is stopped");
+        log.info("STOMPProtocolServer is stopped");
     }
 
     @Override
@@ -87,8 +90,11 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
     @Override
     public void sendMessage(Message message) {
         log.info("Received message on topic " + message.getMessage() );
-        server.sendMessage( message );
-
+        try {
+            server.sendMessage( message );
+        } catch (InterceptException e) {
+            e.printStackTrace();
+        }
     }
 
     public void incrementTotalRequests() {
