@@ -9,16 +9,19 @@ import org.apache.log4j.Logger;
 import org.ow2.joram.mom.amqp.AMQPMessageListener;
 import org.ow2.joram.mom.amqp.messages.*;
 
-import java.util.logging.Formatter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AMQP091MessageListener implements AMQPMessageListener {
 
     private static Logger log = Logger.getLogger(AMQP091MessageListener.class);
 
     private final AMQP091ProtocolServer amqpProtocolServer;
+    private Map<String, Subscriber> subscriberMap;
 
     public AMQP091MessageListener(AMQP091ProtocolServer amqp091ProtocolServer) {
         this.amqpProtocolServer = amqp091ProtocolServer;
+        subscriberMap = new HashMap<>();
     }
 
     @Override
@@ -56,12 +59,26 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         log.debug(String.format("%s:%d subscribed on topic %s",
                 subscribeMessage.getHost(), subscribeMessage.getPort(), subscribeMessage.getExchange()
         ));
+        String host = subscribeMessage.getHost();
+        int port = subscribeMessage.getPort();
+        String topic = subscribeMessage.getExchange();
+        Subscriber subscriber = new Subscriber(
+                host, port, topic, amqpProtocolServer.getProtocolServerType()
+        );
+        subscriberMap.put(host + ":" + port +'@' + topic, subscriber);
+        SubscriptionService.getInstance().addSubscriber(subscriber);
     }
 
     @Override
     public void onUnsubscribe(UnsubscribeMessage unsubscribeMessage) {
-        log.debug(String.format("%s:%d unubscribed on topic %s",
+        log.debug(String.format("%s:%d unsubscribed on topic %s",
                 unsubscribeMessage.getHost(), unsubscribeMessage.getPort(), unsubscribeMessage.getExchange()
         ));
+        String host = unsubscribeMessage.getHost();
+        int port = unsubscribeMessage.getPort();
+        String topic = unsubscribeMessage.getExchange();
+
+        Subscriber subscriber = subscriberMap.get(host + ":" + port +'@' + topic);
+        SubscriptionService.getInstance().removeSubscriber(subscriber);
     }
 }
