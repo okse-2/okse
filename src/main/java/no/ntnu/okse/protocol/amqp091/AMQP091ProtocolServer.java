@@ -5,8 +5,12 @@ import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 import org.ow2.joram.mom.amqp.AMQPService;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Created by Andreas the time lord on 30/03/2516
@@ -33,20 +37,36 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
             _serverThread = new Thread(() -> this.run());
             _serverThread.setName("AMQ091ProtocolServer");
             _serverThread.start();
-            log.info("AMQ091ProtocolServer successfully");
+            log.info("AMQ091ProtocolServer booted successfully");
         }
     }
 
     @Override
     public void run() {
         try {
-            AgentServer.init((short) 0, "./s0", null);
-            AMQPService.init("" + port, true);
+            log.debug(String.format("Starting AMQP 0.9.1 service on %s:%d", host, port));
+            AgentServer.init((short) 0, createAgentFolder(), null);
+            AMQPService.init("" + port + " " + host, true);
             AMQPService.addMessageListener(new AMQP091MessageListener(this));
             AMQPService.setPublishing(false);
         } catch (Exception e) {
             // TODO: Properly handle exception
             e.printStackTrace();
+        }
+    }
+
+    private String createAgentFolder() {
+        String directoryName = "agent-server";
+        try {
+            Path agentFolder = Files.createTempDirectory(directoryName);
+            return agentFolder.toString();
+        } catch (IOException e) {
+            log.warn("Failed to create temporary folder, creating folder in local directory");
+            File localDirectory = new File(directoryName);
+            if(!localDirectory.exists()) {
+                localDirectory.mkdir();g
+            }
+            return directoryName;
         }
     }
 
@@ -65,3 +85,4 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
         AMQPService.internalPublish(message.getTopic(), "", message.getMessage().getBytes(StandardCharsets.UTF_8));
     }
 }
+;
