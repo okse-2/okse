@@ -66,6 +66,10 @@ public class SubscriberMap {
     }
 
     public List<Subscriber> getSubscribers(String host, int port) {
-        return subscribersMap.get(new Client(host, port));
+        List<Subscriber> subscribers = subscribersMap.get(new Client(host, port));
+        if(subscribers == null) {
+            subscribers = new ArrayList<>();
+        }
+        return subscribers;
     }
 }
