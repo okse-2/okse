@@ -58,6 +58,7 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 		server = new MQTTServer();
 		MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
 		subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
+		SubscriptionService.getInstance().addSubscriptionChangeListener(subscriptionManager);
 		server.init(host, port);
 		server.setSubscriptionManager(subscriptionManager);
 	}

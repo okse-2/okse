@@ -172,7 +172,7 @@ public class MQTTServer extends Server {
 		PublishMessage msg = createMQTTMessage(message);
 		ArrayList<MQTTSubscriber> subscribers = subscriptionManager.getAllSubscribersFromTopic(message.getTopic());
 		if(subscribers.size() > 0){
-            //This will incremenet the total messages sent for each of the subscribers that the subscription manager found.
+			//This will incremenet the total messages sent for each of the subscribers that the subscription manager found.
             //We should never send fewer or more messages than the number of subscriptions.
             for(int i = 0; i < subscribers.size(); i++){
                 MQTTProtocolServer.getInstance().incrementTotalMessagesSent();

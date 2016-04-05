@@ -1,8 +1,11 @@
 package no.ntnu.okse.protocol.mqtt;
 
+import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
+import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -11,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by ogdans3 on 3/16/16.
  */
-public class MQTTSubscriptionManager {
+public class MQTTSubscriptionManager implements SubscriptionChangeListener {
     private static Logger log;
     private SubscriptionService subscriptionService = null;
     private ConcurrentHashMap<String, Subscriber> localSubscriberMap;
@@ -46,6 +49,16 @@ public class MQTTSubscriptionManager {
         if(index > -1){
             subscriptionService.removeSubscriber(subscriberList.get(index).getSubscriber());
             subscriberList.remove(index);
+        }
+    }
+
+    public void removeSubscriber(Subscriber sub){
+        for(int i = 0; i < subscriberList.size(); i++){
+            MQTTSubscriber mqtt_sub = subscriberList.get(i);
+            if(mqtt_sub.getSubscriber() == sub){
+                removeSubscriber(mqtt_sub.getHost(), mqtt_sub.getPort(), mqtt_sub.getTopic());
+                return;
+            }
         }
     }
 
@@ -126,4 +139,16 @@ public class MQTTSubscriptionManager {
         return localPublisherMap.get(clientID);
     }
 
+    @Override
+    public void subscriptionChanged(SubscriptionChangeEvent e) {
+        if (e.getData().getOriginProtocol().equals("mqtt")) {
+            if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
+                log.debug("Received a UNSUBSCRIBE event");
+                removeSubscriber(e.getData());
+            } else if (e.getType().equals(SubscriptionChangeEvent.Type.SUBSCRIBE)) {
+                log.debug("Received a SUBSCRIBE event");
+            }
+        }
+
+    }
 }
