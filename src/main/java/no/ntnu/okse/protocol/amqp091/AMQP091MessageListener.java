@@ -9,19 +9,18 @@ import org.apache.log4j.Logger;
 import org.ow2.joram.mom.amqp.AMQPMessageListener;
 import org.ow2.joram.mom.amqp.messages.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class AMQP091MessageListener implements AMQPMessageListener {
 
     private static Logger log = Logger.getLogger(AMQP091MessageListener.class);
 
     private final AMQP091ProtocolServer amqpProtocolServer;
-    private Map<String, Subscriber> subscriberMap;
+    private SubscriberMap subscriberMap;
 
     public AMQP091MessageListener(AMQP091ProtocolServer amqp091ProtocolServer) {
         this.amqpProtocolServer = amqp091ProtocolServer;
-        subscriberMap = new HashMap<>();
+        subscriberMap = new SubscriberMap();
     }
 
     @Override
@@ -36,6 +35,10 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         log.debug(String.format("(%s:%d) disconnected",
                 disconnectMessage.getHost(), disconnectMessage.getPort()
         ));
+        List<Subscriber> subscribers = subscriberMap.getSubscribers(disconnectMessage.getHost(), disconnectMessage.getPort());
+        for(Subscriber subscriber : subscribers) {
+            SubscriptionService.getInstance().removeSubscriber(subscriber);
+        }
     }
 
     @Override
@@ -65,7 +68,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         Subscriber subscriber = new Subscriber(
                 host, port, topic, amqpProtocolServer.getProtocolServerType()
         );
-        subscriberMap.put(host + ":" + port +'@' + topic, subscriber);
+        subscriberMap.putSubscriber(subscriber);
         SubscriptionService.getInstance().addSubscriber(subscriber);
     }
 
@@ -78,7 +81,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         int port = unsubscribeMessage.getPort();
         String topic = unsubscribeMessage.getExchange();
 
-        Subscriber subscriber = subscriberMap.get(host + ":" + port +'@' + topic);
+        Subscriber subscriber = subscriberMap.getSubscriber(host, port, topic);
         SubscriptionService.getInstance().removeSubscriber(subscriber);
     }
 }
