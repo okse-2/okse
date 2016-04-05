@@ -64,7 +64,7 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
             log.warn("Failed to create temporary folder, creating folder in local directory");
             File localDirectory = new File(directoryName);
             if(!localDirectory.exists()) {
-                localDirectory.mkdir();g
+                localDirectory.mkdir();
             }
             return directoryName;
         }
