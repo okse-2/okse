@@ -9,6 +9,10 @@ import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import no.ntnu.okse.core.subscription.Publisher;
+import no.ntnu.okse.core.subscription.Subscriber;
+import no.ntnu.okse.core.subscription.SubscriptionService;
+import org.apache.log4j.Logger;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -104,8 +108,12 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
 
     public ArrayList<MQTTSubscriber> getAllSubscribersFromTopic(String topic){
         ArrayList<MQTTSubscriber> subscribers = new ArrayList<MQTTSubscriber>();
+        System.out.println("Sub list:"  + subscriberList.size());
         for(int i = 0; i < subscriberList.size(); i++){
             MQTTSubscriber sub = subscriberList.get(i);
+            System.out.println(sub);
+            System.out.println(topic);
+            System.out.println(sub.getTopic().equals(topic));
             if(sub.getTopic().equals(topic)){
                 subscribers.add(sub);
             }
@@ -145,8 +153,6 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
             if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
                 log.debug("Received a UNSUBSCRIBE event");
                 removeSubscriber(e.getData());
-            } else if (e.getType().equals(SubscriptionChangeEvent.Type.SUBSCRIBE)) {
-                log.debug("Received a SUBSCRIBE event");
             }
         }
 

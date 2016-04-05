@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<servers>
+    <server type="amqp" />
+    <server type="mqtt" />
+    <server type="wsn" />
+</servers>

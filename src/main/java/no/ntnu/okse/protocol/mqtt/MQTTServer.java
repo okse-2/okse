@@ -1,6 +1,8 @@
 package no.ntnu.okse.protocol.mqtt;
 
 import com.sun.istack.internal.NotNull;
+import io.moquette.interception.messages.InterceptDisconnectMessage;
+import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import io.moquette.interception.messages.*;
 import io.moquette.server.config.MemoryConfig;
 import io.netty.channel.Channel;
@@ -8,7 +10,6 @@ import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
-import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.core.topic.TopicService;
 import no.ntnu.okse.protocol.mqtt.MQTTSubscriptionManager;
 import org.apache.log4j.Logger;
@@ -31,6 +32,9 @@ public class MQTTServer extends Server {
 
 	private static Logger log = Logger.getLogger(Server.class);
 	private static String protocolServerType;
+	private MQTTProtocolServer ps;
+	private final IConfig config;
+	private List<InterceptHandler> interceptHandlers;
 	private MQTTSubscriptionManager subscriptionManager;
 
 	protected class MQTTListener extends AbstractInterceptHandler {
@@ -75,13 +79,27 @@ public class MQTTServer extends Server {
 		String payload = getPayload(message);
 
 		sendMessageToOKSE(new Message( payload, topic, null, protocolServerType ));
-		MQTTProtocolServer.getInstance().incrementTotalMessagesReceived();
+		ps.incrementTotalMessagesReceived();
 	}
 
-	void HandleSubscribe(InterceptSubscribeMessage message) {
-		log.info("Client subscribed to: "  + message.getTopicFilter() + "   ID: " + message.getClientID());
+	public MQTTServer(MQTTProtocolServer ps, String host, int port) {
+		this.ps = ps;
+		interceptHandlers = new ArrayList<>();
+		interceptHandlers.add(new MQTTListener());
+		config = new MemoryConfig(getConfig(host, port));
+	}
 
-		TopicService.getInstance().addTopic( message.getTopicFilter() );
+	public void start() {
+		try {
+			startServer(config, interceptHandlers);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+/*	void HandlePublish(InterceptPublishMessage message){
+		log.info("MQTT message received on topic: " + message.getTopicName() + " from ID: " + message.getClientID());
+
 		Channel channel = getChannelByClientId(message.getClientID());
 		if(channel == null)
 			return;
@@ -104,7 +122,7 @@ public class MQTTServer extends Server {
 		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
 //		subscriptionManager.addSubscriber(sub, host + ":" + port + ";" + message.getTopicFilter());
 		subscriptionManager.addSubscriber(host, port, topic, clientID);
-	}
+	}*/
 
 	void HandleUnsubscribe(InterceptUnsubscribeMessage message) {
 		log.info("Client unsubscribed from: "  + message.getTopicFilter() + "   ID: " + message.getClientID());
@@ -123,11 +141,25 @@ public class MQTTServer extends Server {
 		subscriptionManager.removeSubscribers(clientID);
 	}
 
+	void HandleSubscribe(InterceptSubscribeMessage message) {
+		log.info("Client subscribed to: "  + message.getTopicFilter() + "   ID: " + message.getClientID());
+
+		TopicService.getInstance().addTopic( message.getTopicFilter() );
+		Channel channel = getChannelByClientId(message.getClientID());
+		if(channel == null)
+			return;
+
+		int port = getPort(channel);
+		String host = getHost(channel);
+
+		subscriptionManager.addSubscriber(host, port, message.getTopicFilter(), message.getClientID());
+	}
+
 	public void sendMessageToOKSE(Message msg){
 		MessageService.getInstance().distributeMessage(msg);
 	}
 
-	private String getPayload(InterceptPublishMessage message){
+	private String getPayload(InterceptPublishMessage message) {
 		ByteBuffer buffer = message.getPayload();
 		String payload = new String(buffer.array(), buffer.position(), buffer.limit());
 		return payload;
@@ -144,38 +176,29 @@ public class MQTTServer extends Server {
 		this.subscriptionManager = subscriptionManager;
 	}
 
-	public void init(String host, int port) {
-		List<InterceptHandler> interceptHandlers = new ArrayList<>();
-		interceptHandlers.add(new MQTTListener());
-
-		protocolServerType = "MQTT";
-
+	private Properties getConfig(String host, int port) {
 		Properties properties = new Properties();
 		properties.setProperty(BrokerConstants.HOST_PROPERTY_NAME, host);
 		properties.setProperty(BrokerConstants.PORT_PROPERTY_NAME, "" + port);
+		// Set random port for websockets instead of 8080
 		properties.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, "25342");
-
-		final IConfig config = new MemoryConfig(properties);
-		try {
-			startServer(config, interceptHandlers);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		// Disable automatic publishing (handled by the broker instead)
+		properties.setProperty(BrokerConstants.PUBLISH_TO_CONSUMERS, "false");
+		return properties;
 	}
 
 	/**
 	 * Sends the message to any subscriber that is subscribed to the topic that the message was sent to
 	 * @param message is the message that is sent from OKSE core
 	 * */
-	public void sendMessage(@NotNull  Message message) {
+	public void sendMessage(@com.sun.istack.internal.NotNull Message message) {
 		PublishMessage msg = createMQTTMessage(message);
 		ArrayList<MQTTSubscriber> subscribers = subscriptionManager.getAllSubscribersFromTopic(message.getTopic());
 		if(subscribers.size() > 0){
 			//This will incremenet the total messages sent for each of the subscribers that the subscription manager found.
             //We should never send fewer or more messages than the number of subscriptions.
             for(int i = 0; i < subscribers.size(); i++){
-                MQTTProtocolServer.getInstance().incrementTotalMessagesSent();
+                ps.incrementTotalMessagesSent();
             }
 			internalPublish(msg);
 		}
@@ -186,14 +209,14 @@ public class MQTTServer extends Server {
 	 *
 	 * @param message The OKSE message to use when creating MQTT message
 	 * */
-	protected PublishMessage createMQTTMessage(@NotNull Message message){
+	protected PublishMessage createMQTTMessage(@com.sun.istack.internal.NotNull Message message){
 		PublishMessage msg = new PublishMessage();
-		ByteBuffer payload = ByteBuffer.wrap( message.getMessage().getBytes() );
+		ByteBuffer payload = ByteBuffer.wrap(message.getMessage().getBytes());
 
 		String topicName = message.getTopic();
 
-		msg.setPayload( payload );
-		msg.setTopicName( topicName );
+		msg.setPayload(payload);
+		msg.setTopicName(topicName);
 		msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
 		return msg;
 	}

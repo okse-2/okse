@@ -32,12 +32,14 @@ import static org.testng.AssertJUnit.*;
 
 public class MQTTServerTest {
 
+
+
 	enum Status {
 		CONNECT,
 		DISCONNECT,
 		PUBLISH,
 		SUBSCRIBE,
-		UNSUBSCRIBE
+		UNSUBSCRIBE;
 	}
 
 	private static Status status;
@@ -71,29 +73,27 @@ public class MQTTServerTest {
 	}
 
 	MQTTServer mqtt;
+	MQTTProtocolServer ps;
     MQTTSubscriptionManager subManagerMock;
 
 	@BeforeTest
 	public void setUp() {
+		String host = "localhost";
+		int port = 1234;
         subManagerMock = Mockito.mock(MQTTSubscriptionManager.class);
-        mqtt = new MQTTServer();
-		//TODO: Remove this when we test init and change the getinstance method
-		mqtt.init("localhost", 1234);
-        mqtt.setSubscriptionManager(subManagerMock);
-    }
+		ps = new MQTTProtocolServer(host, port);
+		mqtt = new MQTTServer(ps, host, port);
+        mqtt.start();
+		mqtt.setSubscriptionManager(subManagerMock);
+	}
 
 	@AfterTest
 	public void tearDown() {
+        mqtt.stopServer();
 		mqtt = null;
 		status = null;
 	}
 
-	@Test
-	public void init() {
-//		assertFalse(mqtt.isRunning());
-		mqtt.init("localhost", 1234);
-//		assertTrue(mqtt.isRunning());
-	}
 
 	@Test
 	public void sendMessage() {
@@ -103,8 +103,13 @@ public class MQTTServerTest {
 
 		MQTTServer spy = Mockito.spy(mqtt);
 
+		ArrayList<MQTTSubscriber> subscribers = new ArrayList<>();
+		subscribers.add(new MQTTSubscriber("localhost", 1234, "MQTT", "ogdans3", null));
+
 		//Test that internalPublish is called with the correct parameter
 		Mockito.doReturn(msg).when(spy).createMQTTMessage(message);
+		Mockito.doReturn(subscribers).when(subManagerMock).getAllSubscribersFromTopic("MQTT");
+		Mockito.doNothing().when(spy).internalPublish(msg);
 		spy.sendMessage(message);
 		Mockito.verify(spy, Mockito.atLeastOnce()).internalPublish(msg);
         Mockito.reset(spy);
@@ -151,7 +156,6 @@ public class MQTTServerTest {
 
 
         InterceptPublishMessage msg = new InterceptPublishMessage( pubMsg, clientID);
-        System.out.println(msg);
         mqtt_spy.HandlePublish(msg);
         ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
 
@@ -170,7 +174,6 @@ public class MQTTServerTest {
 		InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription("ogdans3", "testing", AbstractMessage.QOSType.LEAST_ONE ));
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1883);
-        Subscriber sub = new Subscriber( "127.0.0.1", 1883, "testing", "MQTT");
         String clientID = msg.getClientID();
 
         Mockito.when(channelMock.remoteAddress()).thenReturn(addr);
@@ -178,10 +181,7 @@ public class MQTTServerTest {
 
         mqtt_spy.HandleSubscribe(msg);
 
-        ArgumentCaptor<Subscriber> subscriberArgument = ArgumentCaptor.forClass(Subscriber.class);
-        ArgumentCaptor<String> clientIDArgument= ArgumentCaptor.forClass(String.class);
-//        Mockito.verify(subManagerMock).addSubscriber(subscriberArgument .capture(), clientIDArgument.capture());
-        assertEquals(clientID, clientIDArgument.getValue());
+        Mockito.verify(subManagerMock).addSubscriber("127.0.0.1", 1883, "testing", "ogdans3");
         Mockito.reset(subManagerMock);
     }
 
@@ -252,14 +252,10 @@ public class MQTTServerTest {
         Mockito.when(mqtt_spy.getChannelByClientId(clientID)).thenReturn(channelMock);
 
         mqtt_spy.HandleDisconnect(msg);
-//        Mockito.verify(subManagerMock).removeSubscriber(msg.getClientID());
-        Mockito.verify(subManagerMock).removePublisher(msg.getClientID());
+        Mockito.verify(subManagerMock).removeSubscribers(msg.getClientID());
         Mockito.reset(subManagerMock);
     }
 
-	@Test
-	public void receiveMessage() {
-	}
 
 	private MQTTServer getInstance(){
 		return mqtt;

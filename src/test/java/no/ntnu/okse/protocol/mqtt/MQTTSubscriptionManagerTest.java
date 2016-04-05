@@ -1,5 +1,6 @@
 package no.ntnu.okse.protocol.mqtt;
 
+import no.ntnu.okse.core.event.SubscriptionChangeEvent;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
@@ -9,7 +10,6 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -69,6 +69,15 @@ public class MQTTSubscriptionManagerTest {
         assertEquals(true, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
         subscriptionHandler_spy.removeSubscriber("127.0.0.1", 1883, "testing");
         assertEquals(false, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
+
+        subscriptionHandler_spy.addSubscriber("127.0.0.1", 1883, "testing", clientID);
+        assertEquals(true, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
+        subscriptionHandler_spy.removeSubscriber(subscriptionHandler_spy.getSubscriber("127.0.0.1", 1883, "testing").getSubscriber());
+        assertEquals(false, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
+
+//        assertEquals(true, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
+//        subscriptionHandler_spy.removeSubscriber(new Subscriber("localhost", 1234, "testing", "mqtt"));
+//        assertEquals(true, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
     }
 
     @Test
@@ -230,6 +239,20 @@ public class MQTTSubscriptionManagerTest {
         Publisher pub = new Publisher( "testing", "127.0.0.1", 1883, "MQTT");
         subscriptionHandler_spy.addPublisher(pub, clientID);
         assertEquals(pub, subscriptionHandler_spy.getPublisher(clientID));
+    }
+
+    @Test
+    public void subscriptionChanged(){
+        MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
+        subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
+        MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
+
+        String clientID = "testClientID";
+        subscriptionHandler_spy.addSubscriber("127.0.0.1", 1883, "testing", clientID);
+        Subscriber sub = subscriptionHandler_spy.getSubscriber("127.0.0.1", 1883, "testing").getSubscriber();
+
+        subscriptionHandler_spy.subscriptionChanged(new SubscriptionChangeEvent(SubscriptionChangeEvent.Type.UNSUBSCRIBE, sub));
+        Mockito.verify(subscriptionHandler_spy).removeSubscriber(sub);
     }
 
     private MQTTSubscriptionManager getInstance(){

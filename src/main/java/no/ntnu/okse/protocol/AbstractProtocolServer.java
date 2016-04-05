@@ -129,7 +129,28 @@ public abstract class AbstractProtocolServer implements ProtocolServer {
         return this.host;
     }
 
-    // Initializer
-    protected abstract void init(String host, Integer port);
+    public void incrementTotalMessagesSent() {
+        totalMessagesSent.incrementAndGet();
+    }
+
+    public void incrementTotalMessagesReceived() {
+        totalMessagesReceived.incrementAndGet();
+    }
+
+    public void incrementTotalRequests() {
+        totalRequests.incrementAndGet();
+    }
+
+    public void incrementTotalBadRequest() {
+        totalBadRequests.incrementAndGet();
+    }
+
+    public void incrementTotalErrors() {
+        totalErrors.incrementAndGet();
+    }
+
+    public void decrementTotalErrors() {
+        totalErrors.decrementAndGet();
+    }
 
 }
