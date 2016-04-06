@@ -118,7 +118,7 @@ public class ProtocolServerFactory {
                 DEFAULT_POOL_SIZE;
 
         String wrapper_name = attr.getNamedItem("wrapper_name") != null ?
-                attr.getNamedItem("wrapped_name").getNodeValue() :
+                attr.getNamedItem("wrapper_name").getNodeValue() :
                 DEFAULT_WRAPPER_NAME;
 
         boolean nat = attr.getNamedItem("nat") != null ?
