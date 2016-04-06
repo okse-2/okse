@@ -28,6 +28,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         log.debug(String.format("(%s:%d) connected",
                 connectMessage.getHost(), connectMessage.getPort()
         ));
+        amqpProtocolServer.incrementTotalRequests();
     }
 
     @Override
@@ -39,6 +40,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         for(Subscriber subscriber : subscribers) {
             SubscriptionService.getInstance().removeSubscriber(subscriber);
         }
+        amqpProtocolServer.incrementTotalRequests();
     }
 
     @Override
@@ -55,6 +57,8 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         Publisher pub = new Publisher(topic, host, port, protocolServerType);
 
         MessageService.getInstance().distributeMessage(new Message(message, topic, pub, protocolServerType));
+        amqpProtocolServer.incrementTotalMessagesReceived();
+        amqpProtocolServer.incrementTotalRequests();
     }
 
     @Override
@@ -70,6 +74,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         );
         subscriberMap.putSubscriber(subscriber);
         SubscriptionService.getInstance().addSubscriber(subscriber);
+        amqpProtocolServer.incrementTotalRequests();
     }
 
     @Override
@@ -83,5 +88,6 @@ public class AMQP091MessageListener implements AMQPMessageListener {
 
         Subscriber subscriber = subscriberMap.getSubscriber(host, port, topic);
         SubscriptionService.getInstance().removeSubscriber(subscriber);
+        amqpProtocolServer.incrementTotalRequests();
     }
 }

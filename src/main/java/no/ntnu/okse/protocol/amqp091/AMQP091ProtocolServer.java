@@ -1,6 +1,8 @@
 package no.ntnu.okse.protocol.amqp091;
 import fr.dyade.aaa.agent.AgentServer;
 import no.ntnu.okse.core.messaging.Message;
+import no.ntnu.okse.core.subscription.Subscriber;
+import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 import org.ow2.joram.mom.amqp.AMQPService;
@@ -10,7 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.HashSet;
 
 /**
  * Created by Andreas the time lord on 30/03/2516
@@ -83,6 +85,14 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
     @Override
     public void sendMessage(Message message) {
         AMQPService.internalPublish(message.getTopic(), "", message.getMessage().getBytes(StandardCharsets.UTF_8));
+        incrementMessageSentForTopic(message.getTopic());
+    }
+
+    private void incrementMessageSentForTopic(String topic) {
+        HashSet<Subscriber> allSubscribers = SubscriptionService.getInstance().getAllSubscribers();
+        allSubscribers.stream()
+                .filter(subscriber -> subscriber.getOriginProtocol().equals(getProtocolServerType()))
+                .filter(subscriber -> subscriber.getTopic().equals(topic))
+                .forEach(subscriber -> incrementTotalMessagesSent());
     }
 }
-;
