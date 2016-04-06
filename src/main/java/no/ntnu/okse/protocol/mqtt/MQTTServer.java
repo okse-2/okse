@@ -10,6 +10,7 @@ import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.topic.TopicService;
+import no.ntnu.okse.protocol.amqp.MessageBytes;
 import no.ntnu.okse.protocol.mqtt.MQTTSubscriptionManager;
 import org.apache.log4j.Logger;
 
@@ -168,6 +169,8 @@ public class MQTTServer extends Server {
 	 * @param message is the message that is sent from OKSE core
 	 * */
 	public void sendMessage(@NotNull Message message) {
+        log.debug("Byte size of message, assuming ascii: " + message.getMessage().length()*8);
+
 		PublishMessage msg = createMQTTMessage(message);
 		ArrayList<MQTTSubscriber> subscribers = subscriptionManager.getAllSubscribersFromTopic(message.getTopic());
 		if(subscribers.size() > 0){

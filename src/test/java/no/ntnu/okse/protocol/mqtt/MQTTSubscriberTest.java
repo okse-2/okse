@@ -7,9 +7,6 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
-/**
- * Created by Ogdans3 on 04.04.2016.
- */
 public class MQTTSubscriberTest {
 
     private String host = "127.0.0.1";

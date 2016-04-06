@@ -15,9 +15,6 @@ import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Created by ogdans3 on 3/16/16.
- */
 public class MQTTSubscriptionManager implements SubscriptionChangeListener {
     private static Logger log;
     private SubscriptionService subscriptionService = null;

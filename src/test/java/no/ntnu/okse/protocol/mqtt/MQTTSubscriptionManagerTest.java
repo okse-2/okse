@@ -13,9 +13,6 @@ import java.util.ArrayList;
 
 import static org.testng.AssertJUnit.assertEquals;
 
-/**
- * Created by ogdans3 on 3/16/16.
- */
 public class MQTTSubscriptionManagerTest {
 
     MQTTSubscriptionManager subscriptionManager;

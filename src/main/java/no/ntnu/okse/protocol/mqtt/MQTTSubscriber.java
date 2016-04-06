@@ -2,9 +2,6 @@ package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.subscription.Subscriber;
 
-/**
- * Created by Ogdans3 on 04.04.2016.
- */
 public class MQTTSubscriber {
     String host;
     int port;
