@@ -86,6 +86,7 @@ public class MQTTServer extends Server {
 
 	public MQTTServer(MQTTProtocolServer ps, String host, int port) {
 		this.ps = ps;
+        protocolServerType = "mqtt";
 		interceptHandlers = new ArrayList<>();
 		interceptHandlers.add(new MQTTListener());
 		config = new MemoryConfig(getConfig(host, port));

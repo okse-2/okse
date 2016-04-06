@@ -106,12 +106,8 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
 
     public ArrayList<MQTTSubscriber> getAllSubscribersFromTopic(String topic){
         ArrayList<MQTTSubscriber> subscribers = new ArrayList<MQTTSubscriber>();
-        System.out.println("Sub list:"  + subscriberList.size());
         for(int i = 0; i < subscriberList.size(); i++){
             MQTTSubscriber sub = subscriberList.get(i);
-            System.out.println(sub);
-            System.out.println(topic);
-            System.out.println(sub.getTopic().equals(topic));
             if(sub.getTopic().equals(topic)){
                 subscribers.add(sub);
             }
