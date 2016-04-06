@@ -79,13 +79,13 @@ public class MQTTServerTest {
 	@BeforeTest
 	public void setUp() {
 		String host = "localhost";
-		int port = 1234;
+		int port = 4213;
         subManagerMock = Mockito.mock(MQTTSubscriptionManager.class);
 		ps = new MQTTProtocolServer(host, port);
 		mqtt = new MQTTServer(ps, host, port);
         mqtt.start();
-		mqtt.setSubscriptionManager(subManagerMock);
-	}
+        mqtt.setSubscriptionManager(subManagerMock);
+    }
 
 	@AfterTest
 	public void tearDown() {
@@ -135,7 +135,7 @@ public class MQTTServerTest {
 
 	@Test
 	public void HandlePublish(){
-        mqtt = getInstance();
+        MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 
         Channel channelMock = Mockito.mock(Channel.class);
@@ -165,7 +165,7 @@ public class MQTTServerTest {
 
 	@Test
 	public void HandleSubscribe() throws InterruptedException {
-		mqtt = getInstance();
+        MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 
         Channel channelMock = Mockito.mock(Channel.class);
@@ -186,7 +186,7 @@ public class MQTTServerTest {
 
     @Test
     public void ChannelIsNull(){
-        mqtt = getInstance();
+        MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 
         Channel channelMock = Mockito.mock(Channel.class);
@@ -215,7 +215,7 @@ public class MQTTServerTest {
 
     @Test
     public void HandleUnsubscribe(){
-        mqtt = getInstance();
+        MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 
         Channel channelMock = Mockito.mock(Channel.class);
@@ -236,7 +236,7 @@ public class MQTTServerTest {
 
     @Test
     public void HandleDisconnect(){
-        mqtt = getInstance();
+        MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 
         Channel channelMock = Mockito.mock(Channel.class);
