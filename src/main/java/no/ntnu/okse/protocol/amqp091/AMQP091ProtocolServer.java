@@ -74,6 +74,8 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void stopServer() {
+        AMQPService.stopService();
+        AgentServer.stop();
         _running = false;
     }
 
