@@ -131,7 +131,6 @@ public class MQTTServerTest {
         PublishMessage actualMsg= mqtt.createMQTTMessage(message);
         assertEquals(expectedMsg.getPayload(), actualMsg.getPayload());
         assertEquals(expectedMsg.getTopicName(), actualMsg.getTopicName());
-        assertEquals(expectedMsg.getQos(), actualMsg.getQos());
     }
 
 	@Test

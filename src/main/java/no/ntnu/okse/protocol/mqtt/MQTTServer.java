@@ -1,6 +1,5 @@
 package no.ntnu.okse.protocol.mqtt;
 
-import com.sun.istack.internal.NotNull;
 import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import io.moquette.interception.messages.*;
@@ -23,6 +22,7 @@ import io.moquette.parser.proto.messages.AbstractMessage;
 import io.moquette.parser.proto.messages.PublishMessage;
 import org.oasis_open.docs.wsn.bw_2.SubscriptionManager;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -78,7 +78,9 @@ public class MQTTServer extends Server {
 		String topic = message.getTopicName();
 		String payload = getPayload(message);
 
-		sendMessageToOKSE(new Message( payload, topic, null, protocolServerType ));
+        Message msg = new Message(payload, topic, null, protocolServerType);
+		msg.setAttribute("qos", String.valueOf(message.getQos().byteValue()));
+        sendMessageToOKSE(msg);
 		ps.incrementTotalMessagesReceived();
 	}
 
@@ -96,33 +98,6 @@ public class MQTTServer extends Server {
 			e.printStackTrace();
 		}
 	}
-
-/*	void HandlePublish(InterceptPublishMessage message){
-		log.info("MQTT message received on topic: " + message.getTopicName() + " from ID: " + message.getClientID());
-
-		Channel channel = getChannelByClientId(message.getClientID());
-		if(channel == null)
-			return;
-
-		int port = getPort(channel);
-		String host = getHost(channel);
-		String topic = message.getTopicFilter();
-		String clientID = message.getClientID();
-
-		Subscriber sub = new Subscriber( host, port, message.getTopicFilter(), protocolServerType );
-		System.out.println(message.getClientID());
-		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
-		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
-		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
-		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
-		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
-		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
-		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
-		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
-		System.out.println(host + ":" + port + ";" + message.getTopicFilter());
-//		subscriptionManager.addSubscriber(sub, host + ":" + port + ";" + message.getTopicFilter());
-		subscriptionManager.addSubscriber(host, port, topic, clientID);
-	}*/
 
 	void HandleUnsubscribe(InterceptUnsubscribeMessage message) {
 		log.info("Client unsubscribed from: "  + message.getTopicFilter() + "   ID: " + message.getClientID());
@@ -191,7 +166,7 @@ public class MQTTServer extends Server {
 	 * Sends the message to any subscriber that is subscribed to the topic that the message was sent to
 	 * @param message is the message that is sent from OKSE core
 	 * */
-	public void sendMessage(@com.sun.istack.internal.NotNull Message message) {
+	public void sendMessage(@NotNull Message message) {
 		PublishMessage msg = createMQTTMessage(message);
 		ArrayList<MQTTSubscriber> subscribers = subscriptionManager.getAllSubscribersFromTopic(message.getTopic());
 		if(subscribers.size() > 0){
@@ -209,7 +184,7 @@ public class MQTTServer extends Server {
 	 *
 	 * @param message The OKSE message to use when creating MQTT message
 	 * */
-	protected PublishMessage createMQTTMessage(@com.sun.istack.internal.NotNull Message message){
+	protected PublishMessage createMQTTMessage(@NotNull Message message){
 		PublishMessage msg = new PublishMessage();
 		ByteBuffer payload = ByteBuffer.wrap(message.getMessage().getBytes());
 
@@ -217,7 +192,10 @@ public class MQTTServer extends Server {
 
 		msg.setPayload(payload);
 		msg.setTopicName(topicName);
-		msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
+        if(message.getAttribute("qos") == null)
+            msg.setQos(AbstractMessage.QOSType.EXACTLY_ONCE);
+        else
+            msg.setQos(AbstractMessage.QOSType.valueOf(Byte.valueOf(message.getAttribute("qos"))));
 		return msg;
 	}
 }

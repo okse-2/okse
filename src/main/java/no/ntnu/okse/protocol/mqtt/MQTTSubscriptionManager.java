@@ -21,13 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MQTTSubscriptionManager implements SubscriptionChangeListener {
     private static Logger log;
     private SubscriptionService subscriptionService = null;
-    private ConcurrentHashMap<String, Subscriber> localSubscriberMap;
     private ConcurrentHashMap<String, Publisher> localPublisherMap;
     private ArrayList<MQTTSubscriber> subscriberList;
 
     public MQTTSubscriptionManager () {
         log = Logger.getLogger(MQTTSubscriptionManager.class.getName());
-        localSubscriberMap = new ConcurrentHashMap<>();
         localPublisherMap= new ConcurrentHashMap<>();
         subscriberList = new ArrayList<MQTTSubscriber>();
     }
