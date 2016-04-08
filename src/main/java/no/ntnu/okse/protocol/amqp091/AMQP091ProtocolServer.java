@@ -7,11 +7,8 @@ import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 import org.ow2.joram.mom.amqp.AMQPService;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashSet;
 
 /**
@@ -21,6 +18,7 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
 
     protected static final String SERVERTYPE = "amqp091";
+    private AMQP091Service amqpService;
 
 
     public AMQP091ProtocolServer(String host, int port) throws IOException {
@@ -31,12 +29,10 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void boot() {
-
-        //_serverThread
-
         if (!_running) {
             _running = true;
-            _serverThread = new Thread(() -> this.run());
+            amqpService = new AMQP091Service(this);
+            _serverThread = new Thread(this::run);
             _serverThread.setName("AMQ091ProtocolServer");
             _serverThread.start();
             log.info("AMQ091ProtocolServer booted successfully");
@@ -45,37 +41,14 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void run() {
-        try {
-            log.debug(String.format("Starting AMQP 0.9.1 service on %s:%d", host, port));
-            AgentServer.init((short) 0, createAgentFolder(), null);
-            AMQPService.init("" + port + " " + host, true);
-            AMQPService.addMessageListener(new AMQP091MessageListener(this));
-            AMQPService.setPublishing(false);
-        } catch (Exception e) {
-            // TODO: Properly handle exception
-            e.printStackTrace();
-        }
-    }
-
-    private String createAgentFolder() {
-        String directoryName = "agent-server";
-        try {
-            Path agentFolder = Files.createTempDirectory(directoryName);
-            return agentFolder.toString();
-        } catch (IOException e) {
-            log.warn("Failed to create temporary folder, creating folder in local directory");
-            File localDirectory = new File(directoryName);
-            if(!localDirectory.exists()) {
-                localDirectory.mkdir();
-            }
-            return directoryName;
-        }
+        log.debug(String.format("Starting AMQP 0.9.1 service on %s:%d", host, port));
+        amqpService.start();
     }
 
     @Override
     public void stopServer() {
-        AMQPService.stopService();
-        AgentServer.stop();
+        amqpService.stop();
+        amqpService = null;
         _running = false;
     }
 
