@@ -9,7 +9,7 @@ public class MQTTSubscriber {
     String clientID;
     Subscriber subscriber;
 
-    MQTTSubscriber(String host, int port, String topic, String clientID, Subscriber subscriber){
+    MQTTSubscriber(String host, int port, String topic, String clientID, Subscriber subscriber) {
         this.host = host;
         this.port = port;
         this.topic = topic;
@@ -33,7 +33,7 @@ public class MQTTSubscriber {
         return clientID;
     }
 
-    public Subscriber getSubscriber(){
+    public Subscriber getSubscriber() {
         return this.subscriber;
     }
 

@@ -1,10 +1,10 @@
 package no.ntnu.okse.protocol.mqtt;
 
 import no.ntnu.okse.core.subscription.Subscriber;
-import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
 import static org.testng.AssertJUnit.assertEquals;
 
 public class MQTTSubscriberTest {
@@ -30,29 +30,27 @@ public class MQTTSubscriberTest {
     }
 
     @Test
-    public void getHost(){
+    public void getHost() {
         assertEquals(host, sub.getHost());
     }
 
     @Test
-    public void getPort(){
+    public void getPort() {
         assertEquals(port, sub.getPort());
     }
 
     @Test
-    public void getTopic(){
+    public void getTopic() {
         assertEquals(topic, sub.getTopic());
     }
 
     @Test
-    public void getClientID(){
+    public void getClientID() {
         assertEquals(clientID, sub.getClientID());
     }
 
     @Test
-    public void getSubscriber(){
+    public void getSubscriber() {
         assertEquals(okseSub, sub.getSubscriber());
     }
-
-
 }

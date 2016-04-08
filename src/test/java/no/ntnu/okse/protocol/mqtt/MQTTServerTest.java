@@ -1,96 +1,88 @@
 package no.ntnu.okse.protocol.mqtt;
 
-import io.moquette.interception.InterceptHandler;
-import io.moquette.interception.messages.*;
+import io.moquette.interception.messages.InterceptDisconnectMessage;
+import io.moquette.interception.messages.InterceptPublishMessage;
+import io.moquette.interception.messages.InterceptSubscribeMessage;
+import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import io.moquette.parser.proto.messages.AbstractMessage;
 import io.moquette.parser.proto.messages.PublishMessage;
-import io.moquette.server.ConnectionDescriptor;
 import io.moquette.spi.impl.subscriptions.Subscription;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import no.ntnu.okse.core.messaging.Message;
-import no.ntnu.okse.core.messaging.MessageService;
-import no.ntnu.okse.core.subscription.Subscriber;
-import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.mockito.internal.configuration.injection.MockInjection;
+import org.mockito.Mockito;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.mockito.Mockito;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.List;
 
-import static org.testng.AssertJUnit.*;
+import static org.testng.AssertJUnit.assertEquals;
 
 
 public class MQTTServerTest {
-	private MQTTServer mqtt;
-	private MQTTProtocolServer ps;
+    private MQTTServer mqtt;
+    private MQTTProtocolServer ps;
     private MQTTSubscriptionManager subManagerMock;
 
-	@BeforeTest
-	public void setUp() {
-		String host = "localhost";
-		int port = 4213;
+    @BeforeTest
+    public void setUp() {
+        String host = "localhost";
+        int port = 4213;
         subManagerMock = Mockito.mock(MQTTSubscriptionManager.class);
-		ps = new MQTTProtocolServer(host, port);
-		mqtt = new MQTTServer(ps, host, port);
+        ps = new MQTTProtocolServer(host, port);
+        mqtt = new MQTTServer(ps, host, port);
         mqtt.start();
         mqtt.setSubscriptionManager(subManagerMock);
     }
 
-	@AfterTest
-	public void tearDown() {
+    @AfterTest
+    public void tearDown() {
         mqtt.stopServer();
-		mqtt = null;
-	}
+        mqtt = null;
+    }
 
-
-	@Test
-	public void sendMessage() {
-		MQTTServer mqtt = getInstance();
-		Message message = new Message("Test message", "MQTT", null, "MQTT");
-		PublishMessage msg = createMQTTMessage();
-
-		MQTTServer spy = Mockito.spy(mqtt);
-
-		ArrayList<MQTTSubscriber> subscribers = new ArrayList<>();
-		subscribers.add(new MQTTSubscriber("localhost", 1234, "MQTT", "ogdans3", null));
-
-		//Test that internalPublish is called with the correct parameter
-		Mockito.doReturn(msg).when(spy).createMQTTMessage(message);
-		Mockito.doReturn(subscribers).when(subManagerMock).getAllSubscribersFromTopic("MQTT");
-		Mockito.doNothing().when(spy).internalPublish(msg);
-		spy.sendMessage(message);
-		Mockito.verify(spy, Mockito.atLeastOnce()).internalPublish(msg);
-        Mockito.reset(spy);
-	}
 
     @Test
-    public void createMQTTMessageTest(){
+    public void sendMessage() {
+        MQTTServer mqtt = getInstance();
+        Message message = new Message("Test message", "MQTT", null, "MQTT");
+        PublishMessage msg = createMQTTMessage();
+
+        MQTTServer spy = Mockito.spy(mqtt);
+
+        ArrayList<MQTTSubscriber> subscribers = new ArrayList<>();
+        subscribers.add(new MQTTSubscriber("localhost", 1234, "MQTT", "ogdans3", null));
+
+        //Test that internalPublish is called with the correct parameter
+        Mockito.doReturn(msg).when(spy).createMQTTMessage(message);
+        Mockito.doReturn(subscribers).when(subManagerMock).getAllSubscribersFromTopic("MQTT");
+        Mockito.doNothing().when(spy).internalPublish(msg);
+        spy.sendMessage(message);
+        Mockito.verify(spy, Mockito.atLeastOnce()).internalPublish(msg);
+        Mockito.reset(spy);
+    }
+
+    @Test
+    public void createMQTTMessageTest() {
         MQTTServer mqtt = getInstance();
         Message message = new Message("Payload", "testing", null, "MQTT");
 
         PublishMessage expectedMsg = new PublishMessage();
-        ByteBuffer payload = ByteBuffer.wrap( "Payload".getBytes() );
-        expectedMsg.setPayload( payload );
-        expectedMsg.setTopicName( "testing" );
+        ByteBuffer payload = ByteBuffer.wrap("Payload".getBytes());
+        expectedMsg.setPayload(payload);
+        expectedMsg.setTopicName("testing");
         expectedMsg.setQos(AbstractMessage.QOSType.LEAST_ONE);
 
-        PublishMessage actualMsg= mqtt.createMQTTMessage(message);
+        PublishMessage actualMsg = mqtt.createMQTTMessage(message);
         assertEquals(expectedMsg.getPayload(), actualMsg.getPayload());
         assertEquals(expectedMsg.getTopicName(), actualMsg.getTopicName());
     }
 
-	@Test
-	public void HandlePublish(){
+    @Test
+    public void HandlePublish() {
         MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 
@@ -110,23 +102,23 @@ public class MQTTServerTest {
         pubMsg.setQos(AbstractMessage.QOSType.LEAST_ONE);
 
 
-        InterceptPublishMessage msg = new InterceptPublishMessage( pubMsg, clientID);
+        InterceptPublishMessage msg = new InterceptPublishMessage(pubMsg, clientID);
         mqtt_spy.HandlePublish(msg);
         ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
 
         Mockito.verify(mqtt_spy).sendMessageToOKSE(messageArgument.capture());
-        assertEquals( payload, messageArgument.getValue().getMessage());
-        assertEquals( topic, messageArgument.getValue().getTopic());
+        assertEquals(payload, messageArgument.getValue().getMessage());
+        assertEquals(topic, messageArgument.getValue().getTopic());
     }
 
-	@Test
-	public void HandleSubscribe() throws InterruptedException {
+    @Test
+    public void HandleSubscribe() throws InterruptedException {
         MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 
         Channel channelMock = Mockito.mock(Channel.class);
 
-		InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription("ogdans3", "testing", AbstractMessage.QOSType.LEAST_ONE ));
+        InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription("ogdans3", "testing", AbstractMessage.QOSType.LEAST_ONE));
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1883);
         String clientID = msg.getClientID();
@@ -141,14 +133,14 @@ public class MQTTServerTest {
     }
 
     @Test
-    public void ChannelIsNull(){
+    public void ChannelIsNull() {
         MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 
         Channel channelMock = Mockito.mock(Channel.class);
         String clientID = "ogdans3";
-        InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription(clientID, "testing", AbstractMessage.QOSType.LEAST_ONE ));
-        InterceptPublishMessage pubMsg = new InterceptPublishMessage (new PublishMessage(), clientID);
+        InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription(clientID, "testing", AbstractMessage.QOSType.LEAST_ONE));
+        InterceptPublishMessage pubMsg = new InterceptPublishMessage(new PublishMessage(), clientID);
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1883);
 
@@ -166,7 +158,7 @@ public class MQTTServerTest {
     }
 
     @Test
-    public void HandleUnsubscribe(){
+    public void HandleUnsubscribe() {
         MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 
@@ -186,7 +178,7 @@ public class MQTTServerTest {
     }
 
     @Test
-    public void HandleDisconnect(){
+    public void HandleDisconnect() {
         MQTTServer mqtt = getInstance();
         MQTTServer mqtt_spy = Mockito.spy(mqtt);
 
@@ -206,19 +198,20 @@ public class MQTTServerTest {
     }
 
 
-	private MQTTServer getInstance(){
-		return mqtt;
-	}
-	private PublishMessage createMQTTMessage(){
-		PublishMessage msg = new PublishMessage();
-		ByteBuffer payload = ByteBuffer.wrap( "This is a test".getBytes() );
+    private MQTTServer getInstance() {
+        return mqtt;
+    }
 
-		String topicName = "Test";
+    private PublishMessage createMQTTMessage() {
+        PublishMessage msg = new PublishMessage();
+        ByteBuffer payload = ByteBuffer.wrap("This is a test".getBytes());
 
-		msg.setPayload( payload );
-		msg.setTopicName( topicName );
-		msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
-		return msg;
+        String topicName = "Test";
 
-	}
+        msg.setPayload(payload);
+        msg.setTopicName(topicName);
+        msg.setQos(AbstractMessage.QOSType.LEAST_ONE);
+        return msg;
+
+    }
 }

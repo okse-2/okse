@@ -5,14 +5,9 @@ import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
-import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
-import no.ntnu.okse.core.subscription.Publisher;
-import no.ntnu.okse.core.subscription.Subscriber;
-import no.ntnu.okse.core.subscription.SubscriptionService;
-import org.apache.log4j.Logger;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MQTTSubscriptionManager implements SubscriptionChangeListener {
@@ -21,10 +16,10 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
     private ConcurrentHashMap<String, Publisher> localPublisherMap;
     private ArrayList<MQTTSubscriber> subscriberList;
 
-    public MQTTSubscriptionManager () {
+    public MQTTSubscriptionManager() {
         log = Logger.getLogger(MQTTSubscriptionManager.class.getName());
-        localPublisherMap= new ConcurrentHashMap<>();
-        subscriberList = new ArrayList<MQTTSubscriber>();
+        localPublisherMap = new ConcurrentHashMap<>();
+        subscriberList = new ArrayList<>();
     }
 
     public void initCoreSubscriptionService(SubscriptionService subService) {
@@ -32,80 +27,81 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
     }
 
     public void addSubscriber(String host, int port, String topic, String clientID) {
-        if(getSubscriberIndex(host, port, topic) != -1){
+        if (getSubscriberIndex(host, port, topic) != -1) {
             log.warn("This subscriber is already added");
             return;
         }
-        Subscriber sub = new Subscriber( host, port, topic, "mqtt");
+        Subscriber sub = new Subscriber(host, port, topic, "mqtt");
         MQTTSubscriber mqttSub = new MQTTSubscriber(host, port, topic, clientID, sub);
 
         subscriptionService.addSubscriber(sub);
         subscriberList.add(mqttSub);
     }
 
-    public void removeSubscriber(String host, int port, String topic){
+    public void removeSubscriber(String host, int port, String topic) {
         int index = getSubscriberIndex(host, port, topic);
-        if(index > -1){
+        if (index > -1) {
             subscriptionService.removeSubscriber(subscriberList.get(index).getSubscriber());
             subscriberList.remove(index);
         }
     }
 
-    public void removeSubscriber(Subscriber sub){
-        for(int i = 0; i < subscriberList.size(); i++){
+    public void removeSubscriber(Subscriber sub) {
+        for (int i = 0; i < subscriberList.size(); i++) {
             MQTTSubscriber mqtt_sub = subscriberList.get(i);
-            if(mqtt_sub.getSubscriber() == sub){
+            if (mqtt_sub.getSubscriber() == sub) {
                 removeSubscriber(mqtt_sub.getHost(), mqtt_sub.getPort(), mqtt_sub.getTopic());
                 return;
             }
         }
     }
 
-    public void removeSubscribers(String clientID){
+    public void removeSubscribers(String clientID) {
         ArrayList<Integer> indexes = getSubscriberIndexes(clientID);
-        for(int i = indexes.size() - 1; i >= 0; i--){
+        for (int i = indexes.size() - 1; i >= 0; i--) {
             int index = indexes.get(i);
             subscriptionService.removeSubscriber(subscriberList.get(index).getSubscriber());
             subscriberList.remove(index);
         }
     }
 
-    public int getSubscriberIndex(String host, int port, String topic){
-        for(int i = 0; i < subscriberList.size(); i++){
+    public int getSubscriberIndex(String host, int port, String topic) {
+        for (int i = 0; i < subscriberList.size(); i++) {
             MQTTSubscriber sub = subscriberList.get(i);
-            if(sub.getHost().equals(host) && sub.getPort() == port && sub.getTopic().equals(topic))
+            if (sub.getHost().equals(host) && sub.getPort() == port && sub.getTopic().equals(topic))
                 return i;
         }
         return -1;
     }
-    public ArrayList<Integer> getSubscriberIndexes(String clientID){
+
+    public ArrayList<Integer> getSubscriberIndexes(String clientID) {
         ArrayList<Integer> indexes = new ArrayList<Integer>();
-        for(int i = 0; i < subscriberList.size(); i++){
+        for (int i = 0; i < subscriberList.size(); i++) {
             MQTTSubscriber sub = subscriberList.get(i);
-            if(sub.getClientID().equals(clientID))
+            if (sub.getClientID().equals(clientID))
                 indexes.add(i);
         }
         return indexes;
     }
 
-    public boolean containsSubscriber(String host, int port, String topic){
-        if(getSubscriberIndex(host, port, topic) == -1)
+    public boolean containsSubscriber(String host, int port, String topic) {
+        if (getSubscriberIndex(host, port, topic) == -1)
             return false;
         return true;
     }
 
-    public MQTTSubscriber getSubscriber(String host, int port, String topic){
+    public MQTTSubscriber getSubscriber(String host, int port, String topic) {
         int index = getSubscriberIndex(host, port, topic);
-        if(index == -1)
+        if (index == -1)
             return null;
         return subscriberList.get(index);
     }
 
-    public ArrayList<MQTTSubscriber> getAllSubscribersFromTopic(String topic){
+    public ArrayList<MQTTSubscriber> getAllSubscribersFromTopic(String topic) {
         ArrayList<MQTTSubscriber> subscribers = new ArrayList<MQTTSubscriber>();
-        for(int i = 0; i < subscriberList.size(); i++){
+        for (int i = 0; i < subscriberList.size(); i++) {
             MQTTSubscriber sub = subscriberList.get(i);
-            if(sub.getTopic().equals(topic)){
+            if (sub.getTopic().equals(topic)) {
                 subscribers.add(sub);
             }
         }
@@ -113,7 +109,7 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
     }
 
     public void addPublisher(Publisher p, String clientID) {
-        if(containsPublisher(clientID)){
+        if (containsPublisher(clientID)) {
             log.warn("This publisher is already added");
             return;
         }
@@ -124,7 +120,7 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
 
 
     public void removePublisher(String clientID) {
-        if(containsPublisher(clientID)){
+        if (containsPublisher(clientID)) {
             subscriptionService.removePublisher(getPublisher(clientID));
             localPublisherMap.remove(clientID);
         }
@@ -134,7 +130,7 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
         return localPublisherMap.containsKey(clientID);
     }
 
-    public Publisher getPublisher(String clientID){
+    public Publisher getPublisher(String clientID) {
         return localPublisherMap.get(clientID);
     }
 

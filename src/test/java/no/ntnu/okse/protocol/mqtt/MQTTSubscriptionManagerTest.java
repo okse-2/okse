@@ -30,33 +30,34 @@ public class MQTTSubscriptionManagerTest {
     }
 
     @Test
-    public void addExistingSubscriber(){
+    public void addExistingSubscriber() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
 
         String clientID = "testClientID";
-        assertEquals(false,subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
+        assertEquals(false, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
         subscriptionHandler_spy.addSubscriber("127.0.0.1", 1883, "testing", clientID);
-        assertEquals(true,subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
+        assertEquals(true, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
         subscriptionHandler_spy.addSubscriber("127.0.0.1", 1883, "testing", clientID);
-        assertEquals(true,subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
-        assertEquals(1,subscriptionHandler_spy.getSubscriberIndexes(clientID).size());
+        assertEquals(true, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
+        assertEquals(1, subscriptionHandler_spy.getSubscriberIndexes(clientID).size());
     }
+
     @Test
-    public void addSubscriber(){
+    public void addSubscriber() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
 
         String clientID = "testClientID";
-        assertEquals(false,subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
+        assertEquals(false, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
         subscriptionHandler_spy.addSubscriber("127.0.0.1", 1883, "testing", clientID);
-        assertEquals(true,subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
+        assertEquals(true, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
     }
 
     @Test
-    public void removeSubscriber(){
+    public void removeSubscriber() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
@@ -74,7 +75,7 @@ public class MQTTSubscriptionManagerTest {
     }
 
     @Test
-    public void removeSubscribers(){
+    public void removeSubscribers() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
@@ -94,7 +95,7 @@ public class MQTTSubscriptionManagerTest {
     }
 
     @Test
-    public void containsSubscirbe(){
+    public void containsSubscirbe() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
@@ -107,7 +108,7 @@ public class MQTTSubscriptionManagerTest {
     }
 
     @Test
-    public void getSubscriber(){
+    public void getSubscriber() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
@@ -122,7 +123,7 @@ public class MQTTSubscriptionManagerTest {
     }
 
     @Test
-    public void getSubscriberIndex(){
+    public void getSubscriberIndex() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
@@ -134,7 +135,7 @@ public class MQTTSubscriptionManagerTest {
     }
 
     @Test
-    public void getSubscriberNonExistingSubscriber(){
+    public void getSubscriberNonExistingSubscriber() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
@@ -145,7 +146,7 @@ public class MQTTSubscriptionManagerTest {
     }
 
     @Test
-    public void getAllSubscribersFromTopic(){
+    public void getAllSubscribersFromTopic() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
@@ -164,42 +165,42 @@ public class MQTTSubscriptionManagerTest {
     }
 
     @Test
-    public void addPublisher(){
+    public void addPublisher() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
 
         String clientID = "testClientID";
-        Publisher pub = new Publisher( "testing", "127.0.0.1", 1883, "MQTT");
+        Publisher pub = new Publisher("testing", "127.0.0.1", 1883, "MQTT");
         assertEquals(false, subscriptionHandler_spy.containsPublisher(clientID));
         subscriptionHandler_spy.addPublisher(pub, clientID);
-        assertEquals(true,subscriptionHandler_spy.containsPublisher(clientID));
+        assertEquals(true, subscriptionHandler_spy.containsPublisher(clientID));
     }
 
     @Test
-    public void addExistingPublisher(){
+    public void addExistingPublisher() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
 
         String clientID = "testClientID";
-        Publisher pub = new Publisher( "testing", "127.0.0.1", 1883, "MQTT");
+        Publisher pub = new Publisher("testing", "127.0.0.1", 1883, "MQTT");
         assertEquals(false, subscriptionHandler_spy.containsPublisher(clientID));
         subscriptionHandler_spy.addPublisher(pub, clientID);
-        assertEquals(true,subscriptionHandler_spy.containsPublisher(clientID));
+        assertEquals(true, subscriptionHandler_spy.containsPublisher(clientID));
         assertEquals(true, subscriptionHandler_spy.containsPublisher(clientID));
         subscriptionHandler_spy.addPublisher(pub, clientID);
-        assertEquals(true,subscriptionHandler_spy.containsPublisher(clientID));
+        assertEquals(true, subscriptionHandler_spy.containsPublisher(clientID));
     }
 
     @Test
-    public void removePublisher_containsPublisher(){
+    public void removePublisher_containsPublisher() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
 
         String clientID = "testClientID";
-        Publisher pub = new Publisher( "testing", "127.0.0.1", 1883, "MQTT");
+        Publisher pub = new Publisher("testing", "127.0.0.1", 1883, "MQTT");
         subscriptionHandler_spy.addPublisher(pub, clientID);
         assertEquals(true, subscriptionHandler_spy.containsPublisher(clientID));
         subscriptionHandler_spy.removePublisher(clientID);
@@ -207,19 +208,19 @@ public class MQTTSubscriptionManagerTest {
     }
 
     @Test
-    public void getPublisher(){
+    public void getPublisher() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
 
         String clientID = "testClientID";
-        Publisher pub = new Publisher( "testing", "127.0.0.1", 1883, "MQTT");
+        Publisher pub = new Publisher("testing", "127.0.0.1", 1883, "MQTT");
         subscriptionHandler_spy.addPublisher(pub, clientID);
         assertEquals(pub, subscriptionHandler_spy.getPublisher(clientID));
     }
 
     @Test
-    public void subscriptionChanged(){
+    public void subscriptionChanged() {
         MQTTSubscriptionManager subscriptionManager = new MQTTSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         MQTTSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
