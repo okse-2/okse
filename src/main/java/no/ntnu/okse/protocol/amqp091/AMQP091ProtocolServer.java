@@ -1,14 +1,10 @@
 package no.ntnu.okse.protocol.amqp091;
-import fr.dyade.aaa.agent.AgentServer;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
-import org.ow2.joram.mom.amqp.AMQPService;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 /**
@@ -19,12 +15,14 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
     protected static final String SERVERTYPE = "amqp091";
     private AMQP091Service amqpService;
+    private SubscriptionService subscriptionService;
 
 
-    public AMQP091ProtocolServer(String host, int port) throws IOException {
+    public AMQP091ProtocolServer(String host, int port) {
         this.port = port;
         this.host = host;
         log = Logger.getLogger(AMQP091ProtocolServer.class.getName());
+        subscriptionService = SubscriptionService.getInstance();
     }
 
     @Override
@@ -47,7 +45,9 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void stopServer() {
-        amqpService.stop();
+        if(amqpService != null) {
+            amqpService.stop();
+        }
         amqpService = null;
         _running = false;
     }
@@ -59,15 +59,23 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void sendMessage(Message message) {
-        AMQPService.internalPublish(message.getTopic(), "", message.getMessage().getBytes(StandardCharsets.UTF_8));
+        amqpService.sendMessage(message);
         incrementMessageSentForTopic(message.getTopic());
     }
 
     private void incrementMessageSentForTopic(String topic) {
-        HashSet<Subscriber> allSubscribers = SubscriptionService.getInstance().getAllSubscribers();
+        HashSet<Subscriber> allSubscribers = subscriptionService.getAllSubscribers();
         allSubscribers.stream()
                 .filter(subscriber -> subscriber.getOriginProtocol().equals(getProtocolServerType()))
                 .filter(subscriber -> subscriber.getTopic().equals(topic))
                 .forEach(subscriber -> incrementTotalMessagesSent());
+    }
+
+    void setAmqpService(AMQP091Service amqpService) {
+        this.amqpService = amqpService;
+    }
+
+    void setSubscriptionService(SubscriptionService subscriptionService) {
+        this.subscriptionService = subscriptionService;
     }
 }

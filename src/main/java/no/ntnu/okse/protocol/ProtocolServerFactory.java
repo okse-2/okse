@@ -92,12 +92,7 @@ public class ProtocolServerFactory {
                 stringToPort(attr.getNamedItem("port").getNodeValue(), DEFAULT_PORT):
                 DEFAULT_PORT;
 
-        try {
-            return new AMQP091ProtocolServer(host, port);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return new AMQP091ProtocolServer(host, port);
     }
 
     private static MQTTProtocolServer createMQTT(NamedNodeMap attr) {

@@ -1,11 +1,13 @@
 package no.ntnu.okse.protocol.amqp091;
 
 import fr.dyade.aaa.agent.AgentServer;
+import no.ntnu.okse.core.messaging.Message;
 import org.apache.log4j.Logger;
 import org.ow2.joram.mom.amqp.AMQPService;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -63,5 +65,9 @@ public class AMQP091Service {
             }
             return directoryName;
         }
+    }
+
+    public void sendMessage(Message message) {
+        AMQPService.internalPublish(message.getTopic(), "", message.getMessage().getBytes(StandardCharsets.UTF_8));
     }
 }
