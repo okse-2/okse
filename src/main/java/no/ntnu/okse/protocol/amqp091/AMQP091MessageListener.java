@@ -17,10 +17,12 @@ public class AMQP091MessageListener implements AMQPMessageListener {
 
     private final AMQP091ProtocolServer amqpProtocolServer;
     private SubscriberMap subscriberMap;
+    private SubscriptionService subscriptionService;
 
     public AMQP091MessageListener(AMQP091ProtocolServer amqp091ProtocolServer) {
         this.amqpProtocolServer = amqp091ProtocolServer;
         subscriberMap = new SubscriberMap();
+        subscriptionService = SubscriptionService.getInstance();
     }
 
     @Override
@@ -38,7 +40,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         ));
         List<Subscriber> subscribers = subscriberMap.getSubscribers(disconnectMessage.getHost(), disconnectMessage.getPort());
         for(Subscriber subscriber : subscribers) {
-            SubscriptionService.getInstance().removeSubscriber(subscriber);
+            subscriptionService.removeSubscriber(subscriber);
         }
         amqpProtocolServer.incrementTotalRequests();
     }
@@ -89,5 +91,13 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         Subscriber subscriber = subscriberMap.getSubscriber(host, port, topic);
         SubscriptionService.getInstance().removeSubscriber(subscriber);
         amqpProtocolServer.incrementTotalRequests();
+    }
+
+    public void setSubscriberMap(SubscriberMap subscriberMap) {
+        this.subscriberMap = subscriberMap;
+    }
+
+    public void setSubscriptionService(SubscriptionService subscriptionService) {
+        this.subscriptionService = subscriptionService;
     }
 }
