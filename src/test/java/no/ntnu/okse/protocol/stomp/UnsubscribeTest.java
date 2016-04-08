@@ -3,9 +3,6 @@ package no.ntnu.okse.protocol.stomp;
 import no.ntnu.okse.protocol.stomp.common.Client;
 import no.ntnu.okse.protocol.stomp.listeners.*;
 
-/**
- * Created by Ogdans3 on 03.04.2016.
- */
 public class UnsubscribeTest {
 
     public static void main(String[] args) throws Exception {

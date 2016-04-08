@@ -4,20 +4,18 @@ import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
+import org.oasis_open.docs.wsn.bw_2.SubscriptionManager;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Created by ogdans3 on 4/1/16.
- */
-public class SubscriptionManager {
+public class STOMPSubscriptionManager {
     private static Logger log;
     private SubscriptionService subscriptionService = null;
     public ConcurrentHashMap<String, Subscriber> localSubscriberMap;
     private ConcurrentHashMap<String, Publisher> localPublisherMap;
 
-    public SubscriptionManager () {
+    public STOMPSubscriptionManager () {
         log = Logger.getLogger(SubscriptionManager.class.getName());
         localSubscriberMap = new ConcurrentHashMap<>();
         localPublisherMap= new ConcurrentHashMap<>();
@@ -34,15 +32,10 @@ public class SubscriptionManager {
         }
         subscriptionService.addSubscriber(s);
         log.debug("Adding Subscriber to local mappings: " + clientID);
-        System.out.println("Subscriber added: " + clientID + " : " + s);
-        System.out.println("\n\n======\n======\n\n");
         localSubscriberMap.put(clientID, s);
-        System.out.println(localSubscriberMap);
     }
 
     public void removeSubscriber(String clientID){
-        System.out.println("Remove subscriber, id: " + clientID);
-        System.out.println("\n\n======\n======\n\n");
         if(containsSubscriber(clientID)){
             subscriptionService.removeSubscriber(getSubscriber(clientID));
             localSubscriberMap.remove(clientID);
@@ -57,16 +50,6 @@ public class SubscriptionManager {
         return localSubscriberMap.get(clientID);
     }
 
-    public void addPublisher(Publisher p, String clientID) {
-        if(containsPublisher(clientID)){
-            log.warn("This publisher is already added");
-            return;
-        }
-        subscriptionService.addPublisher(p);
-        log.debug("Adding Subscriber to local mappings: " + clientID);
-        localPublisherMap.put(clientID, p);
-    }
-
     public HashMap<String, Subscriber> getAllSubscribersForTopic(String topic){
         localSubscriberMap.size();
         HashMap<String, Subscriber> newHashMap = new HashMap<String, Subscriber>();
@@ -79,22 +62,6 @@ public class SubscriptionManager {
             }
         }
         return newHashMap;
-//        return subscriptionService.getAllSubscribersForTopic(topic);
     }
 
-
-    public void removePublisher(String clientID) {
-        if(containsPublisher(clientID)){
-            subscriptionService.removePublisher(getPublisher(clientID));
-            localPublisherMap.remove(clientID);
-        }
-    }
-
-    public boolean containsPublisher(String clientID) {
-        return localPublisherMap.containsKey(clientID);
-    }
-
-    public Publisher getPublisher(String clientID){
-        return localPublisherMap.get(clientID);
-    }
 }

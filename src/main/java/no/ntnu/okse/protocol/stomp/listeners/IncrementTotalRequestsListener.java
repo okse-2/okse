@@ -6,9 +6,6 @@ import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
 import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 
-/**
- * Created by Ogdans3 on 03.04.2016.
- */
 public class IncrementTotalRequestsListener implements StampyMessageListener {
     private STOMPProtocolServer protocolServer;
 

@@ -19,8 +19,7 @@
 package no.ntnu.okse.protocol.stomp;
 
 import no.ntnu.okse.protocol.stomp.common.Client;
-import no.ntnu.okse.protocol.stomp.listeners.*;
-import no.ntnu.okse.protocol.stomp.MessageListener;
+import no.ntnu.okse.protocol.stomp.common.MessageListener;
 
 public class SubscriberTest {
 

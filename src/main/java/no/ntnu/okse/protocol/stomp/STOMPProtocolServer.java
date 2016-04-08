@@ -6,66 +6,41 @@ import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 
-/**
- * Created by ogdans3 on 3/30/16.
- */
 public class STOMPProtocolServer extends AbstractProtocolServer {
 
     private static final String DEFAULT_HOST = "0.0.0.0";
     private static final Integer DEFAULT_PORT = 61613;
 
-    private static boolean _invoked = false;
-    private static STOMPProtocolServer _singleton = null;
-
     public STOMPProtocolServer(String host, Integer port) {
-        init(host, port);
+        this.host = host;
+        this.port = port;
+
+        protocolServerType = "stomp";
+        log = Logger.getLogger(STOMPProtocolServer.class.getName());
     }
 
     private STOMPServer server;
 
-    protected void init(String host, Integer port) {
-        this.host = host;
-        this.port = port;
-
-        _invoked = true;
-        protocolServerType = "STOMP";
-        log = Logger.getLogger(STOMPProtocolServer.class.getName());
-    }
-
-    public static STOMPProtocolServer getInstance() {
-        if(!_invoked) {
-            _singleton = new STOMPProtocolServer(DEFAULT_HOST, DEFAULT_PORT);
-        }
-        return _singleton;
-    }
-
-    public static STOMPProtocolServer getInstance(String host, Integer port) {
-        if(!_invoked) {
-            _singleton = new STOMPProtocolServer(host, port);
-        }
-        return _singleton;
-    }
-
-
     @Override
     public void boot() {
         if(!_running) {
-            _running = true;
+            server = new STOMPServer();
             _serverThread = new Thread(this::run);
             _serverThread.setName("STOMPProtocolServer");
             _serverThread.start();
+            _running = true;
             log.info("STOMPProtocolServer booted successfully");
         }
     }
 
     @Override
     public void run() {
-        server = new STOMPServer();
-        SubscriptionManager subscriptionManager = new SubscriptionManager();
+        STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager ();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         try {
             server.setSubscriptionManager(subscriptionManager);
-            server.init(this, host, port);
+            server.init(host, port);
+            server.setProtocolServer(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,10 +49,8 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
     @Override
     public void stopServer() {
         log.info("Stopping STOMPProtocolServer");
-        _running = false;
-        _singleton = null;
-        _invoked = false;
         server.stopServer();
+        _running = false;
         server = null;
         log.info("STOMPProtocolServer is stopped");
     }
@@ -89,12 +62,17 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void sendMessage(Message message) {
-        log.info("Received message on topic " + message.getMessage() );
+        log.info("Received message on topic " + message.getTopic() );
         try {
-            server.sendMessage( message );
+            server.sendMessage(message);
         } catch (InterceptException e) {
-            e.printStackTrace();
+            log.error("Exception was thrown when sending message to the server", e);
+            log.debug(e);
         }
+    }
+
+    public void setServer(STOMPServer server){
+        this.server = server;
     }
 
     public void incrementTotalRequests() {

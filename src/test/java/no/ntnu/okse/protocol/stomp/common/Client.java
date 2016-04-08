@@ -40,7 +40,6 @@ import asia.stampy.common.message.interceptor.InterceptException;
 import asia.stampy.examples.system.client.netty.SystemNettyClientInitializer;
 import asia.stampy.server.message.error.ErrorMessage;
 import asia.stampy.server.message.receipt.ReceiptMessage;
-import no.ntnu.okse.protocol.stomp.MessageListener;
 
 public class Client {
 

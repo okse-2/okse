@@ -1,4 +1,4 @@
-package no.ntnu.okse.protocol.stomp;
+package no.ntnu.okse.protocol.stomp.common;
 
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.gateway.StampyMessageListener;
@@ -10,14 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 
-/**
- * Created by ogdans3 on 4/1/16.
- */
 public class MessageListener implements StampyMessageListener {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private String id;
 
-    MessageListener(String id){
+    public MessageListener(String id){
         this.id = id;
     }
 

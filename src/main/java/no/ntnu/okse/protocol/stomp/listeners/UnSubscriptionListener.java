@@ -6,13 +6,10 @@ import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.gateway.StampyMessageListener;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
-import no.ntnu.okse.protocol.stomp.SubscriptionManager;
+import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
 
-/**
- * Created by ogdans3 on 4/1/16.
- */
 public class UnSubscriptionListener implements StampyMessageListener {
-    private SubscriptionManager subscriptionManager;
+    private STOMPSubscriptionManager subscriptionManager;
 
     @Override
     public StompMessageType[] getMessageTypes() {
@@ -30,7 +27,7 @@ public class UnSubscriptionListener implements StampyMessageListener {
         subscriptionManager.removeSubscriber(unsubMessage.getHeader().getId());
     }
 
-    public void setSubscriptionManager(SubscriptionManager subscriptionManager) {
+    public void setSubscriptionManager(STOMPSubscriptionManager subscriptionManager) {
         this.subscriptionManager = subscriptionManager;
     }
 }
