@@ -31,50 +31,9 @@ import static org.testng.AssertJUnit.*;
 
 
 public class MQTTServerTest {
-
-
-
-	enum Status {
-		CONNECT,
-		DISCONNECT,
-		PUBLISH,
-		SUBSCRIBE,
-		UNSUBSCRIBE;
-	}
-
-	private static Status status;
-	private static InterceptAbstractMessage interceptMessage;
-
-	private static final class MockObserver implements InterceptHandler {
-		@Override
-		public void onConnect(InterceptConnectMessage interceptConnectMessage) {
-			status = Status.CONNECT;
-		}
-
-		@Override
-		public void onDisconnect(InterceptDisconnectMessage interceptDisconnectMessage) {
-			status = Status.DISCONNECT;
-		}
-
-		@Override
-		public void onPublish(InterceptPublishMessage interceptPublishMessage) {
-			status = Status.PUBLISH;
-		}
-
-		@Override
-		public void onSubscribe(InterceptSubscribeMessage interceptSubscribeMessage) {
-			status = Status.SUBSCRIBE;
-		}
-
-		@Override
-		public void onUnsubscribe(InterceptUnsubscribeMessage interceptUnsubscribeMessage) {
-			status = Status.UNSUBSCRIBE;
-		}
-	}
-
-	MQTTServer mqtt;
-	MQTTProtocolServer ps;
-    MQTTSubscriptionManager subManagerMock;
+	private MQTTServer mqtt;
+	private MQTTProtocolServer ps;
+    private MQTTSubscriptionManager subManagerMock;
 
 	@BeforeTest
 	public void setUp() {
@@ -91,7 +50,6 @@ public class MQTTServerTest {
 	public void tearDown() {
         mqtt.stopServer();
 		mqtt = null;
-		status = null;
 	}
 
 
@@ -119,11 +77,9 @@ public class MQTTServerTest {
     public void createMQTTMessageTest(){
         MQTTServer mqtt = getInstance();
         Message message = new Message("Payload", "testing", null, "MQTT");
-        MQTTServer spy = Mockito.spy(mqtt);
 
         PublishMessage expectedMsg = new PublishMessage();
         ByteBuffer payload = ByteBuffer.wrap( "Payload".getBytes() );
-        String topicName = message.getTopic();
         expectedMsg.setPayload( payload );
         expectedMsg.setTopicName( "testing" );
         expectedMsg.setQos(AbstractMessage.QOSType.LEAST_ONE);
@@ -195,16 +151,12 @@ public class MQTTServerTest {
         InterceptPublishMessage pubMsg = new InterceptPublishMessage (new PublishMessage(), clientID);
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1883);
-        Subscriber sub = new Subscriber( "127.0.0.1", 1883, "testing", "MQTT");
 
         Mockito.when(channelMock.remoteAddress()).thenReturn(addr);
         Mockito.when(mqtt_spy.getChannelByClientId(clientID)).thenReturn(null);
 
         //Test for the HandleSubscribe method
         mqtt_spy.HandleSubscribe(msg);
-        ArgumentCaptor<Subscriber> subscriberArgument = ArgumentCaptor.forClass(Subscriber.class);
-        ArgumentCaptor<String> clientIDArgument= ArgumentCaptor.forClass(String.class);
-//        Mockito.verify(subManagerMock, Mockito.never()).addSubscriber(subscriberArgument.capture(), clientIDArgument.capture());
         Mockito.reset(subManagerMock);
 
         mqtt_spy.HandlePublish(pubMsg);
@@ -223,7 +175,6 @@ public class MQTTServerTest {
         InterceptUnsubscribeMessage msg = new InterceptUnsubscribeMessage("testing", "ogdans3");
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1883);
-        Subscriber sub = new Subscriber( "127.0.0.1", 1883, "testing", "MQTT");
         String clientID = msg.getClientID();
 
         Mockito.when(channelMock.remoteAddress()).thenReturn(addr);
@@ -244,7 +195,6 @@ public class MQTTServerTest {
         InterceptDisconnectMessage msg = new InterceptDisconnectMessage("ogdans3");
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1883);
-        Subscriber sub = new Subscriber( "127.0.0.1", 1883, "testing", "MQTT");
         String clientID = msg.getClientID();
 
         Mockito.when(channelMock.remoteAddress()).thenReturn(addr);
