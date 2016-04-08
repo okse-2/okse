@@ -6,9 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.ow2.joram.mom.amqp.messages.ConnectMessage;
-import org.ow2.joram.mom.amqp.messages.DisconnectMessage;
-import org.ow2.joram.mom.amqp.messages.MessageReceived;
+import org.ow2.joram.mom.amqp.messages.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -58,6 +56,22 @@ public class AMQP091MessageListenerTest {
         MessageReceived message = new MessageReceived("topic1", "", body, "localhost", 1234);
         messageListener.onMessageReceived(message);
         Mockito.verify(protocolServer, Mockito.times(1)).incrementTotalMessagesReceived();
+        Mockito.verify(protocolServer, Mockito.times(1)).incrementTotalRequests();
+    }
+
+    public void onSubscribe() {
+        SubscribeMessage subscribeMessage = new SubscribeMessage("topic1", "", "localhost", 1234);
+        messageListener.onSubscribe(subscribeMessage);
+        Mockito.verify(subscriberMap, Mockito.times(1)).putSubscriber(any(Subscriber.class));
+        Mockito.verify(subscriptionService, Mockito.times(1)).addSubscriber(any(Subscriber.class));
+        Mockito.verify(protocolServer, Mockito.times(1)).incrementTotalRequests();
+    }
+
+    public void unUnsubscribe() {
+        UnsubscribeMessage unsubscribeMessage = new UnsubscribeMessage("topic1", "", "localhost", 1234);
+        messageListener.onUnsubscribe(unsubscribeMessage);
+        Mockito.verify(subscriberMap, Mockito.times(1)).getSubscriber("localhost", 1234, "topic1");
+        Mockito.verify(subscriptionService, Mockito.times(1)).removeSubscriber(any(Subscriber.class));
         Mockito.verify(protocolServer, Mockito.times(1)).incrementTotalRequests();
     }
 

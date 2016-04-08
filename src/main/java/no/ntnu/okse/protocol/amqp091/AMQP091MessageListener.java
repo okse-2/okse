@@ -75,7 +75,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
                 host, port, topic, amqpProtocolServer.getProtocolServerType()
         );
         subscriberMap.putSubscriber(subscriber);
-        SubscriptionService.getInstance().addSubscriber(subscriber);
+        subscriptionService.addSubscriber(subscriber);
         amqpProtocolServer.incrementTotalRequests();
     }
 
@@ -89,7 +89,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         String topic = unsubscribeMessage.getExchange();
 
         Subscriber subscriber = subscriberMap.getSubscriber(host, port, topic);
-        SubscriptionService.getInstance().removeSubscriber(subscriber);
+        subscriptionService.removeSubscriber(subscriber);
         amqpProtocolServer.incrementTotalRequests();
     }
 
