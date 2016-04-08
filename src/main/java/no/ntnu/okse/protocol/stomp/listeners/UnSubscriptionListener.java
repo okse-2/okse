@@ -1,6 +1,5 @@
 package no.ntnu.okse.protocol.stomp.listeners;
 
-import asia.stampy.client.message.subscribe.SubscribeMessage;
 import asia.stampy.client.message.unsubscribe.UnsubscribeMessage;
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.gateway.StampyMessageListener;

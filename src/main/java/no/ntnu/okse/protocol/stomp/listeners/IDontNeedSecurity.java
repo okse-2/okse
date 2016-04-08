@@ -10,7 +10,6 @@ public class IDontNeedSecurity implements StampyMessageListener, SecurityMessage
     @Override
     public StompMessageType[] getMessageTypes() {
         return null;
-//        return new StompMessageType[0];
     }
 
     @Override

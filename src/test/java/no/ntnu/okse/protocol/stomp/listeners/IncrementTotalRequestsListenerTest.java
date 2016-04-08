@@ -1,7 +1,6 @@
 package no.ntnu.okse.protocol.stomp.listeners;
 
 import asia.stampy.common.message.StompMessageType;
-import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 import org.mockito.Mockito;
 import org.testng.annotations.AfterTest;

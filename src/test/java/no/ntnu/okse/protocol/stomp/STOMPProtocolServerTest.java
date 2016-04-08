@@ -1,17 +1,14 @@
 package no.ntnu.okse.protocol.stomp;
 
-import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.interceptor.InterceptException;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.testng.annotations.*;
 
 import static org.testng.AssertJUnit.assertEquals;
-import org.testng.AssertJUnit.*;
 
 public class STOMPProtocolServerTest {
     private STOMPProtocolServer ps_spy;
@@ -40,6 +37,15 @@ public class STOMPProtocolServerTest {
     @AfterMethod
     public void tearDown() throws Exception {
         ps_spy = null;
+    }
+
+    @Test
+    public void run() throws Exception {
+        ps_spy.run();
+        Mockito.verify(server_spy).init("localhost", 61613);
+
+        //Test exception
+        Mockito.doThrow(new Exception()).when(server_spy).init("localhost", 61613);
     }
 
     @Test

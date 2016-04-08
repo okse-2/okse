@@ -1,7 +1,6 @@
 package no.ntnu.okse.protocol.stomp;
 
 import no.ntnu.okse.protocol.stomp.common.Client;
-import no.ntnu.okse.protocol.stomp.listeners.*;
 
 public class UnsubscribeTest {
 

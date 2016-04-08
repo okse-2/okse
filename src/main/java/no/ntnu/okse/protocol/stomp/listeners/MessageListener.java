@@ -5,11 +5,9 @@ import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.gateway.StampyMessageListener;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
-import asia.stampy.common.message.interceptor.InterceptException;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
-import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

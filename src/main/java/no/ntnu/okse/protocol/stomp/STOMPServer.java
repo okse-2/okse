@@ -21,15 +21,12 @@ import asia.stampy.server.netty.receipt.NettyReceiptListener;
 import asia.stampy.server.netty.subscription.NettyAcknowledgementListenerAndInterceptor;
 import asia.stampy.server.netty.transaction.NettyTransactionListener;
 import io.moquette.server.Server;
-import io.netty.channel.ChannelHandlerContext;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.protocol.stomp.listeners.*;
 import no.ntnu.okse.protocol.stomp.listeners.MessageListener;
 import org.apache.log4j.Logger;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -55,12 +52,6 @@ public class STOMPServer extends Server {
         gateway.setPort(port);
         gateway.setHeartbeat(1000);
         gateway.setAutoShutdown(true);
-        gateway.addHandler(new SimpleChannelUpstreamHandler() {
-            public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-                System.out.println("Session destroyed, exiting...");
-                System.exit(0);
-            }
-        });
 
         ServerNettyChannelHandler channelHandler = new ServerNettyChannelHandler();
         channelHandler.setGateway(gateway);
@@ -72,10 +63,10 @@ public class STOMPServer extends Server {
 
         gateway.addMessageListener(new VersionListener());
 
-        NettyLoginMessageListener login = new NettyLoginMessageListener();
+/*        NettyLoginMessageListener login = new NettyLoginMessageListener();
         login.setGateway(gateway);
         login.setLoginHandler(new SystemLoginHandler());
-        gateway.addMessageListener(login);
+        gateway.addMessageListener(login);*/
 
         NettyConnectStateListener connect = new NettyConnectStateListener();
         connect.setGateway(gateway);
@@ -131,6 +122,7 @@ public class STOMPServer extends Server {
         gateway.addMessageListener(subListener);
         gateway.addMessageListener(unsubListener);
         gateway.addMessageListener(messageListener);
+        gateway.addMessageListener(incrementTotalRequestsListener);
     }
 
     public void init(String host, int port) throws Exception {
@@ -173,12 +165,13 @@ public class STOMPServer extends Server {
     }
 
     public void stopServer(){
-        try {
+        //TODO: This needs to be implemented, will be left like this because of demo purposes
+/*        try {
             gateway.shutdown();
             gateway = null;
         } catch (Exception e) {
             log.error("Exception when trying to shutdown the server", e);
         }
-
+*/
     }
 }

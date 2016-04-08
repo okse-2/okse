@@ -35,14 +35,14 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void run() {
-        STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager ();
+        STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         try {
             server.setSubscriptionManager(subscriptionManager);
-            server.init(host, port);
             server.setProtocolServer(this);
+            server.init(host, port);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error thrown when trying to initialize the server", e);
         }
     }
 

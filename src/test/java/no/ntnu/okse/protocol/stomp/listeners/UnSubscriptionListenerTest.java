@@ -1,6 +1,5 @@
 package no.ntnu.okse.protocol.stomp.listeners;
 
-import asia.stampy.client.message.subscribe.SubscribeMessage;
 import asia.stampy.client.message.unsubscribe.UnsubscribeMessage;
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.message.StampyMessage;
@@ -13,7 +12,6 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertEquals;
 
 public class UnSubscriptionListenerTest {
