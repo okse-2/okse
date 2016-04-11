@@ -143,6 +143,11 @@
             <artifactId>WS-Nu</artifactId>
             <version>master-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.vysper</groupId>
+            <artifactId>vysper-core</artifactId>
+            <version>0.7</version>
+        </dependency>
     </dependencies>
 
     <build>
