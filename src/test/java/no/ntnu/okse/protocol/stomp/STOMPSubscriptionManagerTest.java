@@ -72,6 +72,21 @@ public class STOMPSubscriptionManagerTest {
     }
 
     @Test
+    public void removeSubscriberWithHostPort(){
+        STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
+        subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
+        STOMPSubscriptionManager subscriptionHandler_spy = Mockito.spy(subscriptionManager);
+
+        String clientID = "testClientID";
+        Subscriber sub = new Subscriber( "127.0.0.1", 1883, "testing", "mqtt");
+        assertEquals(false,subscriptionHandler_spy.containsSubscriber(clientID));
+        subscriptionHandler_spy.addSubscriber(sub, clientID);
+        assertEquals(true,subscriptionHandler_spy.containsSubscriber(clientID));
+        subscriptionHandler_spy.removeSubscriber("127.0.0.1", 1883);
+        assertEquals(false,subscriptionHandler_spy.containsSubscriber(clientID));
+    }
+
+    @Test
     public void getAllSubscribersForTopic(){
         STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());

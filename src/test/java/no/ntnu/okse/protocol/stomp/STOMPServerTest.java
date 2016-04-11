@@ -20,6 +20,7 @@ import asia.stampy.server.netty.transaction.NettyTransactionListener;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
+import no.ntnu.okse.protocol.stomp.common.Gateway;
 import no.ntnu.okse.protocol.stomp.listeners.IDontNeedSecurity;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -50,7 +51,7 @@ public class STOMPServerTest {
 
     private void startGateway(int port) throws Exception {
         server_spy.setProtocolServer(ps_spy);
-        gateway = initialize(port);
+        gateway = Gateway.initialize(port);
         gateway.connect();
         gateway.shutdown();
         server_spy.gateway = gateway;
@@ -98,64 +99,4 @@ public class STOMPServerTest {
     public void stopServerCatchException() throws Exception {
         //TODO: Implement this after stopServer is implemented
     }
-
-    private AbstractStampyMessageGateway initialize(int port) {
-        HeartbeatContainer heartbeatContainer = new HeartbeatContainer();
-
-        ServerNettyMessageGateway gateway = Mockito.spy(new ServerNettyMessageGateway());
-        gateway.setPort(port);
-        gateway.setHeartbeat(1000);
-        gateway.setAutoShutdown(true);
-
-        ServerNettyChannelHandler channelHandler = new ServerNettyChannelHandler();
-        channelHandler.setGateway(gateway);
-        channelHandler.setHeartbeatContainer(heartbeatContainer);
-
-        gateway.addMessageListener(new IDontNeedSecurity());
-
-        gateway.addMessageListener(new ServerMessageValidationListener());
-
-        gateway.addMessageListener(new VersionListener());
-
-
-        NettyLoginMessageListener login = new NettyLoginMessageListener();
-        login.setGateway(gateway);
-        login.setLoginHandler(new SystemLoginHandler());
-        gateway.addMessageListener(login);
-
-        NettyConnectStateListener connect = new NettyConnectStateListener();
-        connect.setGateway(gateway);
-        gateway.addMessageListener(connect);
-
-        NettyHeartbeatListener heartbeat = new NettyHeartbeatListener();
-        heartbeat.setHeartbeatContainer(heartbeatContainer);
-        heartbeat.setGateway(gateway);
-        gateway.addMessageListener(heartbeat);
-
-        NettyTransactionListener transaction = new NettyTransactionListener();
-        transaction.setGateway(gateway);
-        gateway.addMessageListener(transaction);
-
-        SystemAcknowledgementHandler sys = new SystemAcknowledgementHandler();
-
-        NettyAcknowledgementListenerAndInterceptor acknowledgement = new NettyAcknowledgementListenerAndInterceptor();
-        acknowledgement.setHandler(sys);
-        acknowledgement.setGateway(gateway);
-        acknowledgement.setAckTimeoutMillis(200);
-        gateway.addMessageListener(acknowledgement);
-        gateway.addOutgoingMessageInterceptor(acknowledgement);
-
-        NettyReceiptListener receipt = new NettyReceiptListener();
-        receipt.setGateway(gateway);
-        gateway.addMessageListener(receipt);
-
-        NettyConnectResponseListener connectResponse = new NettyConnectResponseListener();
-        connectResponse.setGateway(gateway);
-        gateway.addMessageListener(connectResponse);
-
-        gateway.setHandler(channelHandler);
-
-        return gateway;
-    }
-
 }

@@ -6,6 +6,7 @@ import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
 import org.oasis_open.docs.wsn.bw_2.SubscriptionManager;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,6 +40,18 @@ public class STOMPSubscriptionManager {
         if(containsSubscriber(clientID)){
             subscriptionService.removeSubscriber(getSubscriber(clientID));
             localSubscriberMap.remove(clientID);
+        }
+    }
+
+    public void removeSubscriber(String host, int port){
+        Enumeration<String> enum_keys = localSubscriberMap.keys();
+        while(enum_keys.hasMoreElements()){
+            String key = enum_keys.nextElement();
+            Subscriber sub = localSubscriberMap.get(key);
+            if(sub.getHost().equals(host) && sub.getPort() == port){
+                subscriptionService.removeSubscriber(sub);
+                localSubscriberMap.remove(key);
+            }
         }
     }
 

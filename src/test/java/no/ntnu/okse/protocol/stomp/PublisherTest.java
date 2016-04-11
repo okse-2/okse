@@ -9,7 +9,7 @@ public class PublisherTest {
         client.init(null);
         client.testConnect(String.valueOf(0 + (int)(Math.random() * 500)));
 
-        for(int i = 0; i < 1000000; i++){
+        for(int i = 0; i < 1; i++){
             System.out.println("Send message #" + i);
             client.testMessage(String.valueOf(i));
         }

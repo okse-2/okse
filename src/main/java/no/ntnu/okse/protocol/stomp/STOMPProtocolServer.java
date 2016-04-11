@@ -66,8 +66,7 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
         try {
             server.sendMessage(message);
         } catch (InterceptException e) {
-            log.error("Exception was thrown when sending message to the server", e);
-            log.debug(e);
+            log.error("Error happened when STOMP tried to send a message to the client", e);
         }
     }
 

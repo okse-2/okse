@@ -7,7 +7,6 @@ import asia.stampy.common.heartbeat.StampyHeartbeatContainer;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.interceptor.InterceptException;
 import asia.stampy.examples.system.server.SystemAcknowledgementHandler;
-import asia.stampy.examples.system.server.SystemLoginHandler;
 import asia.stampy.server.listener.validate.ServerMessageValidationListener;
 import asia.stampy.server.listener.version.VersionListener;
 import asia.stampy.server.message.message.MessageMessage;
@@ -16,7 +15,6 @@ import asia.stampy.server.netty.ServerNettyMessageGateway;
 import asia.stampy.server.netty.connect.NettyConnectResponseListener;
 import asia.stampy.server.netty.connect.NettyConnectStateListener;
 import asia.stampy.server.netty.heartbeat.NettyHeartbeatListener;
-import asia.stampy.server.netty.login.NettyLoginMessageListener;
 import asia.stampy.server.netty.receipt.NettyReceiptListener;
 import asia.stampy.server.netty.subscription.NettyAcknowledgementListenerAndInterceptor;
 import asia.stampy.server.netty.transaction.NettyTransactionListener;
@@ -27,6 +25,9 @@ import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.protocol.stomp.listeners.*;
 import no.ntnu.okse.protocol.stomp.listeners.MessageListener;
 import org.apache.log4j.Logger;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -63,10 +64,14 @@ public class STOMPServer extends Server {
 
         gateway.addMessageListener(new VersionListener());
 
-/*        NettyLoginMessageListener login = new NettyLoginMessageListener();
-        login.setGateway(gateway);
-        login.setLoginHandler(new SystemLoginHandler());
-        gateway.addMessageListener(login);*/
+        //It seems that this listener needs to be placed here for some odd reason
+        //TODO: Investigate further, want to move this to the addGatewayListenersAndHandlers method
+        DisconnectListener disconnectListener = new DisconnectListener();
+
+        disconnectListener.setSubscriptionManager(subscriptionManager);
+        disconnectListener.setGateway(gateway);
+        gateway.addMessageListener(disconnectListener);
+
 
         NettyConnectStateListener connect = new NettyConnectStateListener();
         connect.setGateway(gateway);
@@ -84,7 +89,6 @@ public class STOMPServer extends Server {
         SystemAcknowledgementHandler sys = new SystemAcknowledgementHandler();
 
         NettyAcknowledgementListenerAndInterceptor acknowledgement = new NettyAcknowledgementListenerAndInterceptor();
-        acknowledgement.setHandler(sys);
         acknowledgement.setGateway(gateway);
         acknowledgement.setAckTimeoutMillis(200);
         gateway.addMessageListener(acknowledgement);
@@ -98,14 +102,14 @@ public class STOMPServer extends Server {
         connectResponse.setGateway(gateway);
         gateway.addMessageListener(connectResponse);
 
+        addGatewayListenersAndHandlers(gateway);
+        acknowledgement.setHandler(sys);
         gateway.setHandler(channelHandler);
-
-        addGatewayListeners(gateway);
 
         return gateway;
     }
 
-    private void addGatewayListeners(ServerNettyMessageGateway gateway){
+    private void addGatewayListenersAndHandlers(ServerNettyMessageGateway gateway){
         no.ntnu.okse.protocol.stomp.listeners.MessageListener messageListener = new MessageListener();
         SubscriptionListener subListener = new SubscriptionListener();
         UnSubscriptionListener unsubListener = new UnSubscriptionListener();
@@ -150,6 +154,7 @@ public class STOMPServer extends Server {
 
             //TODO: Do we also have to change the message id?
             MessageMessage msg = createSTOMPMessage(message, key);
+            System.out.println("Send message");
             gateway.sendMessage((StampyMessage<?>) msg, new HostPort(sub.getHost(), sub.getPort()));
             ps.incrementTotalMessagesSent();
         }
