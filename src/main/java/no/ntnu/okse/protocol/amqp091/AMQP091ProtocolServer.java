@@ -7,9 +7,6 @@ import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 
-/**
- * Created by Andreas the time lord on 30/03/2516
- */
 public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
 
