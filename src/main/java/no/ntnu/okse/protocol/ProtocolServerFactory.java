@@ -1,10 +1,13 @@
 package no.ntnu.okse.protocol;
 
 import no.ntnu.okse.protocol.amqp.AMQProtocolServer;
+import no.ntnu.okse.protocol.amqp091.AMQP091ProtocolServer;
 import no.ntnu.okse.protocol.mqtt.MQTTProtocolServer;
 import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+
+import java.io.IOException;
 
 public class ProtocolServerFactory {
 
@@ -20,6 +23,8 @@ public class ProtocolServerFactory {
                 return createMQTT(attr);
             case "wsn":
                 return createWSN(attr);
+            case "amqp091":
+                return createAMQP091(attr);
             default:
                 return null;
         }
@@ -75,6 +80,21 @@ public class ProtocolServerFactory {
         return new AMQProtocolServer(host, port, queue, sasl);
     }
 
+    private static AMQP091ProtocolServer createAMQP091(NamedNodeMap attr) {
+        final String DEFAULT_HOST = "0.0.0.0";
+        final int DEFAULT_PORT = 5672;
+
+        String host = attr.getNamedItem("host") != null ?
+                attr.getNamedItem("host").getNodeValue() :
+                DEFAULT_HOST;
+
+        int port = attr.getNamedItem("port") != null ?
+                stringToPort(attr.getNamedItem("port").getNodeValue(), DEFAULT_PORT):
+                DEFAULT_PORT;
+
+        return new AMQP091ProtocolServer(host, port);
+    }
+
     private static MQTTProtocolServer createMQTT(NamedNodeMap attr) {
         final String DEFAULT_HOST = "0.0.0.0";
         final int DEFAULT_PORT = 1883;
@@ -89,7 +109,6 @@ public class ProtocolServerFactory {
 
         return new MQTTProtocolServer(host, port);
     }
-
 
     private static WSNotificationServer createWSN(NamedNodeMap attr) {
         final String DEFAULT_HOST = "0.0.0.0";
