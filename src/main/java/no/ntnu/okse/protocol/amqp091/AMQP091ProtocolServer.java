@@ -57,6 +57,10 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
         return SERVERTYPE;
     }
 
+    public boolean isRunning() {
+        return _running;
+    }
+
     @Override
     public void sendMessage(Message message) {
         amqpService.sendMessage(message);

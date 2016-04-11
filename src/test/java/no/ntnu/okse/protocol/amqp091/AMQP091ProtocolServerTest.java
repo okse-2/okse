@@ -40,8 +40,9 @@ public class AMQP091ProtocolServerTest {
     public void boot() {
         protocolServer.setAmqpService(null);
         doNothing().when(protocolServer).run();
+        assertFalse(protocolServer.isRunning());
         protocolServer.boot();
-        verify(protocolServer).run();
+        assertTrue(protocolServer.isRunning());
     }
 
     public void run_stop() {
