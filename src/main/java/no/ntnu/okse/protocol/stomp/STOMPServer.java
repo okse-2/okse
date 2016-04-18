@@ -159,10 +159,25 @@ public class STOMPServer extends Server {
         }
     }
 
+    /**
+     * Creates a STOMP message from an OKSE message
+     * @param msg - OKSE message to convert to STOMP message
+     * @param id - Specific ID for the message
+     * @return
+     */
     private MessageMessage createSTOMPMessage(Message msg, String id){
         String msgId = msg.getMessageID();
         MessageMessage message = new MessageMessage(msg.getTopic(), msgId, id);
-        
+
+        //Adds all the user defined headers to the STOMP message
+        HashMap<String, String> attributes = msg.getAttributes();
+        Iterator it = attributes.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry pair = (Map.Entry) it.next();
+            String key = (String) pair.getKey();
+            message.getHeader().addHeader(key, attributes.get(key));
+        }
+
         message.setBody(msg.getMessage());
         message.getHeader().setAck(msgId);
         return message;
