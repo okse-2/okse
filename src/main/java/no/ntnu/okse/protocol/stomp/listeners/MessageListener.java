@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Iterator;
+import java.util.Map;
 
 public class MessageListener implements StampyMessageListener {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -40,6 +42,20 @@ public class MessageListener implements StampyMessageListener {
 
         //TODO: Stomp uses mime types and can send any data. Needs to be handled, will send an email to FFI about this issue
         Message okseMsg = new Message((String)sendMessage.getBody(), destination, null, protocol);
+
+        Map<String, String> headers = sendMessage.getHeader().getHeaders();
+        Iterator it = headers.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry pair = (Map.Entry) it.next();
+            String key = (String) pair.getKey();
+            //Skip the headers that are in the STOMP specification
+            if(key.equals("Destination") || key.equals("Receipt")
+               || key.equals("Transaction") || key.equals("Transaction")
+               || key.equals("ContentType") || key.equals("ContentLength"))
+                continue;
+            okseMsg.setAttribute(key, headers.get(key));
+        }
+        
         sendMessageToOKSE(okseMsg);
         protocolServer.incrementTotalMessagesReceived();
     }

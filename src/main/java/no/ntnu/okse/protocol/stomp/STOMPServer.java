@@ -163,7 +163,7 @@ public class STOMPServer extends Server {
     private MessageMessage createSTOMPMessage(Message msg, String id){
         String msgId = msg.getMessageID();
         MessageMessage message = new MessageMessage(msg.getTopic(), msgId, id);
-
+        
         message.setBody(msg.getMessage());
         message.getHeader().setAck(msgId);
         return message;
