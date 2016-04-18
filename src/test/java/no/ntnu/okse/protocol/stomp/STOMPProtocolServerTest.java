@@ -46,6 +46,12 @@ public class STOMPProtocolServerTest {
 
         //Test exception
         Mockito.doThrow(new Exception()).when(server_spy).init("localhost", 61613);
+
+        Mockito.reset(ps_spy);
+
+        ps_spy.run();
+        //Test exception
+        Mockito.doThrow(new InterceptException("Uncaught test exception")).when(server_spy).init("localhost", 61613);
     }
 
     @Test

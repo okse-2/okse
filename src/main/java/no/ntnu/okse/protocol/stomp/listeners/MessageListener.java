@@ -49,11 +49,17 @@ public class MessageListener implements StampyMessageListener {
             Map.Entry pair = (Map.Entry) it.next();
             String key = (String) pair.getKey();
             //Skip the headers that are in the STOMP specification
-            if(key.equals("Destination") || key.equals("Receipt")
-               || key.equals("Transaction") || key.equals("Transaction")
-               || key.equals("ContentType") || key.equals("ContentLength"))
-                continue;
-            okseMsg.setAttribute(key, headers.get(key));
+            switch(key){
+                case "destination":
+                case "receipt":
+                case "transaction":
+                case "content-type":
+                case "content-length":
+                    break;
+                default:
+                    okseMsg.setAttribute(key, headers.get(key));
+                    break;
+            }
         }
         
         sendMessageToOKSE(okseMsg);

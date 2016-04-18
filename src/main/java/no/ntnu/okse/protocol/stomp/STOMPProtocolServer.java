@@ -94,8 +94,6 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
         totalMessagesSent.incrementAndGet();
     }
 
-
-
     public boolean isRunning() {
         return _running;
     }

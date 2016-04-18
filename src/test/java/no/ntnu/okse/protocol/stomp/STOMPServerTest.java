@@ -75,7 +75,9 @@ public class STOMPServerTest {
         ArgumentCaptor<StampyMessage> messageArgument = ArgumentCaptor.forClass(StampyMessage.class);
         ArgumentCaptor<HostPort> hostPortArgument = ArgumentCaptor.forClass(HostPort.class);
 
-        server_spy.sendMessage(new Message("testing", "testing", null, "stomp"));
+        Message msg = new Message("testing", "testing", null, "stomp");
+        msg.setAttribute("test", "user defined attribute");
+        server_spy.sendMessage(msg);
         Mockito.verify(gateway).sendMessage(messageArgument.capture(), hostPortArgument.capture());
     }
 

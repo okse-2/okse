@@ -63,12 +63,48 @@ public class STOMPMessageListenerTest {
         Mockito.verify(messageService_spy).distributeMessage(messageArgument.capture());
         assertEquals( "Testing", messageArgument.getValue().getMessage());
         assertEquals( "bernt", messageArgument.getValue().getTopic());
+
+        Mockito.reset(messageService_spy);
+    }
+
+    @Test
+    public void differentMessageHeaders() throws Exception {
+        StampyMessage msg = createSendMessageWithHeaders();
+        messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
+
+        ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
+
+        Mockito.verify(messageService_spy).distributeMessage(messageArgument.capture());
+
+        assertEquals( "Testing", messageArgument.getValue().getMessage());
+        assertEquals( "bernt", messageArgument.getValue().getTopic());
+
+        assertEquals("user defined header", messageArgument.getValue().getAttribute("testing"));
+        assertEquals(null, messageArgument.getValue().getAttribute("transaction"));
+        assertEquals(null, messageArgument.getValue().getAttribute("content-length"));
+        assertEquals(null, messageArgument.getValue().getAttribute("content-type"));
+        assertEquals(null, messageArgument.getValue().getAttribute("receipt"));
+
+        Mockito.reset(messageService_spy);
+    }
+
+    private StampyMessage createSendMessageWithHeaders(){
+        SendMessage msg = new SendMessage();
+        msg.setBody("Testing");
+        msg.getHeader().setDestination("bernt");
+        msg.getHeader().setTransaction("testing");
+        msg.getHeader().setContentType("plain/text");
+        msg.getHeader().setContentLength(2);
+        msg.getHeader().setReceipt("test");
+        msg.getHeader().addHeader("testing", "user defined header");
+        return msg;
     }
 
     private StampyMessage createSendMessage(){
         SendMessage msg = new SendMessage();
         msg.setBody("Testing");
         msg.getHeader().setDestination("bernt");
+        msg.getHeader().addHeader("testing", "user defined header");
         return msg;
     }
 
