@@ -95,7 +95,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
     private HttpClient _client;
     private HashSet<ServiceConnection> _services;
     private ExecutorService clientPool;
-    private TreeMap<String, String> relays = new TreeMap();
+    private TreeSet<String> relays = new TreeSet<>();
 
     /**
      * Constructor that takes in configuration options for the WSNotification
@@ -815,7 +815,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
             add("localhost");
         }};
 
-        if(relays.containsKey(relay)) return false;
+        if(relays.contains(relay)) return false;
 
         // if relay.host == 0.0.0 etc sjekk port
         if (localRelays.contains(host)) {
@@ -853,15 +853,14 @@ public class WSNotificationServer extends AbstractProtocolServer {
             return false;
 
         }
-
-        relays.put(subscriptionReference.split("subscriberkey=")[1], subscriptionReference);
+        relays.add(subscriptionReference);
         log.debug("Relay added");
         return true;
     }
 
     public boolean deleteRelay(String relay) {
-        if (relays.containsKey(relay)) {
-            WsnUtilities.sendUnsubscribeRequest(relays.get(relay), getRequestParser());
+        if (relays.contains(relay)) {
+            WsnUtilities.sendUnsubscribeRequest(relay, getRequestParser());
             relays.remove(relay);
             log.debug("Removed relay: " + relay);
             return true;
@@ -872,15 +871,15 @@ public class WSNotificationServer extends AbstractProtocolServer {
     }
 
     public void deleteAllRelays() {
-        relays.forEach((k, v) -> {
+        relays.forEach((v) -> {
             WsnUtilities.sendUnsubscribeRequest(v, getRequestParser());
-            log.debug("Removed relay: " + k);
+            log.debug("Removed relay: " + v);
         });
 
         relays.clear();
     }
 
-    public Map<String, String> getRelays() {
+    public Set<String> getRelays() {
         return relays;
     }
 }

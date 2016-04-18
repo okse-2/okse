@@ -55,11 +55,15 @@ var Config = (function($) {
 
     var createTableForAllRelays = function(relays) {
         var trHTML = ""
-        $.map(relays, function(value, key) {
+        $.map(relays, function(value) {
+            var match = value.match(/(https?:\/\/)?[^:/?]+(:\d+)?\/?/);
+            if(match == null) match = value
+            else match = match[0]
             trHTML +=
                 '<tr>' +
-                    '<td>' + value.split('subscriptionManager')[0] + '</td>' +
-                    '<td>' + '<a class="btn btn-xs btn-block btn-danger delete-relay" id="' + key + '">Delete</a></td>' +
+                //TODO: Ugly regex. A better solution should be found for this.
+                    '<td>' + match + '</td>' +
+                    '<td>' + '<a class="btn btn-xs btn-block btn-danger delete-relay" id="' + value + '">Delete</a></td>' +
                 '</tr>'
         });
         return trHTML

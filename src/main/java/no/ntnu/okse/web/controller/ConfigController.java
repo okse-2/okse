@@ -76,7 +76,7 @@ public class ConfigController {
     @RequestMapping(method = RequestMethod.GET, value = GET_WSN_RELAYS)
     public
     @ResponseBody
-    Map<String, String> getWsnRelays(@RequestParam(value = "serverid") Integer id) {
+    Set<String> getWsnRelays(@RequestParam(value = "serverid") Integer id) {
         return wsnServers.get(id).getRelays();
     }
 
