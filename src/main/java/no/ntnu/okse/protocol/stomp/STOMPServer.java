@@ -154,7 +154,6 @@ public class STOMPServer extends Server {
 
             //TODO: Do we also have to change the message id?
             MessageMessage msg = createSTOMPMessage(message, key);
-            System.out.println("Send message");
             gateway.sendMessage((StampyMessage<?>) msg, new HostPort(sub.getHost(), sub.getPort()));
             ps.incrementTotalMessagesSent();
         }
