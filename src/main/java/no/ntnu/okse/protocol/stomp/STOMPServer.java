@@ -148,8 +148,11 @@ public class STOMPServer extends Server {
         HashMap<String, Subscriber> subs = subscriptionManager.getAllSubscribersForTopic(message.getTopic());
 
         Object[] keys = subs.keySet().toArray();
-        for(int i = 0; i < subs.size(); i++){
-            String key = (String)keys[i];
+        Iterator it = subs.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry pair = (Map.Entry) it.next();
+            String key = (String) pair.getKey();
+
             Subscriber sub = subs.get(key);
 
             //TODO: Do we also have to change the message id?
