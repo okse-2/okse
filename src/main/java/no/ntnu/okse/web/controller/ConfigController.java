@@ -1,17 +1,14 @@
 package no.ntnu.okse.web.controller;
 
-import com.sun.org.apache.bcel.internal.generic.GETFIELD;
 import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.topic.TopicService;
 import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.apache.log4j.Logger;
-import org.ntnunotif.wsnu.services.general.WsnUtilities;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -43,6 +40,7 @@ public class ConfigController {
      * Constructor for ConfigController. Initiates the localRelays
      */
     public ConfigController() {
+        getWsnServers();
     }
 
     /**
@@ -77,7 +75,11 @@ public class ConfigController {
     public
     @ResponseBody
     Set<String> getWsnRelays(@RequestParam(value = "serverid") Integer id) {
-        return wsnServers.get(id).getRelays();
+        try {
+            return wsnServers.get(id).getRelays();
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
     /**
