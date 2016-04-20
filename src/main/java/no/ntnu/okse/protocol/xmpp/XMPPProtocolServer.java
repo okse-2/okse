@@ -31,8 +31,10 @@ import java.util.logging.Logger;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.vysper.mina.TCPEndpoint;
+import org.apache.vysper.storage.OpenStorageProviderRegistry;
 import org.apache.vysper.storage.StorageProviderRegistry;
 import org.apache.vysper.storage.inmemory.MemoryStorageProviderRegistry;
+import org.apache.vysper.storage.jcr.JcrStorageProviderRegistry;
 import org.apache.vysper.xmpp.addressing.Entity;
 import org.apache.vysper.xmpp.addressing.EntityImpl;
 import org.apache.vysper.xmpp.authorization.AccountCreationException;
@@ -41,11 +43,14 @@ import org.apache.vysper.xmpp.modules.Module;
 import org.apache.vysper.xmpp.modules.extension.xep0049_privatedata.PrivateDataModule;
 import org.apache.vysper.xmpp.modules.extension.xep0050_adhoc_commands.AdhocCommandsModule;
 import org.apache.vysper.xmpp.modules.extension.xep0054_vcardtemp.VcardTempModule;
+import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PublishSubscribeModule;
 import org.apache.vysper.xmpp.modules.extension.xep0077_inbandreg.InBandRegistrationModule;
 import org.apache.vysper.xmpp.modules.extension.xep0092_software_version.SoftwareVersionModule;
 import org.apache.vysper.xmpp.modules.extension.xep0119_xmppping.XmppPingModule;
 import org.apache.vysper.xmpp.modules.extension.xep0133_service_administration.ServiceAdministrationModule;
 import org.apache.vysper.xmpp.modules.extension.xep0202_entity_time.EntityTimeModule;
+import org.apache.vysper.xmpp.modules.roster.persistence.MemoryRosterManager;
+import org.apache.vysper.xmpp.server.ServerFeatures;
 import org.apache.vysper.xmpp.server.XMPPServer;
 /**
  * starts the server as a standalone application
@@ -66,6 +71,73 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
     public static void init() throws AccountCreationException, FileNotFoundException {
 
+//        StorageProviderRegistry providerRegistry = new MemoryStorageProviderRegistry();
+/*        StorageProviderRegistry providerRegistry = new OpenStorageProviderRegistry();
+
+        providerRegistry.add(new Authorization());
+        providerRegistry.add(new MemoryRosterManager());
+
+        XMPPServer server = new XMPPServer("127.0.0.1");
+        server.setStorageProviderRegistry(providerRegistry);
+
+//        final AccountManagement accountManagement = (AccountManagement) providerRegistry.retrieve(AccountManagement.class);
+        //adding user
+/*        final Entity adminJID = EntityImpl.parseUnchecked("user1@vysper.org");
+        accountManagement.addUser(adminJID, "password1");
+        Entity user1 = EntityImpl.parseUnchecked("user1@127.0.0.1");
+        accountManagement.addUser(user1, "pass");
+        System.out.println(accountManagement.verifyAccountExists(user1));
+        System.out.println(accountManagement.verifyAccountExists(adminJID));*/
+        //adding certificate
+        //
+//        server.setTLSCertificateInfo(new File("src/bogus_mina_tls.cert"), "boguspw");
+        //adding endpoint
+//        server.addEndpoint(new TCPEndpoint());
+        /*try {
+            server.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //adding modules
+        try {
+            server.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        server.addModule(new PublishSubscribeModule());
+        server.getServerRuntimeContext().getServerFeatures().setStartTLSRequired(false);
+
+*/
+
+        try {
+            // choose the storage you want to use
+            //        StorageProviderRegistry providerRegistry = new JcrStorageProviderRegistry();
+            StorageProviderRegistry providerRegistry = new MemoryStorageProviderRegistry();
+
+            final AccountManagement accountManagement = (AccountManagement) providerRegistry.retrieve(AccountManagement.class);
+
+            if(!accountManagement.verifyAccountExists(EntityImpl.parse("user1@vysper.org"))) {
+                accountManagement.addUser(EntityImpl.parse("user1@vysper.org"), "password");
+            }
+            if(!accountManagement.verifyAccountExists(EntityImpl.parse("user2@vysper.org"))) {
+                accountManagement.addUser(EntityImpl.parse("user2@vysper.org"), "password");
+            }
+
+            XMPPServer server = new XMPPServer("vysper.org");
+            server.addEndpoint(new TCPEndpoint());
+            server.setStorageProviderRegistry(providerRegistry);
+            server.setTLSCertificateInfo(new File("src/bogus_mina_tls.cert"), "boguspw");
+
+            server.start();
+            System.out.println("server is running...");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        /*
+
+
         String domain = "localhost";
         String addedModuleProperty = System.getProperty("vysper.add.module");
         List<Module> listOfModules = null;
@@ -79,8 +151,8 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
         // choose the storage you want to use
         //StorageProviderRegistry providerRegistry = new JcrStorageProviderRegistry();
         StorageProviderRegistry providerRegistry = new MemoryStorageProviderRegistry();
-        //final Entity adminJID = EntityImpl.parseUnchecked("admin@" + domain);
-        final Entity adminJID = EntityImpl.parseUnchecked("admin");
+        final Entity adminJID = EntityImpl.parseUnchecked("admin@" + domain);
+        //final Entity adminJID = EntityImpl.parseUnchecked("");
         final AccountManagement accountManagement = (AccountManagement) providerRegistry
                 .retrieve(AccountManagement.class);
         String initialPassword = System.getProperty("vysper.admin.initial.password", "password");
@@ -90,10 +162,10 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
         }
         XMPPServer server = new XMPPServer(domain);
         server.addEndpoint(new TCPEndpoint());
-        //server.addEndpoint(new StanzaSessionFactory());
         server.setStorageProviderRegistry(providerRegistry);
-//        server.setTLSCertificateInfo(new File("src/bogus_mina_tls.cert"), "boguspw");
-        server.setTLSCertificateInfo(new File("src/main/bogus_mina_tls.cert"), "boguspw");
+
+        server.setTLSCertificateInfo(new File("src/bogus_mina_tls.cert"), "boguspw");
+        //server.setTLSCertificateInfo(new File("src/main/bogus_mina_tls.cert"), "boguspw");
         try {
             server.start();
             System.out.println("vysper server is running...");
@@ -107,6 +179,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
         server.addModule(new PrivateDataModule());
         server.addModule(new InBandRegistrationModule());
         server.addModule(new AdhocCommandsModule());
+        server.addModule(new PublishSubscribeModule());
         final ServiceAdministrationModule serviceAdministrationModule = new ServiceAdministrationModule();
         // unless admin user account with a secure password is added, this will be not become effective
         serviceAdministrationModule.setAddAdminJIDs(Arrays.asList(adminJID));
@@ -116,7 +189,12 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
                 server.addModule(module);
             }
         }
+        server.getServerRuntimeContext().getServerFeatures().setStartTLSRequired(false);
+     */
     }
+
+
+
     private static List<Module> createModuleInstances(String[] moduleClassNames) {
         List<Module> modules = new ArrayList<Module>();
         for (String moduleClassName : moduleClassNames) {
