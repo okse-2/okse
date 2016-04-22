@@ -28,6 +28,7 @@ import no.ntnu.okse.core.messaging.Message;
 import org.apache.log4j.Logger;
 import org.ntnunotif.wsnu.base.net.NuNamespaceContextResolver;
 import org.ntnunotif.wsnu.base.net.XMLParser;
+import org.ntnunotif.wsnu.base.soap.Soap;
 import org.ntnunotif.wsnu.base.topics.ConcreteEvaluator;
 import org.ntnunotif.wsnu.base.topics.SimpleEvaluator;
 import org.ntnunotif.wsnu.base.util.InternalMessage;
@@ -41,9 +42,6 @@ import org.w3._2005._08.addressing.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xmlsoap.schemas.soap.envelope.Body;
-import org.xmlsoap.schemas.soap.envelope.Envelope;
-import org.xmlsoap.schemas.soap.envelope.Header;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -65,6 +63,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -201,12 +200,11 @@ public class WSNTools {
             log.error("There was an error during parsing of raw xml string");
             return null;
         }
-        // Extract message object as a JAXB element
-        JAXBElement msg = (JAXBElement) result.getMessage();
-        // Cast it to a SOAP envelope
-        Envelope env = (Envelope) msg.getValue();
+
+        Soap soap = Soap.createSameAs(m);
+        List<Object> body = soap.getBodyContent(m);
         // Extract the Notify wrapper
-        Notify notify = (Notify) env.getBody().getAny().get(0);
+        Notify notify = (Notify) body.get(0);
 
         return notify;
     }
@@ -371,8 +369,8 @@ public class WSNTools {
             log.debug("Extracting subscriptionRef from raw XML response: " + subResponse.getMessage().toString());
             InternalMessage parsed = parseRawXmlString(subResponse.getMessage().toString());
             JAXBElement jaxb = (JAXBElement) parsed.getMessage();
-            Envelope env = (Envelope) jaxb.getValue();
-            SubscribeResponse sr = (SubscribeResponse) env.getBody().getAny().get(0);
+            Soap soap = Soap.createSameAs(jaxb);
+            SubscribeResponse sr = (SubscribeResponse) soap.getBodyContent(jaxb).get(0);
             return ServiceUtilities.getAddress(sr.getSubscriptionReference());
 
         } catch (ClassCastException e) {

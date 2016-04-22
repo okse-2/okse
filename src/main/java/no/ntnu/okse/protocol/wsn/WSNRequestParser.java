@@ -25,16 +25,14 @@
 package no.ntnu.okse.protocol.wsn;
 
 import com.google.common.io.ByteStreams;
+import com.sun.istack.internal.NotNull;
 import org.apache.log4j.Logger;
 import org.ntnunotif.wsnu.base.internal.Hub;
 import org.ntnunotif.wsnu.base.internal.ServiceConnection;
 import org.ntnunotif.wsnu.base.net.XMLParser;
+import org.ntnunotif.wsnu.base.soap.Soap;
 import org.ntnunotif.wsnu.base.util.InternalMessage;
 import org.ntnunotif.wsnu.base.util.Utilities;
-import org.xmlsoap.schemas.soap.envelope.Body;
-import org.xmlsoap.schemas.soap.envelope.Envelope;
-import org.xmlsoap.schemas.soap.envelope.Header;
-import org.xmlsoap.schemas.soap.envelope.ObjectFactory;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -104,7 +102,7 @@ public class WSNRequestParser implements Hub {
                     JAXBElement msg = (JAXBElement) message.getMessage();
                     Class messageClass = msg.getDeclaredType();
 
-                    if (messageClass.equals(org.w3._2001._12.soap_envelope.Envelope.class)) {
+                    if (messageClass.equals(org.w3._2003._05.soap_envelope.Envelope.class)) {
                         message.setMessage(msg.getValue());
                     } else if (messageClass.equals(org.xmlsoap.schemas.soap.envelope.Envelope.class)) {
                         message.setMessage(msg.getValue());
@@ -121,7 +119,8 @@ public class WSNRequestParser implements Hub {
                 }
 
                 try {
-                    XMLParser.writeObjectToStream(Utilities.createSoapFault("Client", "Invalid formatted message"), streamToRequestor);
+                    Soap soap = Soap.create(Soap.SoapVersion.SOAP_1_1);
+                    XMLParser.writeObjectToStream(soap.createFault(Soap.SoapFaultType.SOAP_CLIENT, "Invalid formatted message"), streamToRequestor);
                     return new InternalMessage(InternalMessage.STATUS_FAULT | InternalMessage.STATUS_FAULT_INVALID_PAYLOAD, null);
                 } catch (JAXBException faultGeneratingJaxbException) {
                     log.error("Failed to generate SOAP fault message: " + faultGeneratingJaxbException.getMessage());
@@ -244,8 +243,8 @@ public class WSNRequestParser implements Hub {
                 if ((returnMessage.statusCode & InternalMessage.STATUS_FAULT_INVALID_DESTINATION) > 0) {
 
                     try {
-
-                        XMLParser.writeObjectToStream(Utilities.createSoapFault("Client", "The message did not contain any information relevant to any web service at this address"), streamToRequestor);
+                        Soap soap = Soap.create(Soap.SoapVersion.SOAP_1_1);
+                        XMLParser.writeObjectToStream(soap.createFault(Soap.SoapFaultType.SOAP_CLIENT, "The message did not contain any information relevant to any web service at this address"), streamToRequestor);
                         return returnMessage;
 
                     } catch (JAXBException e) {
@@ -257,8 +256,8 @@ public class WSNRequestParser implements Hub {
                 } else {
 
                     try {
-
-                        XMLParser.writeObjectToStream(Utilities.createSoapFault("Server", "There was an unexpected error while processing the request."), streamToRequestor);
+                        Soap soap = Soap.create(Soap.SoapVersion.SOAP_1_1);
+                        XMLParser.writeObjectToStream(soap.createFault(Soap.SoapFaultType.SOAP_SERVER, "There was an unexpected error while processing the request."), streamToRequestor);
                         return returnMessage;
 
                     } catch (JAXBException e) {
@@ -287,35 +286,22 @@ public class WSNRequestParser implements Hub {
      * @param o the <code>Object</code> to wrap
      * @return the wrapped JAXBElement
      */
-    private Object wrapInJAXBAcceptedSoapEnvelope(Object o) {
-
+    private Object wrapInJAXBAcceptedSoapEnvelope(@NotNull Object o) {
         // Check if this is already correct type
-        if (o instanceof JAXBElement) {
-            JAXBElement element = (JAXBElement) o;
-            if (element.getDeclaredType() == Envelope.class ||
-                    element.getDeclaredType() == org.w3._2001._12.soap_envelope.Envelope.class)
-                return o;
-        }
-
-        if (o != null) {
-            // Check if it is not already wrapped in an envelope, if so wrap it
-            if (!((o instanceof org.w3._2001._12.soap_envelope.Envelope) || o instanceof Envelope)) {
-                ObjectFactory factory = new ObjectFactory();
-                Envelope env = factory.createEnvelope();
-                Body body = factory.createBody();
-                body.getAny().add(o);
-                env.setBody(body);
-                return factory.createEnvelope(env);
-            } else if (o instanceof org.w3._2001._12.soap_envelope.Envelope) {
-                org.w3._2001._12.soap_envelope.ObjectFactory factory = new org.w3._2001._12.soap_envelope.ObjectFactory();
-                return factory.createEnvelope((org.w3._2001._12.soap_envelope.Envelope) o);
-            } else if (o instanceof Envelope) {
-                ObjectFactory factory = new ObjectFactory();
-                return factory.createEnvelope((Envelope) o);
+        if (o instanceof JAXBElement && Soap.version(((JAXBElement) o).getDeclaredType()) != Soap.SoapVersion.SOAP_NOT_ENVELOPE) {
+            return o;
+        } else {
+            if(Soap.isSoapEnvelope(o)) {
+                // If we are sent an envelope, pack it in the correct JAXBElement
+                Soap soap = Soap.create(Soap.version(o.getClass()));
+                return soap.createMessage(o);
+            } else {
+                // Else pack it in some envelope and JAXBElement
+                // TODO: Make this user-settable
+                Soap soap = Soap.create(Soap.SoapVersion.SOAP_1_1);
+                return soap.createMessage(o);
             }
         }
-
-        return null;
     }
 
     /**
@@ -348,17 +334,9 @@ public class WSNRequestParser implements Hub {
                 }
 
             } else {
+                Soap soap = Soap.create(message.getVersion());
 
-                ObjectFactory factory = new ObjectFactory();
-                Envelope envelope = new Envelope();
-                Header header = new Header();
-                Body body = new Body();
-
-                body.getAny().add(messageContent);
-                envelope.setBody(body);
-                envelope.setHeader(header);
-
-                InputStream messageAsStream = Utilities.convertUnknownToInputStream(factory.createEnvelope(envelope));
+                InputStream messageAsStream = Utilities.convertUnknownToInputStream(soap.createMessage(messageContent));
                 message.setMessage(messageAsStream);
                 message.statusCode = InternalMessage.STATUS_OK |
                         InternalMessage.STATUS_HAS_MESSAGE |
