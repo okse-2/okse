@@ -1,13 +1,11 @@
 package no.ntnu.okse.protocol.stomp.common;
 
-import asia.stampy.common.gateway.AbstractStampyMessageGateway;
 import asia.stampy.common.heartbeat.HeartbeatContainer;
 import asia.stampy.examples.system.server.SystemAcknowledgementHandler;
 import asia.stampy.examples.system.server.SystemLoginHandler;
 import asia.stampy.server.listener.validate.ServerMessageValidationListener;
 import asia.stampy.server.listener.version.VersionListener;
 import asia.stampy.server.netty.ServerNettyChannelHandler;
-import asia.stampy.server.netty.ServerNettyMessageGateway;
 import asia.stampy.server.netty.connect.NettyConnectResponseListener;
 import asia.stampy.server.netty.connect.NettyConnectStateListener;
 import asia.stampy.server.netty.heartbeat.NettyHeartbeatListener;
@@ -15,15 +13,17 @@ import asia.stampy.server.netty.login.NettyLoginMessageListener;
 import asia.stampy.server.netty.receipt.NettyReceiptListener;
 import asia.stampy.server.netty.subscription.NettyAcknowledgementListenerAndInterceptor;
 import asia.stampy.server.netty.transaction.NettyTransactionListener;
+import no.ntnu.okse.protocol.stomp.STOMPGateway;
 import no.ntnu.okse.protocol.stomp.listeners.IDontNeedSecurity;
 import org.mockito.Mockito;
 
-public class Gateway extends ServerNettyMessageGateway{
-    public static AbstractStampyMessageGateway initialize(int port) {
+public class Gateway extends STOMPGateway {
+    public static STOMPGateway initialize(String host, int port) {
         HeartbeatContainer heartbeatContainer = new HeartbeatContainer();
 
-        ServerNettyMessageGateway gateway = Mockito.spy(new ServerNettyMessageGateway());
+        STOMPGateway gateway = Mockito.spy(new Gateway());
         gateway.setPort(port);
+        gateway.setHost(host);
         gateway.setHeartbeat(1000);
         gateway.setAutoShutdown(true);
 

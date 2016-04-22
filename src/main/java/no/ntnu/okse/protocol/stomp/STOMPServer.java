@@ -1,6 +1,5 @@
 package no.ntnu.okse.protocol.stomp;
 
-import asia.stampy.common.gateway.AbstractStampyMessageGateway;
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.heartbeat.HeartbeatContainer;
 import asia.stampy.common.heartbeat.StampyHeartbeatContainer;
@@ -25,32 +24,45 @@ import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.protocol.stomp.listeners.*;
 import no.ntnu.okse.protocol.stomp.listeners.MessageListener;
 import org.apache.log4j.Logger;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
 
 public class STOMPServer extends Server {
     private static STOMPSubscriptionManager subscriptionManager;
-    public AbstractStampyMessageGateway gateway;
+    public STOMPGateway gateway;
     private static STOMPProtocolServer ps;
     private Logger log;
 
+    /**
+     * Sets up the logger when we create a new instance of this class
+     */
     public STOMPServer(){
         log = Logger.getLogger(STOMPProtocolServer.class.getName());
     }
 
+    /**
+     * Sets the subscription manager for the class
+     * @param subscriptionManager the subscription manager instance
+     */
     public void setSubscriptionManager(STOMPSubscriptionManager subscriptionManager) {
         this.subscriptionManager = subscriptionManager;
     }
 
-    private AbstractStampyMessageGateway initialize(int port) {
+    /**
+     * Initialises the gateway and sets handlers, listeners, host and port.
+     * Also sets many other settings
+     * @param host the host to bind to
+     * @param port the port to bind to
+     * @return the gateway object
+     */
+    private STOMPGateway initialize(String host, int port) {
         StampyHeartbeatContainer heartbeatContainer = new HeartbeatContainer();
 
-        ServerNettyMessageGateway gateway = new ServerNettyMessageGateway();
+//        ServerNettyMessageGateway gateway = new ServerNettyMessageGateway();
+        STOMPGateway gateway = new STOMPGateway();
         gateway.setPort(port);
+        gateway.setHost(host);
         gateway.setHeartbeat(1000);
         gateway.setAutoShutdown(true);
 
@@ -102,13 +114,25 @@ public class STOMPServer extends Server {
         connectResponse.setGateway(gateway);
         gateway.addMessageListener(connectResponse);
 
-        addGatewayListenersAndHandlers(gateway);
         acknowledgement.setHandler(sys);
         gateway.setHandler(channelHandler);
+
+        addGatewayListenersAndHandlers(gateway);
 
         return gateway;
     }
 
+    /**
+     * Adds gateway listeners to the gateway object. These listeners subscribe to particular messages
+     * and perform some action when these messages are received.
+     * This method is called as the last method before we return the
+     * gateway object in the initialize method
+     *
+     * We prefer that every listener performs a specific action, for example a subscriber handler would
+     * only handle subscriptions and no other aspects of the publish/subscribe pattern, unsubscribing for example.
+     *
+     * @param gateway the gateway object to add listeners to
+     */
     private void addGatewayListenersAndHandlers(ServerNettyMessageGateway gateway){
         no.ntnu.okse.protocol.stomp.listeners.MessageListener messageListener = new MessageListener();
         SubscriptionListener subListener = new SubscriptionListener();
@@ -129,11 +153,21 @@ public class STOMPServer extends Server {
         gateway.addMessageListener(incrementTotalRequestsListener);
     }
 
+    /**
+     * Inits the actual gateway and all its listeners, also binds the to a specific host and port
+     * @param host the host to bind to
+     * @param port the port to bind to
+     * @throws Exception
+     */
     public void init(String host, int port) throws Exception {
-        gateway = initialize(port);
+        gateway = initialize(host, port);
         gateway.connect();
     }
 
+    /**
+     * Sets the protocolServer for the class
+     * @param ps the protocol server to be set
+     */
     public void setProtocolServer(STOMPProtocolServer ps){
         this.ps = ps;
     }
@@ -186,14 +220,17 @@ public class STOMPServer extends Server {
         return message;
     }
 
+    /**
+     * Stops the server and sets gateway to null
+     */
     public void stopServer(){
         //TODO: This needs to be implemented, will be left like this because of demo purposes
-/*        try {
+        log.info("Shutting down STOMP server");
+        try {
             gateway.shutdown();
             gateway = null;
         } catch (Exception e) {
             log.error("Exception when trying to shutdown the server", e);
         }
-*/
     }
 }
