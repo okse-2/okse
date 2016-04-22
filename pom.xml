@@ -144,18 +144,13 @@
             <version>master-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.vysper</groupId>
-            <artifactId>vysper-core</artifactId>
-            <version>0.7</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.vysper.extensions</groupId>
             <artifactId>xep0060-pubsub</artifactId>
             <version>0.7</version>
         </dependency>
         <dependency>
             <groupId>org.apache.vysper</groupId>
-            <artifactId>demo-pubsub-client</artifactId>
+            <artifactId>vysper-core</artifactId>
             <version>0.7</version>
         </dependency>
 
