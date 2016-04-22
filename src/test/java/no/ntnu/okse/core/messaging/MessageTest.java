@@ -141,6 +141,13 @@ public class MessageTest {
     }
 
     @Test
+    public void testGetAttributes() throws Exception {
+        assertEquals(0, m.getAttributes().size());
+        m.setAttribute("flag", "value");
+        assertEquals(1, m.getAttributes().size());
+    }
+
+    @Test
     public void testGetCompletionTime() throws Exception {
         LocalDateTime completed = m.setProcessed();
         assertTrue(completed.equals(m.getCompletionTime()));

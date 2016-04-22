@@ -315,13 +315,6 @@ public class WSNotificationServer extends AbstractProtocolServer {
     }
 
     /**
-     * Support method to allow other classes in the wsn package to increment total messages received
-     */
-    protected void incrementTotalMessagesReceived() {
-        totalMessagesReceived.incrementAndGet();
-    }
-
-    /**
      * Retrieve the default element name for non-XML messages that are to be wrapped in a soap enveloped
      * WSNotification Notify element. This element will be the first and only child of the Message element.
      *

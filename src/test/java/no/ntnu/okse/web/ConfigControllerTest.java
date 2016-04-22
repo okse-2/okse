@@ -1,15 +1,18 @@
 package no.ntnu.okse.web;
 
 import no.ntnu.okse.core.CoreService;
+import no.ntnu.okse.protocol.ProtocolServer;
 import no.ntnu.okse.web.controller.ConfigController;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.log4j.PropertyConfigurator;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.BufferedInputStream;
 import java.io.StringReader;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,14 +24,20 @@ public class ConfigControllerTest {
     private final int PORT1 = 40000;
     private final int PORT2 = 50000;
 
-    @BeforeTest
-    public void setup() {
+    @BeforeClass
+    public void setup() throws NoSuchFieldException, IllegalAccessException {
         PropertyConfigurator.configure("config/log4j.properties");
         final String xml_cfg =
                 "<servers>" +
                     "<server type=\"wsn\" host=\"127.0.0.1\" port=\""+PORT1+"\" />" +
                     "<server type=\"wsn\" host=\"127.0.0.1\" port=\""+PORT2+"\" />" +
                 "</servers>";
+        CoreService cs = CoreService.getInstance();
+        Field field = CoreService.class.getDeclaredField("protocolServers");
+        field.setAccessible(true);
+        ArrayList<ProtocolServer> ps = (ArrayList<ProtocolServer>)field.get(cs);
+        ps.clear();
+        cs.protocolServersBooted = false;
         CoreService.getInstance().bootProtocolServers(new BufferedInputStream(new ReaderInputStream(new StringReader(xml_cfg))));
         configController = new ConfigController();
     }

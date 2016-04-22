@@ -134,9 +134,34 @@
             <version>1.52</version>
         </dependency>
         <dependency>
-            <groupId>com.github.tOgg1</groupId>
-            <artifactId>WS-Nu</artifactId>
-            <version>master-SNAPSHOT</version>
+            <groupId>io.moquette</groupId>
+            <artifactId>moquette-broker</artifactId>
+            <version>0.9-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ntnunotif.wsnu</groupId>
+            <artifactId>wsnu-base</artifactId>
+            <version>0.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ntnunotif.wsnu</groupId>
+            <artifactId>wsnu-services</artifactId>
+            <version>0.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.joram</groupId>
+            <artifactId>joram-mom-amqp</artifactId>
+            <version>5.11.0-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.joram</groupId>
+            <artifactId>joram-mom-core</artifactId>
+            <version>5.11.0-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.joram</groupId>
+            <artifactId>jndi-server</artifactId>
+            <version>5.11.0-okse</version>
         </dependency>
     </dependencies>
 
@@ -187,8 +212,8 @@
 
     <repositories>
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
+            <id>okse-jenkins</id>
+            <url>http://okse.badjokecounter.press:8081/jenkins/plugin/repository/everything/</url>
         </repository>
     </repositories>
 

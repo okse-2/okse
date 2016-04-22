@@ -33,6 +33,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -48,6 +50,11 @@ public class CoreServiceTest {
     @BeforeClass
     public void boot() throws Exception {
         cs = CoreService.getInstance();
+        Field field = CoreService.class.getDeclaredField("protocolServers");
+        field.setAccessible(true);
+        ArrayList<ProtocolServer> ps = (ArrayList<ProtocolServer>)field.get(cs);
+        ps.clear();
+        cs.protocolServersBooted = false;
         cs.bootProtocolServers();
     }
 

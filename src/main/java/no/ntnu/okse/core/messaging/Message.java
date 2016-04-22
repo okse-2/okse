@@ -205,6 +205,14 @@ public class Message {
         if (attributes.containsKey(key)) return attributes.get(key);
         return null;
     }
+    /**
+     * Retrieves all the attributes associated with this message object
+     *
+     * @return Attributes associated with the object
+     * */
+    public HashMap<String, String> getAttributes(){
+        return attributes;
+    }
 
     /**
      * Retrieves the completion time of this message (when it was processed).
