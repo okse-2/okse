@@ -7,6 +7,10 @@ import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
 import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
 
+/**
+ * This class listens to the UNSUBSCRIBE message type
+ * and handles any connection that wants to unsubscribe from the service
+ */
 public class UnSubscriptionListener implements StampyMessageListener {
     private STOMPSubscriptionManager subscriptionManager;
 
@@ -26,6 +30,11 @@ public class UnSubscriptionListener implements StampyMessageListener {
         subscriptionManager.removeSubscriber(unsubMessage.getHeader().getId());
     }
 
+    /**
+     * Sets the subscriptionManager for this class, it is used
+     * to remove any subscribers after they disconnect
+     * @param subscriptionManager the subscription manager instance
+     */
     public void setSubscriptionManager(STOMPSubscriptionManager subscriptionManager) {
         this.subscriptionManager = subscriptionManager;
     }

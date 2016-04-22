@@ -4,8 +4,6 @@ import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
-import javax.annotation.Resource;
-
 import asia.stampy.server.netty.ServerNettyMessageGateway;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -14,13 +12,18 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import asia.stampy.common.StampyLibrary;
-
 /**
- * The Class ServerNettyMessageGateway.
+ * This class actually creates and returns the gateway object
+ *
+ * This class was extended from ServerNettyMessageGateway to
+ * fix some issues with the shutdown of the server.
+ * Aswell as adding the option to specifically set the host
+ * of the STOMP server.
+ *
+ * We decided that this was much easier than to fork the entire project
+ *
+ * @see ServerNettyMessageGateway for any changes modifications
  */
-@Resource
-@StampyLibrary(libraryName = "stampy-NETTY-client-server-RI")
 public class STOMPGateway extends ServerNettyMessageGateway {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private NioServerSocketChannelFactory factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
@@ -41,6 +44,10 @@ public class STOMPGateway extends ServerNettyMessageGateway {
         return bootstrap;
     }
 
+    /**
+     * Returns the server, used in testing and debugging
+     * @return
+     */
     public Channel getServer(){
         return server;
     }

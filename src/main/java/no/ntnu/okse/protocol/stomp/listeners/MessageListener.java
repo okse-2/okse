@@ -15,12 +15,23 @@ import java.lang.invoke.MethodHandles;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * This class will listen to the MESSAGE message type
+ * and whenever one is received it will send that message into
+ * OKSE. It also has special handling for adding any user defined
+ * headers to the OKSE message.
+ *
+ * Also increments the total number of messages received
+ */
 public class MessageListener implements StampyMessageListener {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private String protocol;
     private STOMPProtocolServer protocolServer;
     private MessageService messageService;
 
+    /**
+     * Constructor for the class, simply sets the protocol type
+     */
     public MessageListener(){
         this.protocol = "stomp";
     }
@@ -66,12 +77,28 @@ public class MessageListener implements StampyMessageListener {
         protocolServer.incrementTotalMessagesReceived();
     }
 
+    /**
+     * Sends a message into OKSE
+     * @param msg the message to send
+     */
     private void sendMessageToOKSE(Message msg){
         messageService.distributeMessage(msg);
     }
+
+    /**
+     * Sets the message service for the class, used for sending message
+     * into OKSE
+     * @param instance the message service instance
+     */
     public void setMessageService(MessageService instance){
         messageService = instance;
     }
+
+    /**
+     * Sets the protocol server, used to increment total number of message
+     * received
+     * @param protocolServer the protocol server
+     */
     public void setProtocolServer(STOMPProtocolServer protocolServer) {
         this.protocolServer = protocolServer;
     }

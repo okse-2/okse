@@ -8,17 +8,25 @@ import asia.stampy.common.message.StompMessageType;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
 
+/**
+ * This class listens to the SUBSCRIBE message type and
+ * handles any connection that wants to subscribe to a topic
+ */
 public class SubscriptionListener implements StampyMessageListener {
-    private static StompMessageType[] TYPES;
     private STOMPSubscriptionManager subscriptionManager;
     private String protocol;
+
+    /**
+     * Constructor for the class
+     * Sets the protcol type to stomp
+     */
     public SubscriptionListener(){
         this.protocol = "stomp";
     }
 
     @Override
     public StompMessageType[] getMessageTypes() {
-        return TYPES;
+        return new StompMessageType[]{StompMessageType.SUBSCRIBE};
     }
 
     @Override
@@ -33,10 +41,11 @@ public class SubscriptionListener implements StampyMessageListener {
         subscriptionManager.addSubscriber(sub, subMessage.getHeader().getId());
     }
 
-    static {
-        TYPES = new StompMessageType[]{StompMessageType.SUBSCRIBE};
-    }
-
+    /**
+     * Sets the subscriptionManager for this class, it is used
+     * to remove any subscribers after they disconnect
+     * @param subscriptionManager the subscription manager instance
+     */
     public void setSubscriptionManager(STOMPSubscriptionManager subscriptionManager){
         this.subscriptionManager = subscriptionManager;
     }

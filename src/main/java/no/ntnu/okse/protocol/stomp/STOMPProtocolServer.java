@@ -11,6 +11,14 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
     private static final String DEFAULT_HOST = "0.0.0.0";
     private static final Integer DEFAULT_PORT = 61613;
 
+    private STOMPServer server;
+
+    /**
+     * Constructor for the class, sets the host and port for the gateway
+     * Also initiates the logger and sets the server type to stomp
+     * @param host the host to listen to
+     * @param port the port to listen to
+     */
     public STOMPProtocolServer(String host, Integer port) {
         this.host = host;
         this.port = port;
@@ -19,7 +27,6 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
         log = Logger.getLogger(STOMPProtocolServer.class.getName());
     }
 
-    private STOMPServer server;
 
     @Override
     public void boot() {
@@ -70,30 +77,53 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
         }
     }
 
+    /**
+     * Sets the server, this is used for testing and debugging
+     * @param server
+     */
     public void setServer(STOMPServer server){
         this.server = server;
     }
 
+    /**
+     * Increments the total number of requests by 1
+     */
     public void incrementTotalRequests() {
         totalRequests.incrementAndGet();
     }
 
+    /**
+     * Increments the total number of bad requests by 1
+     */
     public void incrementTotalBadRequests() {
         totalBadRequests.incrementAndGet();
     }
 
+    /**
+     * Increments the total number of errors by 1
+     */
     public void incrementTotalErrors() {
         totalErrors.incrementAndGet();
     }
 
+    /**
+     * Increments the total number of messages received by 1
+     */
     public void incrementTotalMessagesReceived() {
         totalMessagesReceived.incrementAndGet();
     }
 
+    /**
+     * Increments the total number of messages sent by 1
+     */
     public void incrementTotalMessagesSent() {
         totalMessagesSent.incrementAndGet();
     }
 
+    /**
+     * Returns whether the server is running or not
+     * @return true if the server is running, false otherwise
+     */
     public boolean isRunning() {
         return _running;
     }
