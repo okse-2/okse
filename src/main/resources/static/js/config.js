@@ -24,14 +24,46 @@
 
 
 var Config = (function($) {
+    wsn_servers = [];
+
+    var currentWsnInstance = function() {
+        return $("#wsn-instance").val()
+    }
+
+    var updateRelays = function(id) {
+        $.okseDebug.logPrint('updateRelays(' + id +')')
+        if(id === null) {
+            $('#relays-table').html('<tr class="danger"><td colspan="2"><h4 class="text-center">No WSNotification server selected</h4></td></tr>')
+            return
+        }
+
+        Main.ajax({
+            url: 'config/relay/get?serverid=' + id,
+            type: 'GET',
+            success: function(data) {
+                if(Object.keys(data).length > 0) $('#relays-table').html(createTableForAllRelays(data))
+                else $('#relays-table').html('<tr class="danger"><td colspan="2"><h4 class="text-center">No relays returned from ConfigController</h4></td></tr>')
+            },
+            error: function(xhr, status, error) {
+                var data = JSON.parse(xhr.responseText)
+                Main.error(xhr, status, error)
+                Main.displayMessage(data.message)
+                $('#relays-table').html('<tr class="danger"><td colspan="2"><h4 class="text-center">WSN instance not valid</h4></td></tr>')
+            }
+        });
+    }
 
     var createTableForAllRelays = function(relays) {
         var trHTML = ""
-        $.map(relays, function(value, key) {
+        $.map(relays, function(value) {
+            var match = value.match(/(https?:\/\/)?[^:/?]+(:\d+)?\/?/);
+            if(match == null) match = value
+            else match = match[0]
             trHTML +=
                 '<tr>' +
-                    '<td>' + value.split('subscriptionManager')[0] + '</td>' +
-                    '<td>' + '<a class="btn btn-xs btn-block btn-danger delete-relay" id="' + key + '">Delete</a></td>' +
+                //TODO: Ugly regex. A better solution should be found for this.
+                    '<td>' + match + '</td>' +
+                    '<td>' + '<a class="btn btn-xs btn-block btn-danger delete-relay" id="' + value + '">Delete</a></td>' +
                 '</tr>'
         });
         return trHTML
@@ -104,7 +136,7 @@ var Config = (function($) {
                 $(e.target).addClass("disabled")
 
                 Main.ajax({
-                    url: 'config/relay/delete/single?relayID=' + relay,
+                    url: 'config/relay/delete/single?relayID=' + relay + "&serverID=" + currentWsnInstance(),
                     type: 'DELETE',
                     success: function(data) {
                         $.okseDebug.logPrint("[Debug][Config] Callback from server; relay deleted")
@@ -120,6 +152,8 @@ var Config = (function($) {
                     }
                 });
             }
+
+            updateRelays(currentWsnInstance())
         });
 
     }
@@ -129,18 +163,11 @@ var Config = (function($) {
             unBindButtons()
 
             var countMappings = Object.keys(response.mappings).length
-            var countRelays = Object.keys(response.relays).length
 
             if ( ! countMappings == 0 ) {
                 $('#mappings-table').html(createTableForAllMappings(response.mappings))
             } else {
                 $('#mappings-table').html('<tr class="danger"><td colspan="3"><h4 class="text-center">No mappings returned from TopicService</h4></td></tr>')
-            }
-
-            if ( ! countRelays == 0) {
-                $('#relays-table').html(createTableForAllRelays(response.relays))
-            } else {
-                $('#relays-table').html('<tr class="danger"><td colspan="2"><h4 class="text-center">No relays returned from ConfigController</h4></td></tr>')
             }
 
             bindButtons()
@@ -157,11 +184,14 @@ var Config = (function($) {
                     url += ('&topic=' + encodeURIComponent(relayTopic))
                 }
 
+                url += ('&serverID=' + $('#wsn-instance').val())
+
                 Main.ajax({
                     url: url,
                     type: 'POST',
                     success: function(data) {
                         $.okseDebug.logPrint("[Debug][Config] Callback from server; added relay")
+                        updateRelays(currentWsnInstance())
                     },
                     error: function(xhr, status, error) {
                         var data = JSON.parse(xhr.responseText)
@@ -248,6 +278,32 @@ var Config = (function($) {
                     }
                 })
             });
+
+            $('#wsn-instance').on('change', function(e) {
+                updateRelays(currentWsnInstance());
+            });
+
+            Main.ajax({
+                url: 'config/get_wsn',
+                type: 'GET',
+                success: function(data) {
+                    wsn_servers = data
+                    var options = wsn_servers.reduce((str, server, id) =>
+                        str + "<option value='" + (id) + "'>" + server.host + ":" + server.port + "</option>"
+                    , "");
+                    $('#wsn-instance').html(options);
+                    updateRelays(currentWsnInstance());
+                },
+                error: function(xhr, status, error) {
+                    var data = JSON.parse(xhr.responseText)
+                    Main.error(xhr, status, error)
+                    Main.displayMessage(data.message)
+                    wsn_servers = []
+                }
+            });
+
+            if(wsn_servers.length > 0) updateRelays(0)
+            else updateRelays(null)
         }
     }
 

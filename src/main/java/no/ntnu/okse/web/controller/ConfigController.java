@@ -1,14 +1,17 @@
 package no.ntnu.okse.web.controller;
 
+import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.topic.TopicService;
+import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/config")
@@ -24,25 +27,59 @@ public class ConfigController {
     private static final String ADD_RELAY = "/relay/add";
     private static final String DELETE_ALL_RELAYS = "/relay/delete/all";
     private static final String DELETE_RELAY = "/relay/delete/single";
+    private static final String GET_WSN_SERVERS = "/get_wsn";
+    private static final String GET_WSN_RELAYS = "/relay/get";
 
     // LOG4J logger
     private static Logger log = Logger.getLogger(ConfigController.class.getName());
 
     // Relay fields
-    private ConcurrentHashMap<String, String> relays;
-    private HashSet<String> localRelays;
+    private List<WSNotificationServer> wsnServers;
 
     /**
      * Constructor for ConfigController. Initiates the localRelays
      */
     public ConfigController() {
-        relays = new ConcurrentHashMap<>();
-        localRelays = new HashSet<String>() {{
-            add("127.0.0.1");
-            add("0.0.0.0");
-            add("localhost");
-            // Maybe WSNotificationServer.getInstance().getPublicWANHost() should be added here?
-        }};
+        getWsnServers();
+    }
+
+    /**
+     * Returns all running WSN servers
+     *
+     * @return A List containing all running WSN servers
+     */
+    @RequestMapping(method = RequestMethod.GET, value = GET_WSN_SERVERS)
+    public
+    @ResponseBody
+    List<Map<String,Object>> getWsnServers() {
+        wsnServers = CoreService.getInstance().getAllProtocolServers().stream()
+                .filter(server -> server.getProtocolServerType().equals("WSNotification"))
+                .map(s -> (WSNotificationServer)s)
+                .collect(Collectors.toList());
+
+            return wsnServers.stream()
+                .map(server -> new HashMap<String, Object>() {{
+                    put("host", server.getHost());
+                    put("port", server.getPort());
+                }})
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns all configured relays for a given WSN server
+     *
+     * @param id Integer  ID of WSN server to fetch relays from
+     * @return A list
+     */
+    @RequestMapping(method = RequestMethod.GET, value = GET_WSN_RELAYS)
+    public
+    @ResponseBody
+    Set<String> getWsnRelays(@RequestParam(value = "serverid") Integer id) {
+        try {
+            return wsnServers.get(id).getRelays();
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
     /**
@@ -59,7 +96,6 @@ public class ConfigController {
 
         HashMap<String, Object> result = new HashMap<String, Object>() {{
             put("mappings", allMappings);
-            put("relays", relays);
         }};
 
         return result;
@@ -160,8 +196,10 @@ public class ConfigController {
     @RequestMapping(method = RequestMethod.POST, value = ADD_RELAY)
     public
     @ResponseBody
-    ResponseEntity<String> addRelay(@RequestParam(value = "from") String relay, @RequestParam(value = "topic", required = false) String topic) {
-        /*
+    ResponseEntity<String> addRelay(
+            @RequestParam(value = "serverID") Integer id,
+            @RequestParam(value = "from") String relay,
+            @RequestParam(value = "topic", required = false) String topic) {
         log.debug("Trying to add relay from: " + relay + " with topic:" + topic);
 
         String regex = "(?:http.*://)?(?<host>[^:/ ]+).?(?<port>[0-9]*).*";
@@ -179,47 +217,12 @@ public class ConfigController {
             return new ResponseEntity<String>("{ \"message\" :\"Host or port not provided, not able to add relay\" }", HttpStatus.BAD_REQUEST);
         }
 
-        // if relay.host == 0.0.0 etc sjekk port
-        if (localRelays.contains(host)) {
-            log.debug("Same host, need to check port");
-            if (WSNotificationServer.getInstance().getPort() == port) {
-                log.debug("Same port, invalid relay command");
-                return new ResponseEntity<String>("{ \"message\" :\"Same host and port, not able to add relay\" }", HttpStatus.BAD_REQUEST);
-            }
-            // else sjekk relay.host mot publicWANHost, så sjekk port
-        } else if (host.equals(WSNotificationServer.getInstance().getPublicWANHost())) {
-            log.info("Same host (WAN), need to check port");
-            if (WSNotificationServer.getInstance().getPublicWANPort() == port) {
-                log.info("Same port (WAN), invalid relay command");
-                return new ResponseEntity<String>("{ \"message\" :\"Same host and port (WAN), not able to add relay\" }", HttpStatus.BAD_REQUEST);
-            }
+        if(wsnServers.get(id).addRelay(relay, host, port, topic)) {
+            return new ResponseEntity<String>("{ \"message\" :\"Successfully added relay\" }", HttpStatus.OK);
+        } else {
+
+            return new ResponseEntity<String>("{ \"message\" :\"Unable to add relay\" }", HttpStatus.OK);
         }
-
-        if (!relay.startsWith("http://") && !relay.startsWith("https://")) {
-            relay = "http://" + relay;
-        }
-
-        String subscriptionReference = WSNTools.extractSubscriptionReferenceFromRawXmlResponse(
-                WSNotificationServer.getInstance().sendMessage(
-                        WSNTools.generateSubscriptionRequestWithTopic(
-                                relay,
-                                topic, // Topic
-                                WSNotificationServer.getInstance().getURI(),
-                                null // Termination time
-                        )
-                )
-        );
-
-        if (subscriptionReference == null) {
-            log.debug("Relay could not be created");
-            return new ResponseEntity<String>("{ \"message\" :\"The subscription request failed for relay failed\" }", HttpStatus.BAD_REQUEST);
-
-        }
-        relays.put(subscriptionReference.split("subscriberkey=")[1], subscriptionReference);
-        log.debug("Relay got subscriptionReference: " + subscriptionReference);
-        return new ResponseEntity<String>("{ \"message\" :\"Successfully added relay\" }", HttpStatus.OK);
-        */
-        return new ResponseEntity<String>("{ \"message\" :\"UNIMPLEMENTED\" }", HttpStatus.OK);
     }
 
     /**
@@ -232,21 +235,14 @@ public class ConfigController {
     @RequestMapping(method = RequestMethod.DELETE, value = DELETE_RELAY)
     public
     @ResponseBody
-    ResponseEntity<String> deleteRelay(@RequestParam(value = "relayID") String relay) {
+    ResponseEntity<String> deleteRelay(@RequestParam(value = "serverID") Integer id, @RequestParam(value = "relayID") String relay) {
         log.debug("Trying to remove a relay: " + relay);
+        final WSNotificationServer server = wsnServers.get(id);
 
-        /*
-        if (relays.containsKey(relay)) {
-            WsnUtilities.sendUnsubscribeRequest(relays.get(relay), WSNotificationServer.getInstance().getRequestParser());
-            relays.remove(relay);
-            log.debug("Removed relay: " + relay);
+        if(server.deleteRelay(relay))
             return new ResponseEntity<String>("{ \"message\" :\"Successfully removed the relay\" }", HttpStatus.OK);
-        } else {
-            log.debug("Unable to remove relay: " + relay);
+        else
             return new ResponseEntity<String>("{ \"message\" :\"Unable to remove the relay, can't find it.\" }", HttpStatus.OK);
-        }
-        */
-        return new ResponseEntity<String>("{ \"message\" :\"NOT IMPLEMENTED\" }", HttpStatus.OK);
     }
 
     /**
@@ -259,16 +255,7 @@ public class ConfigController {
     public
     @ResponseBody
     ResponseEntity<String> deleteAllRelays() {
-        log.debug("Trying to delete all relays");
-        /*
-        relays.forEach((k, v) -> {
-            WsnUtilities.sendUnsubscribeRequest(relays.get(k), WSNotificationServer.getInstance().getRequestParser());
-            relays.remove(k);
-            log.debug("Removed relay: " + k);
-        });
-
+        wsnServers.forEach(s -> s.deleteAllRelays());
         return new ResponseEntity<String>("{ \"message\" :\"Deleted all relays\" }", HttpStatus.OK);
-        */
-        return new ResponseEntity<String>("{ \"message\" :\"NOT IMPLEMENTED\" }", HttpStatus.OK);
     }
 }

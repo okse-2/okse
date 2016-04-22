@@ -46,6 +46,7 @@ import org.ntnunotif.wsnu.base.internal.ServiceConnection;
 import org.ntnunotif.wsnu.base.net.NuNamespaceContextResolver;
 import org.ntnunotif.wsnu.base.util.InternalMessage;
 import org.ntnunotif.wsnu.base.util.RequestInformation;
+import org.ntnunotif.wsnu.services.general.WsnUtilities;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 import org.oasis_open.docs.wsn.b_2.Notify;
 import org.oasis_open.docs.wsn.b_2.TopicExpressionType;
@@ -56,9 +57,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -96,6 +95,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
     private HttpClient _client;
     private HashSet<ServiceConnection> _services;
     private ExecutorService clientPool;
+    private TreeSet<String> relays = new TreeSet<>();
 
     /**
      * Constructor that takes in configuration options for the WSNotification
@@ -440,7 +440,10 @@ public class WSNotificationServer extends AbstractProtocolServer {
             return "http://" + DEFAULT_HOST + ":" + DEFAULT_PORT;
         }
         // Return the server connectors registered host and port
-        return "http://" + _server.getURI().getHost() + ":" + (_server.getURI().getPort() > -1 ? _server.getURI().getPort() : DEFAULT_PORT);
+        //return "http://" + _server.getURI().getHost() + ":" + (_server.getURI().getPort() > -1 ? _server.getURI().getPort() : DEFAULT_PORT);
+        // TODO: getURI.getPort() returns -1 (because the server hasn't started yet?), we should find a better fix for this
+        ServerConnector c = (ServerConnector) _server.getConnectors()[0];
+        return "http://" + _server.getURI().getHost() + ":" + (_server.getURI().getPort() > -1 ? _server.getURI().getPort() : c.getPort());
     }
 
     /**
@@ -796,6 +799,81 @@ public class WSNotificationServer extends AbstractProtocolServer {
             log.error("sendMessage(): Unable to establish connection: " + e.getMessage());
             return new InternalMessage(InternalMessage.STATUS_FAULT_INTERNAL_ERROR, null);
         }
+    }
+
+    public boolean addRelay(String relay, String host, Integer port, String topic) {
+        final Set<String> localRelays = new HashSet<String>() {{
+            add("127.0.0.1");
+            add("0.0.0.0");
+            add("localhost");
+        }};
+
+        if(relays.contains(relay)) return false;
+
+        // if relay.host == 0.0.0 etc sjekk port
+        if (localRelays.contains(host)) {
+            log.debug("Same host, need to check port");
+            if (getPort() == port) {
+                log.debug("Same port, invalid relay command");
+                return false;
+            }
+            // else sjekk relay.host mot publicWANHost, så sjekk port
+        } else if (host.equals(getPublicWANHost())) {
+            log.info("Same host (WAN), need to check port");
+            if (getPublicWANPort() == port) {
+                log.info("Same port (WAN), invalid relay command");
+                return false;
+            }
+        }
+
+        if (!relay.startsWith("http://") && !relay.startsWith("https://")) {
+            relay = "http://" + relay;
+        }
+
+        String subscriptionReference = WSNTools.extractSubscriptionReferenceFromRawXmlResponse(
+                sendMessage(
+                        WSNTools.generateSubscriptionRequestWithTopic(
+                                relay,
+                                topic, // Topic
+                                getURI(),
+                                null // Termination time
+                        )
+                )
+        );
+
+        if (subscriptionReference == null) {
+            log.debug("Relay could not be created");
+            return false;
+
+        }
+        relays.add(subscriptionReference);
+        log.debug("Relay added");
+        return true;
+    }
+
+    public boolean deleteRelay(String relay) {
+        if (relays.contains(relay)) {
+            WsnUtilities.sendUnsubscribeRequest(relay, getRequestParser());
+            relays.remove(relay);
+            log.debug("Removed relay: " + relay);
+            return true;
+        } else {
+            log.debug("Unable to remove relay: " + relay);
+            return false;
+        }
+    }
+
+    public void deleteAllRelays() {
+        relays.forEach((v) -> {
+            WsnUtilities.sendUnsubscribeRequest(v, getRequestParser());
+            log.debug("Removed relay: " + v);
+        });
+
+        relays.clear();
+    }
+
+    public Set<String> getRelays() {
+        return relays;
     }
 }
 
