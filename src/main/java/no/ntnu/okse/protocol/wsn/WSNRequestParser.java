@@ -42,8 +42,8 @@ import java.util.Collection;
 
 public class WSNRequestParser implements Hub {
 
-    private static Logger log;
-    private static WSNotificationServer _protocolServer;
+    private Logger log;
+    private WSNotificationServer _protocolServer;
 
     public WSNRequestParser(WSNotificationServer server) {
         log = Logger.getLogger(WSNRequestParser.class.getName());

@@ -42,6 +42,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -434,9 +435,23 @@ public class CoreService extends AbstractCoreService {
     }
 
     /**
+     * Helper method that boots all protocolservers from config/protocolservers.xml
+     */
+
+    public void bootProtocolServers() {
+        try {
+            FileInputStream is = new FileInputStream("config/protocolservers.xml");
+            bootProtocolServers(is);
+        } catch (FileNotFoundException e) {
+            log.error("config/protocolservers.xml not found");
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Helper method that boots all added protocolservers
      */
-    public void bootProtocolServers() {
+    public void bootProtocolServers(InputStream configStream) {
         // If they are already booted, return.
         if (protocolServersBooted) return;
 
@@ -444,24 +459,19 @@ public class CoreService extends AbstractCoreService {
         NodeList servers;
         try {
             Document cfg;
-            FileInputStream is = new FileInputStream("config/protocolservers.xml");
-            cfg = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+            cfg = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(configStream);
             servers = cfg.getElementsByTagName("server");
             if(servers == null) {
                 log.error("No server tags in protocolservers.xml");
                 return;
             }
-        } catch (FileNotFoundException e) {
-            log.error("protocolservers.xml not found");
-            e.printStackTrace();
-            return;
         } catch (SAXException | IOException | ParserConfigurationException e) {
-            log.error("protocolservers.xml parsing error, message: " + e.getMessage());
+            log.error("ProtocolServer configuration parsing error, message: " + e.getMessage());
             e.printStackTrace();
             return;
         }
 
-        // Instantiate all servers in configuration file
+        // Instantiate all servers in configuration
         for(int i = 0; i < servers.getLength(); i++) {
             ProtocolServer ps = ProtocolServerFactory.create(servers.item(i));
             if(ps != null) {
