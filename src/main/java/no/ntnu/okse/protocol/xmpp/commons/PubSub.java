@@ -3,7 +3,6 @@ package no.ntnu.okse.protocol.xmpp.commons;
 //import org.apache.vysper.compliance.SpecCompliant;
 import no.ntnu.okse.protocol.xmpp.listeners.PubSubPublishHandler2;
 import no.ntnu.okse.protocol.xmpp.listeners.PubSubSubscribeHandler2;
-import no.ntnu.okse.protocol.xmpp.listeners.PubSubTestHandler;
 import org.apache.vysper.xmpp.addressing.Entity;
 import org.apache.vysper.xmpp.addressing.EntityUtils;
 import org.apache.vysper.xmpp.modules.core.base.handler.MessageHandler;
@@ -12,10 +11,8 @@ import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PubSubServiceConf
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PublishSubscribeModule;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.ServiceDiscoItemsVisitor;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubCreateNodeHandler;
-import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubPublishHandler;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubRetrieveAffiliationsHandler;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubRetrieveSubscriptionsHandler;
-import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubSubscribeHandler;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubUnsubscribeHandler;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.owner.PubSubOwnerConfigureNodeHandler;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.owner.PubSubOwnerDeleteNodeHandler;
@@ -51,6 +48,7 @@ import java.util.List;
  */
 //@SpecCompliant(spec = "xep-0060", comment = "spec. version: 1.13rc", status = SpecCompliant.ComplianceStatus.IN_PROGRESS, coverage = SpecCompliant.ComplianceCoverage.PARTIAL)
 public class PubSub extends PublishSubscribeModule {
+    private PubSubPublishHandler2 pubSubPublishHandler2;
 
     // The configuration of the service
     private PubSubServiceConfiguration serviceConfiguration = null;
@@ -71,6 +69,14 @@ public class PubSub extends PublishSubscribeModule {
      * the domain derived from the subdomain and the server domain
      */
     protected Entity fullDomain;
+
+
+    public PubSubPublishHandler2 getPubSubPublishHandler2(){
+        return pubSubPublishHandler2;
+    }
+    public  ServerRuntimeContext getServerRuntimeContext(){
+        return serverRuntimeContext;
+    }
 
     /**
      * Create a new PublishSubscribeModule together with a new root-collection node.
@@ -234,10 +240,11 @@ public class PubSub extends PublishSubscribeModule {
      */
     private void addPubsubHandlers(ComponentStanzaProcessor dictionary) {
         ArrayList<StanzaHandler> pubsubHandlers = new ArrayList<StanzaHandler>();
-        //pubsubHandlers.add(new PubSubTestHandler(serviceConfiguration));
         pubsubHandlers.add(new PubSubSubscribeHandler2(serviceConfiguration));
         pubsubHandlers.add(new PubSubUnsubscribeHandler(serviceConfiguration));
-        pubsubHandlers.add(new PubSubPublishHandler2(serviceConfiguration));
+        pubSubPublishHandler2 = new PubSubPublishHandler2(serviceConfiguration);
+        pubsubHandlers.add(pubSubPublishHandler2);
+
         pubsubHandlers.add(new PubSubCreateNodeHandler(serviceConfiguration));
         pubsubHandlers.add(new PubSubRetrieveSubscriptionsHandler(serviceConfiguration));
         pubsubHandlers.add(new PubSubRetrieveAffiliationsHandler(serviceConfiguration));

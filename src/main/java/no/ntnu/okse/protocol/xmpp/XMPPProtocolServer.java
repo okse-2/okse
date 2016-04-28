@@ -1,63 +1,35 @@
 package no.ntnu.okse.protocol.xmpp;
 
 
-import java.io.IOException;
-import java.net.SocketAddress;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import no.ntnu.okse.protocol.xmpp.commons.PubSub;
-import no.ntnu.okse.protocol.xmpp.listeners.PubSubTestHandler;
+import no.ntnu.okse.protocol.xmpp.listeners.PubSubPublishHandler2;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
-import org.apache.mina.core.filterchain.IoFilterChain;
-import org.apache.mina.core.filterchain.IoFilterChainBuilder;
-import org.apache.mina.core.filterchain.IoFilterEvent;
-import org.apache.mina.core.future.WriteFuture;
-import org.apache.mina.core.service.*;
-import org.apache.mina.core.session.IoEvent;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.core.session.IoSessionConfig;
-import org.apache.mina.core.session.IoSessionDataStructureFactory;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
-import org.apache.mina.filter.util.CommonEventFilter;
 import org.apache.vysper.mina.S2SEndpoint;
 import org.apache.vysper.mina.TCPEndpoint;
-import org.apache.vysper.mina.codec.StanzaWriteInfo;
 import org.apache.vysper.storage.OpenStorageProviderRegistry;
 import org.apache.vysper.storage.StorageProviderRegistry;
-import org.apache.vysper.xmpp.addressing.Entity;
-import org.apache.vysper.xmpp.addressing.EntityImpl;
 import org.apache.vysper.xmpp.modules.extension.xep0049_privatedata.PrivateDataModule;
 import org.apache.vysper.xmpp.modules.extension.xep0050_adhoc_commands.AdhocCommandsModule;
 import org.apache.vysper.xmpp.modules.extension.xep0054_vcardtemp.VcardTempModule;
-import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PubSubServiceConfiguration;
-import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PublishSubscribeModule;
-import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubSubscribeHandler;
 import org.apache.vysper.xmpp.modules.extension.xep0092_software_version.SoftwareVersionModule;
 import org.apache.vysper.xmpp.modules.extension.xep0119_xmppping.XmppPingModule;
 import org.apache.vysper.xmpp.modules.extension.xep0202_entity_time.EntityTimeModule;
 import org.apache.vysper.xmpp.modules.roster.persistence.MemoryRosterManager;
-import org.apache.vysper.xmpp.modules.servicediscovery.management.ItemRequestListener;
-import org.apache.vysper.xmpp.protocol.NamespaceHandlerDictionary;
-import org.apache.vysper.xmpp.protocol.NamespaceURIs;
-import org.apache.vysper.xmpp.protocol.StanzaHandler;
-import org.apache.vysper.xmpp.protocol.StanzaProcessor;
-import org.apache.vysper.xmpp.server.ServerFeatures;
 import org.apache.vysper.xmpp.server.ServerRuntimeContext;
 import org.apache.vysper.xmpp.server.XMPPServer;
-import org.apache.vysper.xmpp.server.components.ComponentStanzaProcessor;
-import org.apache.vysper.xmpp.stanza.Stanza;
 import org.apache.vysper.xmpp.stanza.StanzaBuilder;
 
 public class XMPPProtocolServer extends AbstractProtocolServer {
     private TCPEndpoint tcpEndpoint;
+    private ServerRuntimeContext serverRuntimeContext;
+    private PubSubPublishHandler2 pubSubPublishHandler2;
     protected static final String SERVERTYPE = "xmpp";
 
     private static Logger log = Logger.getLogger(XMPPProtocolServer.class.getName());
@@ -96,33 +68,17 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
         }
 
         ProtocolCodecFilter codecFilter = new ProtocolCodecFilter( new TextLineCodecFactory( Charset.forName( "UTF-8" )));
-        //tcpEndpoint.getFilterChainBuilder().addLast( "codec", codecFilter);
-
         server.addModule(new SoftwareVersionModule());
         server.addModule(new EntityTimeModule());
         server.addModule(new VcardTempModule());
         server.addModule(new XmppPingModule());
         server.addModule(new PrivateDataModule());
-        AdhocCommandsModule adhocCommandsModule = new AdhocCommandsModule();
-        server.addModule(adhocCommandsModule);
-
-
         PubSub publishSubscribeModule = new PubSub();
         server.addModule(publishSubscribeModule);
+        pubSubPublishHandler2 = publishSubscribeModule.getPubSubPublishHandler2();
+        serverRuntimeContext = publishSubscribeModule.getServerRuntimeContext();
 
-        //the line under sets relaying messages on/off
-        //server.getServerRuntimeContext().getServerFeatures().setRelayingMessages();
-        //IoEvent event = new IoEvent()
-
-        DefaultIoFilterChainBuilder filterChainBuilder = tcpEndpoint.getFilterChainBuilder();
-
-        StanzaBuilder stanzaBuilder = new StanzaBuilder("fucku");
-        stanzaBuilder.addAttribute("aa", "ad");
-
-        System.out.println("aaaaa" + server.getServerRuntimeContext().getResourceRegistry().getSessionCount());
     }
-
-
 
     @Override
     public void boot() {
@@ -152,6 +108,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void sendMessage(Message message) {
+        pubSubPublishHandler2.publishXMPPmessage(message, serverRuntimeContext);
     }
 
     public boolean isRunning() {

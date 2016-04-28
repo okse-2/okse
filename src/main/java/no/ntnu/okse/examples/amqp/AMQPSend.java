@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 public class AMQPSend {
 
     private static Logger tracer = Logger.getLogger("proton.example");
-    private String address = "amqp://m.fap.no:61050/amqp";
+    private String address = "amqp://localhost:5672/testing";
     private String subject = "NEWS!";
     private String[] bodies = new String[]{"Y0! Trond, zup?"};
 

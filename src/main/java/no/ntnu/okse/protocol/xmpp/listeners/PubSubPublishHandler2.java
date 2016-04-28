@@ -107,6 +107,7 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
             return errorStanzaGenerator.generateNoNodeErrorStanza(sender, serverJID, stanza);
         }
 
+        //Andreas ... can edit this one if we want all users to be able to publish on all topics
         if (!node.isAuthorized(sender, PubSubPrivilege.PUBLISH)) {
             // not enough privileges to publish - error condition 1 (7.1.3)
             return errorStanzaGenerator.generateInsufficientPrivilegesErrorStanza(sender, serverJID, stanza);
@@ -115,6 +116,7 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
         System.out.println("NODENAME " + nodeName);
         System.out.println("payload " + item.getInnerText());
         System.out.println("ID " + strID);
+        System.out.println("STANZA GET TO " + stanza.getTo());
 
         handlePublishInOkse(nodeName, item.getInnerText(), strID);
 
@@ -127,6 +129,7 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
         eventItemBuilder.addAttribute("id", strID);
 
         for (XMLFragment fragment : item.getInnerFragments()) {
+            System.out.println("frament :" + fragment.toString());
             if (fragment instanceof XMLElement) {
                 eventItemBuilder.addPreparedElement((XMLElement) fragment);
             } else {
@@ -135,7 +138,9 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
             }
         }
 
-        // node.publish(sender, relay, strID, eventItemBuilder.build());
+         //node.publish(sender, relay, strID, eventItemBuilder.build());
+        //node.publish(null, relay, "demoID1461861614060", eventItemBuilder.build());
+
 
         buildSuccessStanza(sb, nodeName, strID);
 
@@ -168,5 +173,20 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
     void handlePublishInOkse(String topic, XMLText payload, String id){
         log.info("XMPP message received on topic: " + topic + " from ID: " + id);
         sendMessageToOKSE(new Message( payload.toString(), topic, null, "XMPP"));
+    }
+
+    public void publishXMPPmessage(Message message, ServerRuntimeContext serverRuntimeContext){
+        CollectionNode root = serviceConfiguration.getRootNode();
+        LeafNode node = root.find(message.getTopic());
+        XMLElementBuilder eventItemBuilder = new XMLElementBuilder("item", NamespaceURIs.XEP0060_PUBSUB_EVENT);
+        String strID = idGenerator.create();
+        eventItemBuilder.addAttribute("id", strID);
+        eventItemBuilder.addText(message.getMessage());
+        StanzaRelay relay = serverRuntimeContext.getStanzaRelay();
+        System.out.println("IN publishXMPPmessage function");
+        System.out.println("topic " + message.getTopic());
+        System.out.println("payload " + message.getMessage());
+        node.publish(null, relay, strID, eventItemBuilder.build());
+
     }
 }
