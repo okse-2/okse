@@ -56,13 +56,9 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -201,8 +197,8 @@ public class WSNTools {
             return null;
         }
 
-        Soap soap = Soap.createSameAs(m);
-        List<Object> body = soap.getBodyContent(m);
+        Soap soap = Soap.createSameAs((JAXBElement)result.getMessage());
+        List<Object> body = soap.getBodyContent(((JAXBElement) result.getMessage()).getValue());
         // Extract the Notify wrapper
         Notify notify = (Notify) body.get(0);
 
@@ -370,7 +366,7 @@ public class WSNTools {
             InternalMessage parsed = parseRawXmlString(subResponse.getMessage().toString());
             JAXBElement jaxb = (JAXBElement) parsed.getMessage();
             Soap soap = Soap.createSameAs(jaxb);
-            SubscribeResponse sr = (SubscribeResponse) soap.getBodyContent(jaxb).get(0);
+            SubscribeResponse sr = (SubscribeResponse) soap.getBodyContent(jaxb.getValue()).get(0);
             return ServiceUtilities.getAddress(sr.getSubscriptionReference());
 
         } catch (ClassCastException e) {
@@ -387,16 +383,19 @@ public class WSNTools {
      * @param consumerReference The consumer reference, which is the address of the subscriber
      * @param terminationTime   An initialtermination time in milliseconds since epoch.
      *                          Can be null to allow broker to use internal defaults.
+     * @param version           The SOAP version to use for the message
      * @return An InternalMessage with the Subscribe payload, preset with correct destination endpoint
      */
     public static InternalMessage generateSubscriptionRequestWithTopic(
-            @NotNull String endpointReference, @Nullable String topic, @NotNull String consumerReference, @Nullable Long terminationTime) {
+            @NotNull String endpointReference, @Nullable String topic, @NotNull String consumerReference, @Nullable Long terminationTime, @NotNull Soap.SoapVersion version) {
+        Soap soap = Soap.create(version);
+
         String rawXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
             "<ns6:Envelope xmlns:ns2=\"http://www.w3.org/2005/08/addressing\" " +
             "xmlns:ns3=\"http://docs.oasis-open.org/wsn/b-2\" " +
             "xmlns:ns4=\"http://docs.oasis-open.org/wsn/t-1\" " +
             "xmlns:ns5=\"http://docs.oasis-open.org/wsrf/bf-2\" " +
-            "xmlns:ns6=\"http://schemas.xmlsoap.org/soap/envelope/\">" +
+            "xmlns:ns6=\""+soap.namespace()+"\">" +
             "<ns6:Header>" +
             "<ns2:Action>http://docs.oasis-open.org/wsn/bw-2/NotificationProducer/SubscribeRequest</ns2:Action>" +
             "</ns6:Header>" +
@@ -456,6 +455,11 @@ public class WSNTools {
         message.getRequestInformation().setEndpointReference(endpointReference);
 
         return message;
+    }
+
+    public static InternalMessage generateSubscriptionRequestWithTopic(
+            @NotNull String endpointReference, @Nullable String topic, @NotNull String consumerReference, @Nullable Long terminationTime) {
+        return generateSubscriptionRequestWithTopic(endpointReference, topic, consumerReference, terminationTime, Soap.SoapVersion.SOAP_1_1);
     }
 
     /**

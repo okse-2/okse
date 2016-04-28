@@ -100,13 +100,10 @@ public class WSNRequestParser implements Hub {
 
                     log.debug("Attempting to cast to JAXBElement");
                     JAXBElement msg = (JAXBElement) message.getMessage();
-                    Class messageClass = msg.getDeclaredType();
 
-                    if (messageClass.equals(org.w3._2003._05.soap_envelope.Envelope.class)) {
+                    if(Soap.isSoapEnvelope(msg.getValue()))
                         message.setMessage(msg.getValue());
-                    } else if (messageClass.equals(org.xmlsoap.schemas.soap.envelope.Envelope.class)) {
-                        message.setMessage(msg.getValue());
-                    }
+
                 } catch (ClassCastException classcastex) {
                     log.error("Failed to cast a message to a SOAP envelope");
                     return new InternalMessage(InternalMessage.STATUS_FAULT | InternalMessage.STATUS_FAULT_INVALID_PAYLOAD, null);
@@ -119,7 +116,7 @@ public class WSNRequestParser implements Hub {
                 }
 
                 try {
-                    Soap soap = Soap.create(Soap.SoapVersion.SOAP_1_1);
+                    Soap soap = Soap.create(returnMessage.getVersion());
                     XMLParser.writeObjectToStream(soap.createFault(Soap.SoapFaultType.SOAP_CLIENT, "Invalid formatted message"), streamToRequestor);
                     return new InternalMessage(InternalMessage.STATUS_FAULT | InternalMessage.STATUS_FAULT_INVALID_PAYLOAD, null);
                 } catch (JAXBException faultGeneratingJaxbException) {
@@ -177,7 +174,7 @@ public class WSNRequestParser implements Hub {
                     }
                 } else {
 
-                    Object messageToParse = wrapInJAXBAcceptedSoapEnvelope(returnMessage.getMessage());
+                    Object messageToParse = wrapInJAXBAcceptedSoapEnvelope(returnMessage.getMessage(), returnMessage.getVersion());
 
                     /* Try to parse the object directly into the OutputStream passed in */
                     try {
@@ -224,7 +221,7 @@ public class WSNRequestParser implements Hub {
 
                 try {
 
-                    Utilities.attemptToParseException((Exception) returnMessage.getMessage(), streamToRequestor);
+                    Utilities.attemptToParseException((Exception) returnMessage.getMessage(), streamToRequestor, returnMessage.getVersion());
                     log.debug("Returning parsed error");
                     return new InternalMessage(InternalMessage.STATUS_FAULT, null);
 
@@ -243,7 +240,7 @@ public class WSNRequestParser implements Hub {
                 if ((returnMessage.statusCode & InternalMessage.STATUS_FAULT_INVALID_DESTINATION) > 0) {
 
                     try {
-                        Soap soap = Soap.create(Soap.SoapVersion.SOAP_1_1);
+                        Soap soap = Soap.create(returnMessage.getVersion());
                         XMLParser.writeObjectToStream(soap.createFault(Soap.SoapFaultType.SOAP_CLIENT, "The message did not contain any information relevant to any web service at this address"), streamToRequestor);
                         return returnMessage;
 
@@ -256,7 +253,7 @@ public class WSNRequestParser implements Hub {
                 } else {
 
                     try {
-                        Soap soap = Soap.create(Soap.SoapVersion.SOAP_1_1);
+                        Soap soap = Soap.create(returnMessage.getVersion());
                         XMLParser.writeObjectToStream(soap.createFault(Soap.SoapFaultType.SOAP_SERVER, "There was an unexpected error while processing the request."), streamToRequestor);
                         return returnMessage;
 
@@ -276,7 +273,6 @@ public class WSNRequestParser implements Hub {
         return returnMessage;
     }
 
-
     /**
      * Takes an object and wraps it in an JAXBElement with declared type Envelope. If it is already a JAXBElement with
      * this declared type, it just returns it. If it is an accepted envelope, it creates the corresponding JAXBElement
@@ -284,9 +280,10 @@ public class WSNRequestParser implements Hub {
      * http://schemas.xmlsoap.org/soap/envelope/
      *
      * @param o the <code>Object</code> to wrap
+     * @param ver the <code>Version</code> of SOAP to wrap with
      * @return the wrapped JAXBElement
      */
-    private Object wrapInJAXBAcceptedSoapEnvelope(@NotNull Object o) {
+    private Object wrapInJAXBAcceptedSoapEnvelope(@NotNull Object o, Soap.SoapVersion ver) {
         // Check if this is already correct type
         if (o instanceof JAXBElement && Soap.version(((JAXBElement) o).getDeclaredType()) != Soap.SoapVersion.SOAP_NOT_ENVELOPE) {
             return o;
@@ -297,8 +294,7 @@ public class WSNRequestParser implements Hub {
                 return soap.createMessage(o);
             } else {
                 // Else pack it in some envelope and JAXBElement
-                // TODO: Make this user-settable
-                Soap soap = Soap.create(Soap.SoapVersion.SOAP_1_1);
+                Soap soap = Soap.create(ver);
                 return soap.createMessage(o);
             }
         }

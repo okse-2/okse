@@ -35,6 +35,7 @@ import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
 import org.ntnunotif.wsnu.base.internal.Hub;
 import org.ntnunotif.wsnu.base.net.NuNamespaceContextResolver;
+import org.ntnunotif.wsnu.base.soap.Soap;
 import org.ntnunotif.wsnu.base.topics.TopicUtils;
 import org.ntnunotif.wsnu.base.topics.TopicValidator;
 import org.ntnunotif.wsnu.base.util.InternalMessage;
@@ -133,7 +134,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
      * @param reference The consumer reference of the
      * @throws SubscribeCreationFailedFault If subscriber reference would cause loopback
      */
-    private void throwFaultIfConsumerRefWouldCauseLoopback(String reference) throws SubscribeCreationFailedFault {
+    private void throwFaultIfConsumerRefWouldCauseLoopback(String reference, Soap.SoapVersion version) throws SubscribeCreationFailedFault {
         boolean isLegal = true;
         // Strip off protocol
         reference = reference.replace("http://", "").replace("https://", "");
@@ -446,6 +447,14 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         this.sendNotification(notify, connection.getRequestInformation().getNamespaceContextResolver());
     }
 
+    @Override
+    @WebMethod(operationName = "Subscribe")
+    public SubscribeResponse subscribe(@WebParam(partName = "SubscribeRequest", name = "Subscribe",
+            targetNamespace = "http://docs.oasis-open.org/wsn/b-2") Subscribe subscribeRequest) {
+        log.error("This should never be invoked");
+        return null;
+    }
+
     /**
      * The Subscribe request message as defined by the WS-N specification.
      * <p>
@@ -466,10 +475,9 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
      * @throws TopicNotSupportedFault                   If the topic in some way is unknown or unsupported.
      * @throws InvalidMessageContentExpressionFault     Never.
      */
-    @Override
     @WebMethod(operationName = "Subscribe")
     public SubscribeResponse subscribe(@WebParam(partName = "SubscribeRequest", name = "Subscribe",
-            targetNamespace = "http://docs.oasis-open.org/wsn/b-2") Subscribe subscribeRequest) throws NotifyMessageNotSupportedFault, UnrecognizedPolicyRequestFault, TopicExpressionDialectUnknownFault, ResourceUnknownFault, InvalidTopicExpressionFault, UnsupportedPolicyRequestFault, InvalidFilterFault, InvalidProducerPropertiesExpressionFault, UnacceptableInitialTerminationTimeFault, SubscribeCreationFailedFault, TopicNotSupportedFault, InvalidMessageContentExpressionFault {
+            targetNamespace = "http://docs.oasis-open.org/wsn/b-2") Subscribe subscribeRequest, Soap.SoapVersion version) throws NotifyMessageNotSupportedFault, UnrecognizedPolicyRequestFault, TopicExpressionDialectUnknownFault, ResourceUnknownFault, InvalidTopicExpressionFault, UnsupportedPolicyRequestFault, InvalidFilterFault, InvalidProducerPropertiesExpressionFault, UnacceptableInitialTerminationTimeFault, SubscribeCreationFailedFault, TopicNotSupportedFault, InvalidMessageContentExpressionFault {
 
         W3CEndpointReference consumerEndpoint = subscribeRequest.getConsumerReference();
         boolean useRaw = false;
@@ -481,7 +489,7 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         String endpointReference = ServiceUtilities.getAddress(consumerEndpoint);
 
         // Loopback check
-        throwFaultIfConsumerRefWouldCauseLoopback(endpointReference);
+        throwFaultIfConsumerRefWouldCauseLoopback(endpointReference, version);
 
         // EndpointReference is returned as "" from getAddress if something went wrong.
         if (endpointReference.equals("")) {
@@ -693,6 +701,23 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
         // Register the OKSE subscriber to the SubscriptionService, via the WSNSubscriptionManager
         log.debug("Passing the subscriber to the SubscriptionService...");
 
+        String ver;
+        switch(version) {
+            default:
+                log.error("Subscribed with invalid SOAP version, falling back on 1.1");
+                /* FALLTHROUGH */
+            case SOAP_1_1:
+                ver = "soap11";
+                break;
+            case SOAP_1_2_2001:
+                ver = "soap12D";
+                break;
+            case SOAP_1_2_2003:
+                ver = "soap12F";
+                break;
+        }
+
+        subscriber.setAttribute("soap_version", ver);
         _subscriptionManager.addSubscriber(subscriber, subscriptionHandle);
 
         return response;
