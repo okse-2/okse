@@ -137,6 +137,7 @@ public class STOMPServer extends Server {
         no.ntnu.okse.protocol.stomp.listeners.MessageListener messageListener = new MessageListener();
         SubscriptionListener subListener = new SubscriptionListener();
         UnSubscriptionListener unsubListener = new UnSubscriptionListener();
+        MIMEtypeListener mimeTypeListener = new MIMEtypeListener();
         IncrementTotalRequestsListener incrementTotalRequestsListener = new IncrementTotalRequestsListener();
 
         subListener.setSubscriptionManager(subscriptionManager);
@@ -147,6 +148,7 @@ public class STOMPServer extends Server {
 
         messageListener.setMessageService(MessageService.getInstance());
 
+        gateway.addMessageListener(mimeTypeListener);
         gateway.addMessageListener(subListener);
         gateway.addMessageListener(unsubListener);
         gateway.addMessageListener(messageListener);

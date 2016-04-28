@@ -68,6 +68,12 @@ public class STOMPMessageListenerTest {
     }
 
     @Test
+    public void mimeTypes() throws Exception {
+        StampyMessage msg = createMimeTypeMessage("plain/text", "utf-8", "test");
+        messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
+    }
+
+    @Test
     public void differentMessageHeaders() throws Exception {
         StampyMessage msg = createSendMessageWithHeaders();
         messageListener_spy.messageReceived(msg, new HostPort("localhost", 61613));
@@ -86,6 +92,14 @@ public class STOMPMessageListenerTest {
         assertEquals(null, messageArgument.getValue().getAttribute("receipt"));
 
         Mockito.reset(messageService_spy);
+    }
+
+    private StampyMessage createMimeTypeMessage(String mimeType, String encoding, Object body){
+        SendMessage msg = new SendMessage();
+        msg.setBody(body);
+        msg.setMimeType(mimeType, encoding);
+        msg.getHeader().setDestination("bernt");
+        return msg;
     }
 
     private StampyMessage createSendMessageWithHeaders(){

@@ -41,6 +41,9 @@ import asia.stampy.examples.system.client.netty.SystemNettyClientInitializer;
 import asia.stampy.server.message.error.ErrorMessage;
 import asia.stampy.server.message.receipt.ReceiptMessage;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+
 public class Client {
 
     private static final String CANNOT_BE_LOGGED_IN = "cannot be logged in";
@@ -171,6 +174,19 @@ public class Client {
         message.setBody(text);
         getGateway().broadcastMessage(message);
     }
+
+    public void testMIMEtype(String text, String MIMEtype, String charset) throws Exception{
+        String id = "gabrielb";
+        SendMessage message = new SendMessage("test", id);
+        message.getHeader().setReceipt(id);
+//        message.getHeader().setDestination("test");
+        message.getHeader().setContentType(MIMEtype);
+        String test ="#" + text + "     :     " + "This is a test";
+        System.out.println("Charset: " + charset);
+        message.setBody(test);
+        getGateway().broadcastMessage(message);
+    }
+
 
     public void testUnsubscribe(String id) throws InterceptException {
         UnsubscribeMessage message = new UnsubscribeMessage(id);

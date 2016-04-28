@@ -8,10 +8,12 @@ import asia.stampy.common.message.StompMessageType;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
+import org.apache.commons.lang.CharSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -64,15 +66,13 @@ public class MessageListener implements StampyMessageListener {
                 case "destination":
                 case "receipt":
                 case "transaction":
-                case "content-type":
-                case "content-length":
                     break;
                 default:
                     okseMsg.setAttribute(key, headers.get(key));
                     break;
             }
         }
-        
+
         sendMessageToOKSE(okseMsg);
         protocolServer.incrementTotalMessagesReceived();
     }
