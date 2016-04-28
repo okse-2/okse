@@ -19,6 +19,8 @@
  */
 package no.ntnu.okse.protocol.xmpp.listeners;
 
+import no.ntnu.okse.core.messaging.Message;
+import no.ntnu.okse.core.messaging.MessageService;
 import org.apache.vysper.compliance.SpecCompliance;
 import org.apache.vysper.compliance.SpecCompliant;
 import org.apache.vysper.xml.fragment.*;
@@ -36,6 +38,8 @@ import org.apache.vysper.xmpp.stanza.IQStanza;
 import org.apache.vysper.xmpp.stanza.IQStanzaType;
 import org.apache.vysper.xmpp.stanza.Stanza;
 import org.apache.vysper.xmpp.stanza.StanzaBuilder;
+
+import static no.ntnu.okse.core.Utilities.log;
 
 /**
  * This class handles the "publish" use cases for the "pubsub" namespace.
@@ -79,38 +83,6 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
             @SpecCompliant(spec = "xep-0060", section = "7.1.3.5", status = SpecCompliant.ComplianceStatus.NOT_STARTED, coverage = SpecCompliant.ComplianceCoverage.UNSUPPORTED),
             @SpecCompliant(spec = "xep-0060", section = "7.1.3.6", status = SpecCompliant.ComplianceStatus.NOT_STARTED, coverage = SpecCompliant.ComplianceCoverage.UNSUPPORTED) })
     protected Stanza handleSet(IQStanza stanza, ServerRuntimeContext serverRuntimeContext, SessionContext sessionContext) {
-  /*      System.out.println("Message received");
-        System.out.println("Message received");
-        System.out.println("Message received");
-        System.out.println("Message received");
-        System.out.println("Message received");
-
-        System.out.println(sessionContext);
-        System.out.println(stanza.toString());
-        System.out.println(stanza.getInnerText());
-        System.out.println(stanza.getInnerElements().toString());
-        System.out.println(stanza.getInnerElements().size());
-        System.out.println(stanza.getInnerElements().get(0));
-        System.out.println(stanza.getInnerElements().get(0).getAttributes());
-        System.out.println(stanza.getInnerElements().get(0).getAttributes().get(0));
-        System.out.println(stanza.getInnerElements().get(0).getAttributes().get(0).toString());
-        System.out.println(stanza.getInnerElements().get(0).getAttributes().get(0).getValue());
-        System.out.println(stanza.getInnerElements().get(0).toString());
-        System.out.println(stanza.getInnerElements().get(0).getInnerText());
-        System.out.println(stanza.getInnerElements().get(0).getInnerText().getText());
-        try {
-            System.out.println(stanza.getInnerElements().get(0).getSingleInnerText().getText());
-        } catch (XMLSemanticError xmlSemanticError) {
-            System.out.println("Something bad happened");
-            xmlSemanticError.printStackTrace();
-        }
-
-        System.out.println("Message received");
-        System.out.println("Message received");
-        System.out.println("Message received");
-        System.out.println("Message received");
-        System.out.println("Message received");
-*/        System.out.println("Message received");
         System.out.println("Message received");
 
 
@@ -126,7 +98,6 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
         String nodeName = publish.getAttributeValue("node"); // MUST
 
         XMLElement item = publish.getFirstInnerElement();
-        System.out.println(item.getInnerText());
         String strID = item.getAttributeValue("id"); // MAY
 
         LeafNode node = root.find(nodeName);
@@ -140,6 +111,12 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
             // not enough privileges to publish - error condition 1 (7.1.3)
             return errorStanzaGenerator.generateInsufficientPrivilegesErrorStanza(sender, serverJID, stanza);
         }
+
+        System.out.println("NODENAME " + nodeName);
+        System.out.println("payload " + item.getInnerText());
+        System.out.println("ID " + strID);
+
+        handlePublishInOkse(nodeName, item.getInnerText(), strID);
 
         StanzaRelay relay = serverRuntimeContext.getStanzaRelay();
 
@@ -158,7 +135,7 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
             }
         }
 
-        node.publish(sender, relay, strID, eventItemBuilder.build());
+        // node.publish(sender, relay, strID, eventItemBuilder.build());
 
         buildSuccessStanza(sb, nodeName, strID);
 
@@ -182,5 +159,14 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
         sb.endInnerElement();
 
         sb.endInnerElement();
+    }
+
+    public void sendMessageToOKSE(Message msg){
+        MessageService.getInstance().distributeMessage(msg);
+    }
+
+    void handlePublishInOkse(String topic, XMLText payload, String id){
+        log.info("XMPP message received on topic: " + topic + " from ID: " + id);
+        sendMessageToOKSE(new Message( payload.toString(), topic, null, "XMPP"));
     }
 }

@@ -234,7 +234,7 @@ public class PubSub extends PublishSubscribeModule {
      */
     private void addPubsubHandlers(ComponentStanzaProcessor dictionary) {
         ArrayList<StanzaHandler> pubsubHandlers = new ArrayList<StanzaHandler>();
-        pubsubHandlers.add(new PubSubTestHandler(serviceConfiguration));
+        //pubsubHandlers.add(new PubSubTestHandler(serviceConfiguration));
         pubsubHandlers.add(new PubSubSubscribeHandler2(serviceConfiguration));
         pubsubHandlers.add(new PubSubUnsubscribeHandler(serviceConfiguration));
         pubsubHandlers.add(new PubSubPublishHandler2(serviceConfiguration));

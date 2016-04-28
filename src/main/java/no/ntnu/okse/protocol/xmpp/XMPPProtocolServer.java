@@ -109,8 +109,6 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
         PubSub publishSubscribeModule = new PubSub();
         server.addModule(publishSubscribeModule);
-        addHandlers((ComponentStanzaProcessor) publishSubscribeModule.getStanzaProcessor(), publishSubscribeModule.getServiceConfiguration());
-
 
         //the line under sets relaying messages on/off
         //server.getServerRuntimeContext().getServerFeatures().setRelayingMessages();
@@ -122,34 +120,9 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
         stanzaBuilder.addAttribute("aa", "ad");
 
         System.out.println("aaaaa" + server.getServerRuntimeContext().getResourceRegistry().getSessionCount());
-        //filterChainBuilder.addAfter("sss", );
-//        List<IoFilterChain.Entry> entries = filterChainBuilder.getAll();
-//        System.out.println("printing out size " + entries.size());
-//        System.out.println("printing out size " + entries.size());
-//        System.out.println("printing out size " + entries.size());
-//        System.out.println("printing out size " + entries.size());
-//        System.out.println("printing out size " + entries.size());
-//        System.out.println("printing out size " + entries.size());
-//        System.out.println("printing out size " + entries.size());
-//        for(int i = 0; i < entries.size(); i++){
-//            System.out.println(entries.toString());
-//        }
-
-
-
-
     }
 
-    private void addHandlers(ComponentStanzaProcessor stanzaProcessor, PubSubServiceConfiguration serviceConfiguration){
-        if(true)
-            return;
-        ArrayList<StanzaHandler> pubsubHandlers = new ArrayList<StanzaHandler>();
 
-        pubsubHandlers.add(new PubSubTestHandler(serviceConfiguration));
-        System.out.println(stanzaProcessor);
-        System.out.println(serviceConfiguration);
-        stanzaProcessor.addDictionary(new NamespaceHandlerDictionary(NamespaceURIs.XEP0060_PUBSUB, pubsubHandlers));
-    }
 
     @Override
     public void boot() {
