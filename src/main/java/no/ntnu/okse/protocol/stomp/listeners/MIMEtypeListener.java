@@ -22,6 +22,8 @@ public class MIMEtypeListener implements StampyMessageListener {
 
     private String getCharSet(String contentType){
         String charset = null;
+        if(contentType == null)
+            return "";
         String[] values = contentType.split(";");
         for (String value : values) {
             value = value.trim();
