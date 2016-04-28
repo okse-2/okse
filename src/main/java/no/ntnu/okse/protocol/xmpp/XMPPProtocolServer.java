@@ -12,6 +12,8 @@ import java.util.logging.Logger;
 
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
+import no.ntnu.okse.protocol.xmpp.commons.PubSub;
+import no.ntnu.okse.protocol.xmpp.listeners.PubSubTestHandler;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
 import org.apache.mina.core.filterchain.IoFilterChain;
 import org.apache.mina.core.filterchain.IoFilterChainBuilder;
@@ -35,14 +37,22 @@ import org.apache.vysper.xmpp.addressing.EntityImpl;
 import org.apache.vysper.xmpp.modules.extension.xep0049_privatedata.PrivateDataModule;
 import org.apache.vysper.xmpp.modules.extension.xep0050_adhoc_commands.AdhocCommandsModule;
 import org.apache.vysper.xmpp.modules.extension.xep0054_vcardtemp.VcardTempModule;
+import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PubSubServiceConfiguration;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PublishSubscribeModule;
+import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubSubscribeHandler;
 import org.apache.vysper.xmpp.modules.extension.xep0092_software_version.SoftwareVersionModule;
 import org.apache.vysper.xmpp.modules.extension.xep0119_xmppping.XmppPingModule;
 import org.apache.vysper.xmpp.modules.extension.xep0202_entity_time.EntityTimeModule;
 import org.apache.vysper.xmpp.modules.roster.persistence.MemoryRosterManager;
 import org.apache.vysper.xmpp.modules.servicediscovery.management.ItemRequestListener;
+import org.apache.vysper.xmpp.protocol.NamespaceHandlerDictionary;
+import org.apache.vysper.xmpp.protocol.NamespaceURIs;
+import org.apache.vysper.xmpp.protocol.StanzaHandler;
+import org.apache.vysper.xmpp.protocol.StanzaProcessor;
 import org.apache.vysper.xmpp.server.ServerFeatures;
+import org.apache.vysper.xmpp.server.ServerRuntimeContext;
 import org.apache.vysper.xmpp.server.XMPPServer;
+import org.apache.vysper.xmpp.server.components.ComponentStanzaProcessor;
 import org.apache.vysper.xmpp.stanza.Stanza;
 import org.apache.vysper.xmpp.stanza.StanzaBuilder;
 
@@ -72,7 +82,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
         // enable classic TCP bases access
         tcpEndpoint = new TCPEndpoint();
         tcpEndpoint.setPort(port);
-        tcpEndpoint
+
         log.info("XMPP port it set to " + port);
         server.addEndpoint(tcpEndpoint);
         server.setStorageProviderRegistry(providerRegistry);
@@ -97,9 +107,11 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
         server.addModule(adhocCommandsModule);
 
 
-        PublishSubscribeModule  publishSubscribeModule = new PublishSubscribeModule();
+        PubSub publishSubscribeModule = new PubSub();
         server.addModule(publishSubscribeModule);
-        publishSubscribeModule
+        addHandlers((ComponentStanzaProcessor) publishSubscribeModule.getStanzaProcessor(), publishSubscribeModule.getServiceConfiguration());
+
+
         //the line under sets relaying messages on/off
         //server.getServerRuntimeContext().getServerFeatures().setRelayingMessages();
         //IoEvent event = new IoEvent()
@@ -126,6 +138,17 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
 
 
+    }
+
+    private void addHandlers(ComponentStanzaProcessor stanzaProcessor, PubSubServiceConfiguration serviceConfiguration){
+        if(true)
+            return;
+        ArrayList<StanzaHandler> pubsubHandlers = new ArrayList<StanzaHandler>();
+
+        pubsubHandlers.add(new PubSubTestHandler(serviceConfiguration));
+        System.out.println(stanzaProcessor);
+        System.out.println(serviceConfiguration);
+        stanzaProcessor.addDictionary(new NamespaceHandlerDictionary(NamespaceURIs.XEP0060_PUBSUB, pubsubHandlers));
     }
 
     @Override
