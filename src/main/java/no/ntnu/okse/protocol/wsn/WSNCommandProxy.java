@@ -448,7 +448,6 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
     }
 
     @Override
-    @WebMethod(operationName = "Subscribe")
     public SubscribeResponse subscribe(@WebParam(partName = "SubscribeRequest", name = "Subscribe",
             targetNamespace = "http://docs.oasis-open.org/wsn/b-2") Subscribe subscribeRequest) {
         log.error("This should never be invoked");
