@@ -185,6 +185,7 @@ var Config = (function($) {
                 }
 
                 url += ('&serverID=' + $('#wsn-instance').val())
+                url += ('&soap-version=' + $('#relay-soap-version').val())
 
                 Main.ajax({
                     url: url,

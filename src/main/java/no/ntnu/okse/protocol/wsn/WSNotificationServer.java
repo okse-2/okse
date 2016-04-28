@@ -823,7 +823,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
         }
     }
 
-    public boolean addRelay(String relay, String host, Integer port, String topic) {
+    public boolean addRelay(String relay, String host, Integer port, String topic, Soap.SoapVersion version) {
         final Set<String> localRelays = new HashSet<String>() {{
             add("127.0.0.1");
             add("0.0.0.0");
@@ -858,7 +858,8 @@ public class WSNotificationServer extends AbstractProtocolServer {
                                 relay,
                                 topic, // Topic
                                 getURI(),
-                                null // Termination time
+                                null, // Termination time
+                                version
                         )
                 )
         );
