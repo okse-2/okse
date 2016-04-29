@@ -9,6 +9,9 @@ import org.apache.log4j.Logger;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * AMQP protocol server
+ */
 public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
 
@@ -18,6 +21,12 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
     private static AtomicBoolean running = new AtomicBoolean(false);
 
 
+    /**
+     * Instantiate protocol server
+     *
+     * @param host hostname
+     * @param port port
+     */
     public AMQP091ProtocolServer(String host, int port) {
         this.port = port;
         this.host = host;
@@ -25,6 +34,9 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
         subscriptionService = SubscriptionService.getInstance();
     }
 
+    /**
+     * Boot protocol server
+     */
     @Override
     public void boot() {
         if (running.compareAndSet(false, true)) {
@@ -42,12 +54,18 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
         }
     }
 
+    /**
+     * Run server
+     */
     @Override
     public void run() {
         log.debug(String.format("Starting AMQP 0.9.1 service on %s:%d", host, port));
         amqpService.start();
     }
 
+    /**
+     * Stop server
+     */
     @Override
     public void stopServer() {
         if(running.compareAndSet(true, false)) {
@@ -62,21 +80,37 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
         }
     }
 
+    /**
+     * @return protocol server type as string
+     */
     @Override
     public String getProtocolServerType() {
         return SERVERTYPE;
     }
 
+    /**
+     * @return server running
+     */
     public boolean isRunning() {
         return running.get();
     }
 
+    /**
+     * Send message to subscribers
+     *
+     * @param message An instance of Message containing the required data to distribute a message.
+     */
     @Override
     public void sendMessage(Message message) {
         amqpService.sendMessage(message);
         incrementMessageSentForTopic(message.getTopic());
     }
 
+    /**
+     * Increment messages sent for a specific topic
+     *
+     * @param topic topic
+     */
     private void incrementMessageSentForTopic(String topic) {
         HashSet<Subscriber> allSubscribers = subscriptionService.getAllSubscribers();
         allSubscribers.stream()
@@ -85,10 +119,20 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
                 .forEach(subscriber -> incrementTotalMessagesSent());
     }
 
+    /**
+     * Dependency setter injection for AMQP service
+     *
+     * @param amqpService AMQP 0.9.1 service
+     */
     void setAmqpService(AMQP091Service amqpService) {
         this.amqpService = amqpService;
     }
 
+    /**
+     * Dependency setter injection for subscription service
+     *
+     * @param subscriptionService subscription service
+     */
     void setSubscriptionService(SubscriptionService subscriptionService) {
         this.subscriptionService = subscriptionService;
     }
