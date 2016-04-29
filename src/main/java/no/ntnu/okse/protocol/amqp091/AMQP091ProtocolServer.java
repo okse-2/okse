@@ -3,9 +3,11 @@ import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
+import no.ntnu.okse.protocol.ProtocolServer;
 import org.apache.log4j.Logger;
 
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
@@ -13,6 +15,7 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
     protected static final String SERVERTYPE = "amqp091";
     private AMQP091Service amqpService;
     private SubscriptionService subscriptionService;
+    private static AtomicBoolean running = new AtomicBoolean(false);
 
 
     public AMQP091ProtocolServer(String host, int port) {
@@ -24,13 +27,17 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void boot() {
-        if (!_running) {
-            _running = true;
+        if (running.compareAndSet(false, true)) {
             amqpService = new AMQP091Service(this);
             _serverThread = new Thread(this::run);
             _serverThread.setName("AMQ091ProtocolServer");
             _serverThread.start();
             log.info("AMQ091ProtocolServer booted successfully");
+        }
+        else {
+            throw new ProtocolServer.BootErrorException(
+                    "Another AMQP 0.9.1 server is already running. Only one server can be running at the same time."
+            );
         }
     }
 
@@ -42,11 +49,15 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void stopServer() {
-        if(amqpService != null) {
-            amqpService.stop();
+        if(running.compareAndSet(true, false)) {
+            if(amqpService != null) {
+                amqpService.stop();
+            }
+            amqpService = null;
         }
-        amqpService = null;
-        _running = false;
+        else {
+            log.error("Server was already stopped");
+        }
     }
 
     @Override
@@ -55,7 +66,7 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
     }
 
     public boolean isRunning() {
-        return _running;
+        return running.get();
     }
 
     @Override
