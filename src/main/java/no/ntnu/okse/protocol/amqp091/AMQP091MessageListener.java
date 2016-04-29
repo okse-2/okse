@@ -2,7 +2,6 @@ package no.ntnu.okse.protocol.amqp091;
 
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
-import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
@@ -56,9 +55,8 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         ));
 
         String protocolServerType = amqpProtocolServer.getProtocolServerType();
-        Publisher pub = new Publisher(topic, host, port, protocolServerType);
 
-        MessageService.getInstance().distributeMessage(new Message(message, topic, pub, protocolServerType));
+        MessageService.getInstance().distributeMessage(new Message(message, topic, null, protocolServerType));
         amqpProtocolServer.incrementTotalMessagesReceived();
         amqpProtocolServer.incrementTotalRequests();
     }
