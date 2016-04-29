@@ -25,7 +25,6 @@
 package no.ntnu.okse.protocol.wsn;
 
 import com.google.common.io.ByteStreams;
-import com.sun.istack.internal.NotNull;
 import org.apache.log4j.Logger;
 import org.ntnunotif.wsnu.base.internal.Hub;
 import org.ntnunotif.wsnu.base.internal.ServiceConnection;
@@ -283,7 +282,7 @@ public class WSNRequestParser implements Hub {
      * @param ver the <code>Version</code> of SOAP to wrap with
      * @return the wrapped JAXBElement
      */
-    private Object wrapInJAXBAcceptedSoapEnvelope(@NotNull Object o, Soap.SoapVersion ver) {
+    private Object wrapInJAXBAcceptedSoapEnvelope(Object o, Soap.SoapVersion ver) {
         // Check if this is already correct type
         if (o instanceof JAXBElement && Soap.version(((JAXBElement) o).getDeclaredType()) != Soap.SoapVersion.SOAP_NOT_ENVELOPE) {
             return o;

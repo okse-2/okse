@@ -141,12 +141,12 @@
         <dependency>
             <groupId>org.ntnunotif.wsnu</groupId>
             <artifactId>wsnu-base</artifactId>
-            <version>0.4-SNAPSHOT</version>
+            <version>0.4-okse</version>
         </dependency>
         <dependency>
             <groupId>org.ntnunotif.wsnu</groupId>
             <artifactId>wsnu-services</artifactId>
-            <version>0.4-SNAPSHOT</version>
+            <version>0.4-okse</version>
         </dependency>
         <dependency>
             <groupId>org.ow2.joram</groupId>
