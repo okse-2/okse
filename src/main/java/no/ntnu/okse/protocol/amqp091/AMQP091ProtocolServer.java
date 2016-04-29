@@ -35,6 +35,7 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
             log.info("AMQ091ProtocolServer booted successfully");
         }
         else {
+            incrementTotalErrors();
             throw new ProtocolServer.BootErrorException(
                     "Another AMQP 0.9.1 server is already running. Only one server can be running at the same time."
             );
@@ -57,6 +58,7 @@ public class AMQP091ProtocolServer extends AbstractProtocolServer {
         }
         else {
             log.error("Server was already stopped");
+            incrementTotalErrors();
         }
     }
 

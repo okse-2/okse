@@ -17,8 +17,10 @@ public class AMQP091Service {
     private final int port;
     private static Logger log = Logger.getLogger(AMQP091Service.class.getName());
     private AMQP091MessageListener messageListener;
+    private AMQP091ProtocolServer protocolServer;
 
     public AMQP091Service(AMQP091ProtocolServer amqp091ProtocolServer) {
+        protocolServer = amqp091ProtocolServer;
         this.host = amqp091ProtocolServer.getHost();
         this.port = amqp091ProtocolServer.getPort();
         messageListener = new AMQP091MessageListener(amqp091ProtocolServer);
@@ -30,11 +32,13 @@ public class AMQP091Service {
             AgentServer.init((short) 0, createAgentFolder(), null);
         } catch (Exception e) {
             log.error("An exception was thrown when starting AMQP 0.9.1 Agent Server", e);
+            protocolServer.incrementTotalErrors();
         }
         try {
             AMQPService.init(getHostPort(), true);
         } catch (Exception e) {
             log.error("An exception was thrown when starting AMQP 0.9.1 service", e);
+            protocolServer.incrementTotalErrors();
         }
         AMQPService.addMessageListener(messageListener);
         AMQPService.setPublishing(false);
