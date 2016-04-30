@@ -1,4 +1,4 @@
-package no.ntnu.okse.protocol.xmpp.commons;
+package no.ntnu.okse.protocol.xmpp.modules;
 
 //import org.apache.vysper.compliance.SpecCompliant;
 import no.ntnu.okse.protocol.xmpp.listeners.PubSubPublishHandler2;

@@ -2,7 +2,7 @@ package no.ntnu.okse.protocol.xmpp;
 
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
-import no.ntnu.okse.protocol.xmpp.commons.PubSub;
+import no.ntnu.okse.protocol.xmpp.modules.PubSub;
 import no.ntnu.okse.protocol.xmpp.listeners.PubSubPublishHandler2;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
@@ -53,7 +53,6 @@ public class XMPPServer {
 
         try {
             server.start();
-            System.out.println("vysper server is running...");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -61,9 +60,6 @@ public class XMPPServer {
         ProtocolCodecFilter codecFilter = new ProtocolCodecFilter( new TextLineCodecFactory( Charset.forName( "UTF-8" )));
         server.addModule(new SoftwareVersionModule());
         server.addModule(new EntityTimeModule());
-        System.out.println("dpodpkopopopopopo");
-        server.addModule(new VcardTempModule());
-        System.out.println("dpodpkopopopopopo");
         server.addModule(new XmppPingModule());
         server.addModule(new PrivateDataModule());
         PubSub publishSubscribeModule = new PubSub();
