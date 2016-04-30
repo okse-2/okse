@@ -21,6 +21,8 @@ package no.ntnu.okse.protocol.xmpp.listeners;
 
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
+import no.ntnu.okse.protocol.xmpp.XMPPServer;
+import org.apache.qpid.proton.codec.messaging.SourceType;
 import org.apache.vysper.compliance.SpecCompliance;
 import org.apache.vysper.compliance.SpecCompliant;
 import org.apache.vysper.xml.fragment.*;
@@ -49,6 +51,7 @@ import static no.ntnu.okse.core.Utilities.log;
 @SpecCompliant(spec = "xep-0060", section = "7.1", status = SpecCompliant.ComplianceStatus.IN_PROGRESS, coverage = SpecCompliant.ComplianceCoverage.PARTIAL)
 public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
 
+    XMPPServer server;
     /**
      * Creates a new handler for publish requests.
      *
@@ -56,6 +59,9 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
      */
     public PubSubPublishHandler2(PubSubServiceConfiguration serviceConfiguration) {
         super(serviceConfiguration);
+    }
+    public void setXMPPServer(XMPPServer server){
+        this.server = server;
     }
 
     /**
@@ -110,9 +116,10 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
         //Andreas ... can edit this one if we want all users to be able to publish on all topics
         if (!node.isAuthorized(sender, PubSubPrivilege.PUBLISH)) {
             // not enough privileges to publish - error condition 1 (7.1.3)
-            return errorStanzaGenerator.generateInsufficientPrivilegesErrorStanza(sender, serverJID, stanza);
+            log.info("THE XMPP publisher for current msg has no publisher rigths, the message should be refused if the standard was followed. error condition 1 (7.1.3). (overwritten in OKSE)");
+            //return errorStanzaGenerator.generateInsufficientPrivilegesErrorStanza(sender, serverJID, stanza);
         }
-
+        //Following printlines should be deleted, for testing only
         System.out.println("NODENAME " + nodeName);
         System.out.println("payload " + item.getInnerText());
         System.out.println("ID " + strID);
@@ -138,6 +145,7 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
             }
         }
 
+        //The 2 lines below should be deleted eventualy, and are just used for imidiate testing. They originaly were here in the default handler class
          //node.publish(sender, relay, strID, eventItemBuilder.build());
         //node.publish(null, relay, "demoID1461861614060", eventItemBuilder.build());
 
@@ -166,18 +174,19 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
         sb.endInnerElement();
     }
 
-    public void sendMessageToOKSE(Message msg){
-        MessageService.getInstance().distributeMessage(msg);
-    }
+
 
     void handlePublishInOkse(String topic, XMLText payload, String id){
-        log.info("XMPP message received on topic: " + topic + " from ID: " + id);
-        sendMessageToOKSE(new Message( payload.toString(), topic, null, "XMPP"));
+        server.sendMessageToOKSE(new Message( payload.toString(), topic, null, "XMPP"));
     }
 
     public void publishXMPPmessage(Message message, ServerRuntimeContext serverRuntimeContext){
         CollectionNode root = serviceConfiguration.getRootNode();
         LeafNode node = root.find(message.getTopic());
+        if(node == null){
+            //no xmpp clients are subscribed on the topic.
+            return;
+        }
         XMLElementBuilder eventItemBuilder = new XMLElementBuilder("item", NamespaceURIs.XEP0060_PUBSUB_EVENT);
         String strID = idGenerator.create();
         eventItemBuilder.addAttribute("id", strID);
@@ -187,6 +196,5 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
         System.out.println("topic " + message.getTopic());
         System.out.println("payload " + message.getMessage());
         node.publish(null, relay, strID, eventItemBuilder.build());
-
     }
 }

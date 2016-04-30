@@ -27,10 +27,9 @@ import org.apache.vysper.xmpp.server.XMPPServer;
 import org.apache.vysper.xmpp.stanza.StanzaBuilder;
 
 public class XMPPProtocolServer extends AbstractProtocolServer {
-    private TCPEndpoint tcpEndpoint;
-    private ServerRuntimeContext serverRuntimeContext;
-    private PubSubPublishHandler2 pubSubPublishHandler2;
     protected static final String SERVERTYPE = "xmpp";
+
+    no.ntnu.okse.protocol.xmpp.XMPPServer server;
 
     private static Logger log = Logger.getLogger(XMPPProtocolServer.class.getName());
 
@@ -39,50 +38,10 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
         this.port = port;
     }
 
-    public void init() {
-        String domain = "okse.ntnu.no";
-
-        StorageProviderRegistry providerRegistry = new OpenStorageProviderRegistry();
-        providerRegistry.add(new Authorization());
-
-        providerRegistry.add(new MemoryRosterManager());
-        final String pathToTLSCertificate = "/keystore.jks";
-        XMPPServer server = new XMPPServer(domain);
-
-        // allow XMPP federation
-        server.addEndpoint(new S2SEndpoint());
-        // enable classic TCP bases access
-        tcpEndpoint = new TCPEndpoint();
-        tcpEndpoint.setPort(port);
-
-        log.info("XMPP port it set to " + port);
-        server.addEndpoint(tcpEndpoint);
-        server.setStorageProviderRegistry(providerRegistry);
-        server.setTLSCertificateInfo(XMPPProtocolServer.class.getResourceAsStream(pathToTLSCertificate), "password1");
-
-        try {
-            server.start();
-            System.out.println("vysper server is running...");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        ProtocolCodecFilter codecFilter = new ProtocolCodecFilter( new TextLineCodecFactory( Charset.forName( "UTF-8" )));
-        server.addModule(new SoftwareVersionModule());
-        server.addModule(new EntityTimeModule());
-        server.addModule(new VcardTempModule());
-        server.addModule(new XmppPingModule());
-        server.addModule(new PrivateDataModule());
-        PubSub publishSubscribeModule = new PubSub();
-        server.addModule(publishSubscribeModule);
-        pubSubPublishHandler2 = publishSubscribeModule.getPubSubPublishHandler2();
-        serverRuntimeContext = publishSubscribeModule.getServerRuntimeContext();
-
-    }
-
     @Override
     public void boot() {
         if (!_running) {
+             server = new no.ntnu.okse.protocol.xmpp.XMPPServer(this, host,port);
             _serverThread = new Thread(this::run);
             _serverThread.setName("XMPPProtocolServer");
             _serverThread.start();
@@ -92,12 +51,12 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
     }
 
     @Override
-    public void run() {
-        init();
-    }
+    public void run() {}
 
     @Override
     public void stopServer() {
+        log.info("Stopping XMPPProtocolServer");
+        server.stopServer();
         _running = false;
     }
 
@@ -108,7 +67,7 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
     @Override
     public void sendMessage(Message message) {
-        pubSubPublishHandler2.publishXMPPmessage(message, serverRuntimeContext);
+        server.sendMessage(message);
     }
 
     public boolean isRunning() {
