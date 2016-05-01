@@ -1,125 +1,83 @@
-package no.ntnu.okse.protocol.stomp.listeners;
+package no.ntnu.okse.protocol.stomp;
 
-import asia.stampy.client.message.disconnect.DisconnectMessage;
-import asia.stampy.common.gateway.AbstractStampyMessageGateway;
 import asia.stampy.common.gateway.HostPort;
-import asia.stampy.common.message.StampyMessage;
-import asia.stampy.common.message.StompMessageType;
-import asia.stampy.server.netty.ServerNettyMessageGateway;
-import no.ntnu.okse.core.messaging.MessageService;
-import no.ntnu.okse.core.subscription.SubscriptionService;
-import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
+import asia.stampy.common.heartbeat.HeartbeatContainer;
+import asia.stampy.common.heartbeat.StampyHeartbeatContainer;
+import no.ntnu.okse.protocol.stomp.commons.STOMPChannelHandler;
 import org.jboss.netty.channel.*;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.testng.AssertJUnit.assertEquals;
 
-public class DisconnectListenerTest{
-    private DisconnectListener listener;
-    private DisconnectListener listener_spy;
-    private MessageService messageService;
-    private MessageService messageService_spy;
-    private AbstractStampyMessageGateway gateway_spy;
-    private STOMPSubscriptionManager subscritpionManager_spy;
 
-    @BeforeTest
-    public void setUp() throws Exception {
-        listener = new DisconnectListener();
-        messageService = MessageService.getInstance();
+public class STOMPChannelHandlerTest {
+    private STOMPChannelHandler handler;
+    private STOMPProtocolServer ps;
+    private String msg;
+    private HostPort hostPort;
+    private StampyHeartbeatContainer heartbeatContainer;
+    private ConcurrentHashMap<HostPort, Channel> sessions;
 
-        messageService_spy = Mockito.spy(messageService);
+    @BeforeMethod
+    public void setup(){
+        msg = "Test";
+        hostPort = new HostPort("localhost", 1883);
+        handler = Mockito.spy(new STOMPChannelHandler());
+        ps = Mockito.spy(new STOMPProtocolServer(hostPort.getHost(), hostPort.getPort()));
 
-        STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
-        subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
-        subscritpionManager_spy = Mockito.spy(subscriptionManager);
-
-        listener.setSubscriptionManager(subscritpionManager_spy);
-
-        listener_spy = Mockito.spy(listener);
+        handler.setProtocolServer(ps);
+        sessions = new ConcurrentHashMap<HostPort, Channel>();
+        sessions.put(hostPort, createChannel());
+        handler.setSessions(sessions);
+        heartbeatContainer = new HeartbeatContainer();
+        handler.setHeartbeatContainer(heartbeatContainer);
     }
 
-    @AfterTest
-    public void tearDown() throws Exception {
-        if(gateway_spy != null)
-            gateway_spy.shutdown();
-        gateway_spy = null;
-        listener = null;
-        listener_spy = null;
-    }
-
-    @Test
-    public void isForMessage(){
-        assertEquals(true, listener_spy.isForMessage(null));
+    @AfterMethod
+    public void tearDown(){
+        hostPort = null;
+        msg = null;
+        sessions = null;
+        heartbeatContainer = null;
+        ps = null;
+        handler = null;
     }
 
     @Test
-    public void getMessageTypes(){
-        StompMessageType[] types = listener_spy.getMessageTypes();
-        assertEquals(StompMessageType.DISCONNECT, types[0]);
+    public void broadcastMessage(){
+        Channel channel = sessions.get(hostPort);
+        Mockito.doReturn(true).when(channel).isConnected();
+        Mockito.doReturn(new InetSocketAddress(1885)).when(channel).getRemoteAddress();
+        handler.broadcastMessage(msg);
+        Mockito.verify(channel).write(msg);
     }
 
     @Test
-    public void messageReceived() throws Exception {
-        StampyMessage msg = createSendMessage();
-        HostPort hostPort = new HostPort("localhost", 61613);
-
-        listener_spy.messageReceived(msg, hostPort);
-
-        ArgumentCaptor<HostPort> hostPortArgumentCaptor = ArgumentCaptor.forClass(HostPort.class);
-        Mockito.verify(listener_spy).cleanUp(hostPortArgumentCaptor.capture());
-        Mockito.doNothing().when(listener_spy).cleanUp(hostPort);
-
-        assertEquals( hostPort.getHost(), hostPortArgumentCaptor.getValue().getHost());
-        assertEquals( hostPort.getPort(), hostPortArgumentCaptor.getValue().getPort());
-        Mockito.reset(listener_spy);
+    public void sendMessage(){
+        HostPort notConnected = new HostPort("localhost", 1884);
+        Channel channel = createChannel();
+        sessions.put(notConnected, channel);
+        handler.sendMessage(msg, notConnected);
+        Mockito.verify(ps).incrementTotalErrors();
     }
 
     @Test
-    public void forcefulDisconnect(){
-        ServerNettyMessageGateway gateway_spy = Mockito.spy(new ServerNettyMessageGateway());
-
-        ArgumentCaptor<SimpleChannelUpstreamHandler> SimpleChannelUpstreamHandlerArgumentcapto= ArgumentCaptor.forClass(SimpleChannelUpstreamHandler.class);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object handler = invocation.getArguments()[0];
-                ChannelHandlerContext ctx = createCTX();
-                Channel channel = createChannel();
-                InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1881);
-                    HostPort hostPort = new HostPort("127.0.0.1", addr.getPort());
-
-                SimpleChannelUpstreamHandler _handler = (SimpleChannelUpstreamHandler) handler;
-
-                Mockito.doReturn(channel).when(ctx).getChannel();
-                Mockito.doReturn(addr).when(channel).getRemoteAddress();
-
-                _handler.channelDisconnected(ctx, null);
-
-                ArgumentCaptor<HostPort> hostPortArgumentCaptor = ArgumentCaptor.forClass(HostPort.class);
-                Mockito.verify(listener_spy).cleanUp(hostPortArgumentCaptor.capture());
-                Mockito.doNothing().when(listener_spy).cleanUp(hostPort);
-
-                assertEquals( hostPort.getHost(), hostPortArgumentCaptor.getValue().getHost());
-                assertEquals( hostPort.getPort(), hostPortArgumentCaptor.getValue().getPort());
-                Mockito.reset(listener_spy);
-                return null;
-            }
-        }).when(gateway_spy).addHandler(SimpleChannelUpstreamHandlerArgumentcapto.capture());
-        listener_spy.setGateway(gateway_spy);
+    public void getHeartbeatContainer(){
+        assertEquals(heartbeatContainer, handler.getHeartbeatContainer());
     }
 
-    private StampyMessage createSendMessage(){
-        DisconnectMessage msg = new DisconnectMessage();
-        return msg;
+    @Test
+    public void getAndSetProtocolServer(){
+        assertEquals(ps, handler.getProtocolServer());
+        handler.setProtocolServer(null);
+        assertEquals(null, handler.getProtocolServer());
     }
 
     private Channel createChannel(){

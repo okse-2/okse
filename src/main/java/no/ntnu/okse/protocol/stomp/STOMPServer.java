@@ -200,12 +200,12 @@ public class STOMPServer extends Server {
             //TODO: Do we also have to change the message id?
             MessageMessage msg = createSTOMPMessage(message, key);
             try {
-                gateway.sendMessage((StampyMessage<?>) msg, new HostPort(sub.getHost(), sub.getPort()));
+                getGateway().sendMessage((StampyMessage<?>) msg, new HostPort(sub.getHost(), sub.getPort()));
+                ps.incrementTotalMessagesSent();
             } catch (InterceptException e) {
                 ps.incrementTotalErrors();
                 log.error("Error happened when STOMP tried to send a message to the client", e);
             }
-            ps.incrementTotalMessagesSent();
         }
     }
 
@@ -245,5 +245,9 @@ public class STOMPServer extends Server {
         } catch (Exception e) {
             log.error("Exception when trying to shutdown the server", e);
         }
+    }
+
+    public STOMPGateway getGateway() {
+        return gateway;
     }
 }

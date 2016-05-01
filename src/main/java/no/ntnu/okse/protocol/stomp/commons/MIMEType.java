@@ -23,11 +23,6 @@ public class MIMEType {
     }
 
     private String getCharsetFromContentType(String contentType){
-        //Assume that it is binary data and that it should be treated as utf-8
-        //According to the specification of STOMP the server should assume any content to be
-        //interpreted as utf-8 binary blob if a contentType is not given.
-        if(contentType == null)
-            return "utf-8";
         String[] values = contentType.split(";");
         for (String value : values) {
             value = value.trim();
