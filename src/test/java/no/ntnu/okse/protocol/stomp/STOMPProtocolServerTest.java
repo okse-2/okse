@@ -62,9 +62,6 @@ public class STOMPProtocolServerTest {
         ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
         Mockito.verify(server_spy).sendMessage(messageArgument.capture());
         assertEquals(msg, messageArgument.getValue());
-
-        Mockito.doThrow(new InterceptException("Testing the catch")).when(server_spy).sendMessage(msg);
-        ps_spy.sendMessage(msg);
     }
 
     @Test

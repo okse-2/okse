@@ -51,7 +51,9 @@ public class STOMPServerTest {
         server_spy.stopServer();
         server_spy = null;
         ps_spy = null;
-        gateway.shutdown();
+        try{
+            gateway.shutdown();
+        }catch(Exception e){}
         gateway = null;
     }
 
@@ -84,9 +86,7 @@ public class STOMPServerTest {
 
     @Test
     public void stopServerCatchException() throws Exception {
-        assertEquals(port, server_spy.gateway.getPort());
-        server_spy.stopServer();
         Mockito.doThrow(new Exception("Test Exception")).when(gateway).shutdown();
-        Mockito.verify(gateway).shutdown();
+        server_spy.stopServer();
     }
 }
