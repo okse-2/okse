@@ -1,13 +1,10 @@
 package no.ntnu.okse.protocol.stomp;
 
 import no.ntnu.okse.protocol.stomp.common.Gateway;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.mockito.Mockito;
+import no.ntnu.okse.protocol.stomp.commons.STOMPGateway;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.net.InetSocketAddress;
 
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
@@ -15,19 +12,20 @@ import static org.testng.AssertJUnit.assertNotNull;
 public class GatewayTest {
     private STOMPGateway gateway;
     private String host = "localhost";
-    private int port = 61631;
+    private int port = 61613;
 
     @BeforeMethod
     public void setup() throws Exception {
+//        port = port + 1;
         gateway = Gateway.initialize(host, port);
-        gateway.setHost("localhost");
-        gateway.setPort(61631);
         gateway.connect();
     }
 
     @AfterMethod
     public void tearDown() throws Exception {
+        System.out.println(gateway);
         gateway.shutdown();
+        System.out.println(gateway);
         gateway = null;
     }
 

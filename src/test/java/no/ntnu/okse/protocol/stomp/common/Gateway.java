@@ -13,7 +13,7 @@ import asia.stampy.server.netty.login.NettyLoginMessageListener;
 import asia.stampy.server.netty.receipt.NettyReceiptListener;
 import asia.stampy.server.netty.subscription.NettyAcknowledgementListenerAndInterceptor;
 import asia.stampy.server.netty.transaction.NettyTransactionListener;
-import no.ntnu.okse.protocol.stomp.STOMPGateway;
+import no.ntnu.okse.protocol.stomp.commons.STOMPGateway;
 import no.ntnu.okse.protocol.stomp.listeners.IDontNeedSecurity;
 import org.mockito.Mockito;
 

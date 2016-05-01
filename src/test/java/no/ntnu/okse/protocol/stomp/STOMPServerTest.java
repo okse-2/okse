@@ -5,6 +5,7 @@ import asia.stampy.common.message.StampyMessage;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
+import no.ntnu.okse.protocol.stomp.commons.STOMPGateway;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import static org.testng.AssertJUnit.assertEquals;
@@ -50,6 +51,7 @@ public class STOMPServerTest {
         server_spy.stopServer();
         server_spy = null;
         ps_spy = null;
+        gateway.shutdown();
         gateway = null;
     }
 

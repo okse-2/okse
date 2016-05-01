@@ -30,8 +30,6 @@ public class MessageListener implements StampyMessageListener {
 
     @Override
     public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) throws Exception {
-        System.out.println("MIME: " + ((MessageMessage)stampyMessage).getHeader().getContentType());
-        System.out.println("Subscriber: " + id + "\n" + "Message says: " + ((MessageMessage)stampyMessage).getBody() + "\n");
     }
 
 }

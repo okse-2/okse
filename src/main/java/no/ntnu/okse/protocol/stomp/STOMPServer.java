@@ -9,7 +9,6 @@ import asia.stampy.examples.system.server.SystemAcknowledgementHandler;
 import asia.stampy.server.listener.validate.ServerMessageValidationListener;
 import asia.stampy.server.listener.version.VersionListener;
 import asia.stampy.server.message.message.MessageMessage;
-import asia.stampy.server.netty.ServerNettyChannelHandler;
 import asia.stampy.server.netty.ServerNettyMessageGateway;
 import asia.stampy.server.netty.connect.NettyConnectResponseListener;
 import asia.stampy.server.netty.connect.NettyConnectStateListener;
@@ -21,6 +20,8 @@ import io.moquette.server.Server;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Subscriber;
+import no.ntnu.okse.protocol.stomp.commons.STOMPChannelHandler;
+import no.ntnu.okse.protocol.stomp.commons.STOMPGateway;
 import no.ntnu.okse.protocol.stomp.listeners.*;
 import no.ntnu.okse.protocol.stomp.listeners.MessageListener;
 import org.apache.log4j.Logger;
@@ -66,7 +67,9 @@ public class STOMPServer extends Server {
         gateway.setHeartbeat(1000);
         gateway.setAutoShutdown(true);
 
-        ServerNettyChannelHandler channelHandler = new ServerNettyChannelHandler();
+//        ServerNettyChannelHandler channelHandler = new ServerNettyChannelHandler();
+        STOMPChannelHandler channelHandler = new STOMPChannelHandler();
+        channelHandler.setProtocolServer(ps);
         channelHandler.setGateway(gateway);
         channelHandler.setHeartbeatContainer(heartbeatContainer);
 
@@ -139,15 +142,18 @@ public class STOMPServer extends Server {
         UnSubscriptionListener unsubListener = new UnSubscriptionListener();
         MIMEtypeListener mimeTypeListener = new MIMEtypeListener();
         IncrementTotalRequestsListener incrementTotalRequestsListener = new IncrementTotalRequestsListener();
+        ErrorListener errorListener = new ErrorListener();
 
         subListener.setSubscriptionManager(subscriptionManager);
         unsubListener.setSubscriptionManager(subscriptionManager);
 
         messageListener.setProtocolServer(ps);
+        errorListener.setProtocolServer(ps);
         incrementTotalRequestsListener.setProtocolServer(ps);
 
         messageListener.setMessageService(MessageService.getInstance());
 
+        gateway.addOutgoingMessageInterceptor(errorListener);
         gateway.addMessageListener(mimeTypeListener);
         gateway.addMessageListener(subListener);
         gateway.addMessageListener(unsubListener);
@@ -178,7 +184,7 @@ public class STOMPServer extends Server {
      * Sends the message to any subscriber that is subscribed to the topic that the message was sent to
      * @param message is the message that is sent from OKSE core
      * */
-    public void sendMessage(@NotNull Message message) throws InterceptException {
+    public void sendMessage(@NotNull Message message) {
         log.debug("OKSE has received a message, please redistribute!");
 
         HashMap<String, Subscriber> subs = subscriptionManager.getAllSubscribersForTopic(message.getTopic());
@@ -193,7 +199,12 @@ public class STOMPServer extends Server {
 
             //TODO: Do we also have to change the message id?
             MessageMessage msg = createSTOMPMessage(message, key);
-            gateway.sendMessage((StampyMessage<?>) msg, new HostPort(sub.getHost(), sub.getPort()));
+            try {
+                gateway.sendMessage((StampyMessage<?>) msg, new HostPort(sub.getHost(), sub.getPort()));
+            } catch (InterceptException e) {
+                ps.incrementTotalErrors();
+                log.error("Error happened when STOMP tried to send a message to the client", e);
+            }
             ps.incrementTotalMessagesSent();
         }
     }

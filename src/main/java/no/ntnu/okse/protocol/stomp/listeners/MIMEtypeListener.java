@@ -5,11 +5,11 @@ import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.gateway.StampyMessageListener;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
+import no.ntnu.okse.protocol.stomp.commons.MIMEType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.nio.charset.Charset;
 
 public class MIMEtypeListener implements StampyMessageListener {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -18,19 +18,6 @@ public class MIMEtypeListener implements StampyMessageListener {
         CharsetException(String msg) {
             super(msg);
         }
-    }
-
-    private String getCharSet(String contentType){
-        String charset = null;
-        String[] values = contentType.split(";");
-        for (String value : values) {
-            value = value.trim();
-
-            if (value.toLowerCase().startsWith("charset=")) {
-                charset = value.substring("charset=".length());
-            }
-        }
-        return charset;
     }
 
     @Override
@@ -50,8 +37,12 @@ public class MIMEtypeListener implements StampyMessageListener {
 
     private void test(StampyMessage<?> stampyMessage, HostPort hostPort) throws CharsetException{
         SendMessage sendMessage = (SendMessage) stampyMessage;
-        String charset = getCharSet(sendMessage.getHeader().getContentType());
-        if(charset == null || charset.equals("")){
+        String contentType = sendMessage.getHeader().getContentType();
+        MIMEType mime = new MIMEType(contentType);
+        String charset = mime.getCharset();
+        if(charset == null)
+            return;
+        if(charset.equals("")){
             throw new CharsetException("Invalid charset given with the message");
         }
     }
