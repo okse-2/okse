@@ -182,7 +182,6 @@ public class Client {
 //        message.getHeader().setDestination("test");
         message.getHeader().setContentType(MIMEtype);
         String test ="#" + text + "     :     " + "This is a test";
-        System.out.println("Charset: " + charset);
         message.setBody(test);
         getGateway().broadcastMessage(message);
     }

@@ -70,11 +70,7 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
     @Override
     public void sendMessage(Message message) {
         log.info("Received message on topic " + message.getTopic() );
-        try {
-            server.sendMessage(message);
-        } catch (InterceptException e) {
-            log.error("Error happened when STOMP tried to send a message to the client", e);
-        }
+        server.sendMessage(message);
     }
 
     /**

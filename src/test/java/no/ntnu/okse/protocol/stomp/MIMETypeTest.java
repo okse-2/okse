@@ -16,7 +16,7 @@ public class MIMETypeTest {
 
         ArrayList<List<String>> mimetypes = new ArrayList<>();
 
-        mimetypes.add(Arrays.asList("text/plain", ""));
+        mimetypes.add(Arrays.asList("text/plain;charset=", ""));
         mimetypes.add(Arrays.asList("text/plain;charset=UTF-8", "UTF-8"));
         mimetypes.add(Arrays.asList("text/html;charset=UTF-16", "UTF-16"));
 //        mimetypes.add(Arrays.asList("application/javascript;charset=ISO-8859-1", "ISO-8859-1"));

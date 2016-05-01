@@ -87,8 +87,8 @@ public class STOMPMessageListenerTest {
 
         assertEquals("user defined header", messageArgument.getValue().getAttribute("testing"));
         assertEquals(null, messageArgument.getValue().getAttribute("transaction"));
-        assertEquals(null, messageArgument.getValue().getAttribute("content-length"));
-        assertEquals(null, messageArgument.getValue().getAttribute("content-type"));
+        assertEquals("2", messageArgument.getValue().getAttribute("content-length"));
+        assertEquals("text/plain", messageArgument.getValue().getAttribute("content-type"));
         assertEquals(null, messageArgument.getValue().getAttribute("receipt"));
 
         Mockito.reset(messageService_spy);
@@ -107,7 +107,7 @@ public class STOMPMessageListenerTest {
         msg.setBody("Testing");
         msg.getHeader().setDestination("bernt");
         msg.getHeader().setTransaction("testing");
-        msg.getHeader().setContentType("plain/text");
+        msg.getHeader().setContentType("text/plain");
         msg.getHeader().setContentLength(2);
         msg.getHeader().setReceipt("test");
         msg.getHeader().addHeader("testing", "user defined header");

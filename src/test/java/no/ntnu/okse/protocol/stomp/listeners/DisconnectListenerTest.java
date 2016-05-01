@@ -53,7 +53,10 @@ public class DisconnectListenerTest{
     }
 
     @AfterTest
-    public void tearDown() {
+    public void tearDown() throws Exception {
+        if(gateway_spy != null)
+            gateway_spy.shutdown();
+        gateway_spy = null;
         listener = null;
         listener_spy = null;
     }
@@ -101,8 +104,6 @@ public class DisconnectListenerTest{
 
                 SimpleChannelUpstreamHandler _handler = (SimpleChannelUpstreamHandler) handler;
 
-                System.out.println("Channel");
-                System.out.println(channel);
                 Mockito.doReturn(channel).when(ctx).getChannel();
                 Mockito.doReturn(addr).when(channel).getRemoteAddress();
 

@@ -1,4 +1,4 @@
-package no.ntnu.okse.protocol.stomp;
+package no.ntnu.okse.protocol.stomp.commons;
 
 import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;

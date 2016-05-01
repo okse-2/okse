@@ -5,6 +5,7 @@ import asia.stampy.common.message.StampyMessage;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
+import no.ntnu.okse.protocol.stomp.commons.STOMPGateway;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import static org.testng.AssertJUnit.assertEquals;
@@ -50,6 +51,9 @@ public class STOMPServerTest {
         server_spy.stopServer();
         server_spy = null;
         ps_spy = null;
+        try{
+            gateway.shutdown();
+        }catch(Exception e){}
         gateway = null;
     }
 
@@ -82,9 +86,7 @@ public class STOMPServerTest {
 
     @Test
     public void stopServerCatchException() throws Exception {
-        assertEquals(port, server_spy.gateway.getPort());
-        server_spy.stopServer();
         Mockito.doThrow(new Exception("Test Exception")).when(gateway).shutdown();
-        Mockito.verify(gateway).shutdown();
+        server_spy.stopServer();
     }
 }
