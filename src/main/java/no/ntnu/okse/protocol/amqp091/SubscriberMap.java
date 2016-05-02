@@ -4,6 +4,9 @@ import no.ntnu.okse.core.subscription.Subscriber;
 
 import java.util.*;
 
+/**
+ * Helper class for mapping host, port and topic to subscribers
+ */
 public class SubscriberMap {
 
     private class Client {
@@ -46,6 +49,11 @@ public class SubscriberMap {
     private Map<Client, Subscriber> topicSubscriberMap = new HashMap<>();
     private Map<Client, List<Subscriber>> subscribersMap = new HashMap<>();
 
+    /**
+     * Put subscriber in map
+     *
+     * @param subscriber subscriber to add
+     */
     public void putSubscriber(Subscriber subscriber) {
         Client topicClient = new Client(subscriber);
         topicSubscriberMap.put(topicClient, subscriber);
@@ -61,10 +69,25 @@ public class SubscriberMap {
         subscribers.add(subscriber);
     }
 
+    /**
+     * Get subscriber based on host, port and topic
+     *
+     * @param host hostname
+     * @param port port
+     * @param topic topic
+     * @return subscriber
+     */
     public Subscriber getSubscriber(String host, int port, String topic) {
         return topicSubscriberMap.get(new Client(host, port, topic));
     }
 
+    /**
+     * Get list of subscribers for a specific host:port
+     *
+     * @param host hostname
+     * @param port port
+     * @return list of subscribers
+     */
     public List<Subscriber> getSubscribers(String host, int port) {
         List<Subscriber> subscribers = subscribersMap.get(new Client(host, port));
         if(subscribers == null) {
