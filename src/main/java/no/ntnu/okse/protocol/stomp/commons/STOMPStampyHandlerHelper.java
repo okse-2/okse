@@ -2,9 +2,7 @@ package no.ntnu.okse.protocol.stomp.commons;
 
 import asia.stampy.client.message.ClientMessageHeader;
 import asia.stampy.common.gateway.*;
-import asia.stampy.common.heartbeat.StampyHeartbeatContainer;
 import asia.stampy.common.message.StampyMessage;
-import asia.stampy.common.parsing.StompMessageParser;
 import asia.stampy.common.parsing.UnparseableException;
 import asia.stampy.server.message.error.ErrorMessage;
 import org.apache.commons.lang.StringUtils;
@@ -15,14 +13,6 @@ import java.lang.invoke.MethodHandles;
 
 public class STOMPStampyHandlerHelper extends StampyHandlerHelper {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    private StompMessageParser parser = new StompMessageParser();
-
-    private StampyHeartbeatContainer heartbeatContainer;
-
-    private AbstractStampyMessageGateway gateway;
-
-    private UnparseableMessageHandler unparseableMessageHandler = new DefaultUnparseableMessageHandler();
 
     /**
      * Handle unexpected error.
@@ -84,7 +74,7 @@ public class STOMPStampyHandlerHelper extends StampyHandlerHelper {
      * @throws Exception
      *           the exception
      */
-    protected void errorHandle(StampyMessage<?> message, Exception e, HostPort hostPort) throws Exception {
+    public void errorHandle(StampyMessage<?> message, Exception e, HostPort hostPort) throws Exception {
         log.error("Handling error, sending error message to " + hostPort, e);
         String receipt = message.getHeader().getHeaderValue(ClientMessageHeader.RECEIPT);
         ErrorMessage error = new ErrorMessage(StringUtils.isEmpty(receipt) ? "n/a" : receipt);
@@ -105,7 +95,7 @@ public class STOMPStampyHandlerHelper extends StampyHandlerHelper {
      * @throws Exception
      *           the exception
      */
-    protected void errorHandle(Exception e, HostPort hostPort) throws Exception {
+    public void errorHandle(Exception e, HostPort hostPort) throws Exception {
         log.error("Handling error, sending error message to " + hostPort, e);
         ErrorMessage error = new ErrorMessage("n/a");
         error.getHeader().setMessageHeader(e.getMessage());
@@ -113,69 +103,5 @@ public class STOMPStampyHandlerHelper extends StampyHandlerHelper {
         //This was added to the existing handler so that we can call any interceptors when an error message is sent
         getGateway().sendMessage(error, hostPort);
 //        getGateway().sendMessage(error.toStompMessage(true), hostPort);
-    }
-
-    /**
-     * Checks if the message is a heartbeat.
-     *
-     * @param msg
-     *          the msg
-     * @return true, if is heartbeat
-     */
-    public boolean isHeartbeat(String msg) {
-        return msg.equals(StampyHeartbeatContainer.HB1) || msg.equals(StampyHeartbeatContainer.HB2);
-    }
-
-    /**
-     * Checks if is valid object. Must be a string.
-     *
-     * @param message
-     *          the message
-     * @return true, if is valid object
-     */
-    public boolean isValidObject(Object message) {
-        return message instanceof String;
-    }
-
-    /**
-     * Reset heartbeat.
-     *
-     * @param hostPort
-     *          the host port
-     */
-    public void resetHeartbeat(HostPort hostPort) {
-        getHeartbeatContainer().reset(hostPort);
-    }
-
-    public StompMessageParser getParser() {
-        return parser;
-    }
-
-    public void setParser(StompMessageParser parser) {
-        this.parser = parser;
-    }
-
-    public StampyHeartbeatContainer getHeartbeatContainer() {
-        return heartbeatContainer;
-    }
-
-    public void setHeartbeatContainer(StampyHeartbeatContainer heartbeatContainer) {
-        this.heartbeatContainer = heartbeatContainer;
-    }
-
-    public AbstractStampyMessageGateway getGateway() {
-        return gateway;
-    }
-
-    public void setGateway(AbstractStampyMessageGateway gateway) {
-        this.gateway = gateway;
-    }
-
-    public UnparseableMessageHandler getUnparseableMessageHandler() {
-        return unparseableMessageHandler;
-    }
-
-    public void setUnparseableMessageHandler(UnparseableMessageHandler unparseableMessageHandler) {
-        this.unparseableMessageHandler = unparseableMessageHandler;
     }
 }

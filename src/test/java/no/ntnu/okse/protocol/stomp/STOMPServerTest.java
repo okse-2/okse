@@ -2,16 +2,24 @@ package no.ntnu.okse.protocol.stomp;
 
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.message.StampyMessage;
+import asia.stampy.common.message.interceptor.InterceptException;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.stomp.commons.STOMPGateway;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.*;
+
+import java.net.InetSocketAddress;
 
 public class STOMPServerTest {
 
@@ -71,9 +79,33 @@ public class STOMPServerTest {
     }
 
     @Test
+    public void incrementTotalErrors() throws InterceptException {
+        subManager_spy.addSubscriber(new Subscriber("localhost", 61613, "testing", "stomp"), "ogdans3");
+
+
+        Message msg = new Message("testing", "testing", null, "stomp");
+        msg.setAttribute("test", "user defined attribute");
+
+        ArgumentCaptor<StampyMessage> stampy = ArgumentCaptor.forClass(StampyMessage.class);
+        ArgumentCaptor<HostPort> hp = ArgumentCaptor.forClass(HostPort.class);
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable, InterceptException {
+                throw new InterceptException("Intercepting to increment total number of errors");
+            }
+        }).when(gateway).sendMessage(stampy.capture(), hp.capture());
+        server_spy.sendMessage(msg);
+    }
+
+    @Test
     public void init() throws Exception {
         assertEquals(port, gateway.getPort());
         assertNotNull(null, gateway);
+    }
+
+    @Test
+    public void getGateway(){
+        assertEquals(gateway, server_spy.getGateway());
     }
 
     @Test

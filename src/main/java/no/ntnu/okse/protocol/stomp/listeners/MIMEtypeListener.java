@@ -8,17 +8,12 @@ import asia.stampy.common.message.StompMessageType;
 import no.ntnu.okse.protocol.stomp.commons.MIMEType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import no.ntnu.okse.protocol.stomp.commons.CharsetException;
 
 import java.lang.invoke.MethodHandles;
 
 public class MIMEtypeListener implements StampyMessageListener {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    class CharsetException extends Exception {
-        CharsetException(String msg) {
-            super(msg);
-        }
-    }
     
     @Override
     public StompMessageType[] getMessageTypes() {
