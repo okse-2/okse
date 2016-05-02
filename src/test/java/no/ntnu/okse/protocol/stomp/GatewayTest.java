@@ -16,7 +16,6 @@ public class GatewayTest {
 
     @BeforeMethod
     public void setup() throws Exception {
-//        port = port + 1;
         gateway = Gateway.initialize(host, port);
         gateway.connect();
     }
