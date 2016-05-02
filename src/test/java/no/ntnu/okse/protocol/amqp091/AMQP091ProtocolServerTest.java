@@ -3,15 +3,14 @@ package no.ntnu.okse.protocol.amqp091;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
+import no.ntnu.okse.protocol.ProtocolServer;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.testng.AssertJUnit.*;
@@ -50,6 +49,7 @@ public class AMQP091ProtocolServerTest {
         assertTrue(protocolServer.isRunning());
     }
 
+    @Test(expectedExceptions = ProtocolServer.BootErrorException.class)
     public void boot_twice() {
         protocolServer.setAmqpService(null);
         doNothing().when(protocolServer).run();
