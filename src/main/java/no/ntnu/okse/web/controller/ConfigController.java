@@ -4,6 +4,7 @@ import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.topic.TopicService;
 import no.ntnu.okse.protocol.wsn.WSNotificationServer;
 import org.apache.log4j.Logger;
+import org.ntnunotif.wsnu.base.soap.Soap;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -199,8 +200,9 @@ public class ConfigController {
     ResponseEntity<String> addRelay(
             @RequestParam(value = "serverID") Integer id,
             @RequestParam(value = "from") String relay,
-            @RequestParam(value = "topic", required = false) String topic) {
-        log.debug("Trying to add relay from: " + relay + " with topic:" + topic);
+            @RequestParam(value = "topic", required = false) String topic,
+            @RequestParam(value = "soap-version") Integer version) {
+        log.debug("Trying to add relay from: " + relay + " with topic:" + topic + ", using SOAP version " + version);
 
         String regex = "(?:http.*://)?(?<host>[^:/ ]+).?(?<port>[0-9]*).*";
         Matcher m = Pattern.compile(regex).matcher(relay);
@@ -217,7 +219,18 @@ public class ConfigController {
             return new ResponseEntity<String>("{ \"message\" :\"Host or port not provided, not able to add relay\" }", HttpStatus.BAD_REQUEST);
         }
 
-        if(wsnServers.get(id).addRelay(relay, host, port, topic)) {
+        Soap.SoapVersion soapVersion;
+        switch(version) {
+            case 11:
+            default:
+                soapVersion = Soap.SoapVersion.SOAP_1_1;
+                break;
+            case 12:
+                soapVersion = Soap.SoapVersion.SOAP_1_2_2003;
+                break;
+        }
+
+        if(wsnServers.get(id).addRelay(relay, host, port, topic, soapVersion)) {
             return new ResponseEntity<String>("{ \"message\" :\"Successfully added relay\" }", HttpStatus.OK);
         } else {
 

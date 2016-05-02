@@ -26,6 +26,7 @@ package no.ntnu.okse.protocol.wsn;
 
 import com.google.common.io.ByteStreams;
 import no.ntnu.okse.core.messaging.Message;
+import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.commons.io.IOUtils;
@@ -44,6 +45,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.xml.XmlConfiguration;
 import org.ntnunotif.wsnu.base.internal.ServiceConnection;
 import org.ntnunotif.wsnu.base.net.NuNamespaceContextResolver;
+import org.ntnunotif.wsnu.base.soap.Soap;
 import org.ntnunotif.wsnu.base.util.InternalMessage;
 import org.ntnunotif.wsnu.base.util.RequestInformation;
 import org.ntnunotif.wsnu.services.general.WsnUtilities;
@@ -413,6 +415,26 @@ public class WSNotificationServer extends AbstractProtocolServer {
                         Object content = WSNTools.extractMessageContentFromNotify(toSend);
                         // Update the InternalMessage with the content of the NotificationMessage
                         outMessage.setMessage(content);
+                    }
+
+                    // Use the correct SOAP version for this subscriber
+                    Subscriber subscriber =_commandProxy.getProxySubscriptionManager().getSubscriber(recipient);
+                    String version = subscriber.getAttribute("soap_version");
+                    if(version == null) {
+                        outMessage.setVersion(Soap.SoapVersion.SOAP_1_1);
+                    } else {
+                        switch(version) {
+                            default:
+                            case "soap11":
+                                outMessage.setVersion(Soap.SoapVersion.SOAP_1_1);
+                                break;
+                            case "soap12D":
+                                outMessage.setVersion(Soap.SoapVersion.SOAP_1_2_2001);
+                                break;
+                            case "soap12F":
+                                outMessage.setVersion(Soap.SoapVersion.SOAP_1_2_2003);
+                                break;
+                        }
                     }
 
                     // Pass it along to the request parser wrapped as a thread pool executed job
@@ -801,7 +823,7 @@ public class WSNotificationServer extends AbstractProtocolServer {
         }
     }
 
-    public boolean addRelay(String relay, String host, Integer port, String topic) {
+    public boolean addRelay(String relay, String host, Integer port, String topic, Soap.SoapVersion version) {
         final Set<String> localRelays = new HashSet<String>() {{
             add("127.0.0.1");
             add("0.0.0.0");
@@ -836,7 +858,8 @@ public class WSNotificationServer extends AbstractProtocolServer {
                                 relay,
                                 topic, // Topic
                                 getURI(),
-                                null // Termination time
+                                null, // Termination time
+                                version
                         )
                 )
         );
