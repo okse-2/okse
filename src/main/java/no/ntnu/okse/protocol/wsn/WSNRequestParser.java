@@ -49,6 +49,14 @@ public class WSNRequestParser implements Hub {
         _protocolServer = server;
     }
 
+    /**
+     * Parse a WS-Nu InternalMessage, act upon its contents and produce a response
+     * to send back to the originator of the message
+     *
+     * @param message Incoming message to parse
+     * @param streamToRequestor Ouput stream for the response message
+     * @return An InternalMessage with status from parsing the message
+     */
     public InternalMessage parseMessage(InternalMessage message, OutputStream streamToRequestor) {
 
         ServiceConnection recipient = findRecipientService(message.getRequestInformation().getRequestURL());
