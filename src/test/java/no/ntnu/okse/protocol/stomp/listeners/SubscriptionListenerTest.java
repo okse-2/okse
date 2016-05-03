@@ -6,7 +6,6 @@ import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
-import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -17,8 +16,6 @@ import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
 public class SubscriptionListenerTest {
-    private STOMPProtocolServer ps;
-    private STOMPProtocolServer ps_spy;
     private SubscriptionListener listener;
     private SubscriptionListener listener_spy;
     private STOMPSubscriptionManager subscritpionManager_spy;
@@ -26,14 +23,12 @@ public class SubscriptionListenerTest {
     @BeforeTest
     public void setUp() {
         listener = new SubscriptionListener();
-        ps = new STOMPProtocolServer("localhost", 61613);
         STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         subscritpionManager_spy = Mockito.spy(subscriptionManager);
 
         listener.setSubscriptionManager(subscritpionManager_spy);
 
-        ps_spy = Mockito.spy(ps);
         listener_spy = Mockito.spy(listener);
     }
 
@@ -41,8 +36,6 @@ public class SubscriptionListenerTest {
     public void tearDown() {
         listener = null;
         listener_spy = null;
-        ps_spy = null;
-        ps = null;
     }
 
     @Test

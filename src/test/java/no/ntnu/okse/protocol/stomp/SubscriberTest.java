@@ -27,12 +27,12 @@ public class SubscriberTest {
         Client client = new Client();
         Client client2 = new Client();
 
-        client.init(new MessageListener("subscription"));
-        client2.init(new MessageListener("ogdans3"));
+        client.init(new MessageListener());
+        client2.init(new MessageListener());
 
-        client.testConnect(String.valueOf(0 + (int)(Math.random() * 500)));
+        client.testConnect(String.valueOf((int) (Math.random() * 500)));
         Thread.sleep(1000);
-        client2.testConnect(String.valueOf(0 + (int)(Math.random() * 500)));
+        client2.testConnect(String.valueOf((int) (Math.random() * 500)));
 
 
         Thread.sleep(1000);

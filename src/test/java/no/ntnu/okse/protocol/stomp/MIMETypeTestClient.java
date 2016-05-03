@@ -11,8 +11,8 @@ public class MIMETypeTestClient {
 
     public static void main(String[] args) throws Exception {
         Client client = new Client();
-        client.init(new MessageListener("mime type"));
-        client.testConnect(String.valueOf(0 + (int)(Math.random() * 500)));
+        client.init(new MessageListener());
+        client.testConnect(String.valueOf((int) (Math.random() * 500)));
 
         ArrayList<List<String>> mimetypes = new ArrayList<>();
 

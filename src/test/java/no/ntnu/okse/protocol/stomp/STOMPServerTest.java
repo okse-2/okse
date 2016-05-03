@@ -7,9 +7,6 @@ import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.stomp.commons.STOMPGateway;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import static org.testng.AssertJUnit.assertEquals;
@@ -18,8 +15,6 @@ import static org.testng.AssertJUnit.assertNotNull;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.*;
-
-import java.net.InetSocketAddress;
 
 public class STOMPServerTest {
 
@@ -61,7 +56,7 @@ public class STOMPServerTest {
         ps_spy = null;
         try{
             gateway.shutdown();
-        }catch(Exception e){}
+        }catch(Exception ignored){}
         gateway = null;
     }
 
@@ -90,7 +85,7 @@ public class STOMPServerTest {
         ArgumentCaptor<HostPort> hp = ArgumentCaptor.forClass(HostPort.class);
         Mockito.doAnswer(new Answer() {
             @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable, InterceptException {
+            public Object answer(InvocationOnMock invocation) throws Throwable {
                 throw new InterceptException("Intercepting to increment total number of errors");
             }
         }).when(gateway).sendMessage(stampy.capture(), hp.capture());

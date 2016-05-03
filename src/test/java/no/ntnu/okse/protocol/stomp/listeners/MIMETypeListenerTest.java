@@ -5,8 +5,6 @@ import asia.stampy.common.gateway.AbstractStampyMessageGateway;
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
-import asia.stampy.server.message.error.ErrorMessage;
-import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 import no.ntnu.okse.protocol.stomp.commons.CharsetException;
 import org.mockito.Mockito;
 import org.testng.annotations.AfterTest;
@@ -19,16 +17,10 @@ public class MIMETypeListenerTest {
     private MIMEtypeListener listener;
     private MIMEtypeListener listener_spy;
     private AbstractStampyMessageGateway gateway_spy;
-    private STOMPProtocolServer ps;
-    private STOMPProtocolServer ps_spy;
 
     @BeforeTest
     public void setUp() throws Exception {
         listener = new MIMEtypeListener();
-        ps = new STOMPProtocolServer("localhost", 61613);
-
-        ps_spy = Mockito.spy(ps);
-
         listener_spy = Mockito.spy(listener);
     }
 
@@ -82,8 +74,7 @@ public class MIMETypeListenerTest {
     }
 
     private StampyMessage createSendMessageNullCharset() {
-        SendMessage msg = new SendMessage();
-        return msg;
+        return new SendMessage();
     }
 
     private StampyMessage createSendMessage(boolean valid){

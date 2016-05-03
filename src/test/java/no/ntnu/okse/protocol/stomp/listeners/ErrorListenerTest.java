@@ -1,24 +1,15 @@
 package no.ntnu.okse.protocol.stomp.listeners;
 
-import asia.stampy.client.message.disconnect.DisconnectMessage;
 import asia.stampy.common.gateway.AbstractStampyMessageGateway;
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
 import asia.stampy.server.message.error.ErrorMessage;
-import asia.stampy.server.netty.ServerNettyMessageGateway;
 import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
-import org.jboss.netty.channel.*;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -78,7 +69,6 @@ public class ErrorListenerTest {
     }
 
     private StampyMessage createSendMessage(){
-        ErrorMessage msg = new ErrorMessage();
-        return msg;
+        return new ErrorMessage();
     }
 }

@@ -15,8 +15,6 @@ import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertEquals;
 
 public class UnSubscriptionListenerTest {
-    private STOMPProtocolServer ps;
-    private STOMPProtocolServer ps_spy;
     private UnSubscriptionListener listener;
     private UnSubscriptionListener listener_spy;
     private STOMPSubscriptionManager subscritpionManager_spy;
@@ -24,14 +22,12 @@ public class UnSubscriptionListenerTest {
     @BeforeTest
     public void setUp() {
         listener = new UnSubscriptionListener();
-        ps = new STOMPProtocolServer("localhost", 61613);
         STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         subscritpionManager_spy = Mockito.spy(subscriptionManager);
 
         listener.setSubscriptionManager(subscritpionManager_spy);
 
-        ps_spy = Mockito.spy(ps);
         listener_spy = Mockito.spy(listener);
     }
 
@@ -39,8 +35,6 @@ public class UnSubscriptionListenerTest {
     public void tearDown() {
         listener = null;
         listener_spy = null;
-        ps_spy = null;
-        ps = null;
     }
 
     @Test

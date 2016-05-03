@@ -6,7 +6,6 @@ import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
 import asia.stampy.server.netty.ServerNettyMessageGateway;
-import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
 import org.jboss.netty.channel.*;
@@ -26,21 +25,15 @@ import static org.testng.AssertJUnit.assertEquals;
 public class DisconnectListenerTest{
     private DisconnectListener listener;
     private DisconnectListener listener_spy;
-    private MessageService messageService;
-    private MessageService messageService_spy;
     private AbstractStampyMessageGateway gateway_spy;
-    private STOMPSubscriptionManager subscritpionManager_spy;
 
     @BeforeTest
     public void setUp() throws Exception {
         listener = new DisconnectListener();
-        messageService = MessageService.getInstance();
-
-        messageService_spy = Mockito.spy(messageService);
 
         STOMPSubscriptionManager subscriptionManager = new STOMPSubscriptionManager();
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
-        subscritpionManager_spy = Mockito.spy(subscriptionManager);
+        STOMPSubscriptionManager subscritpionManager_spy = Mockito.spy(subscriptionManager);
 
         listener.setSubscriptionManager(subscritpionManager_spy);
 
@@ -118,12 +111,11 @@ public class DisconnectListenerTest{
     }
 
     private StampyMessage createSendMessage(){
-        DisconnectMessage msg = new DisconnectMessage();
-        return msg;
+        return new DisconnectMessage();
     }
 
     private Channel createChannel(){
-        Channel channel = Mockito.spy(new Channel() {
+        return Mockito.spy(new Channel() {
             @Override
             public int compareTo(Channel o) {
                 return 0;
@@ -254,10 +246,9 @@ public class DisconnectListenerTest{
 
             }
         });
-        return channel;
     }
     private ChannelHandlerContext createCTX(){
-        ChannelHandlerContext ctx = Mockito.spy(new ChannelHandlerContext() {
+        return Mockito.spy(new ChannelHandlerContext() {
             @Override
             public Channel getChannel() {
                 return null;
@@ -308,6 +299,5 @@ public class DisconnectListenerTest{
 
             }
         });
-        return ctx;
     }
 }

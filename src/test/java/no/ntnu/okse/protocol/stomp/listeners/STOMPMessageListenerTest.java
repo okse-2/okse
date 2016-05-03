@@ -17,16 +17,14 @@ import static org.testng.AssertJUnit.assertEquals;
 
 public class STOMPMessageListenerTest {
     private MessageListener messageListener;
-    private STOMPProtocolServer ps;
-    private MessageService messageService;
     private MessageListener messageListener_spy;
     private MessageService messageService_spy;
 
     @BeforeTest
     public void setUp() {
         messageListener = new MessageListener();
-        messageService = MessageService.getInstance();
-        ps = new STOMPProtocolServer("localhost", 61613);
+        MessageService messageService = MessageService.getInstance();
+        STOMPProtocolServer ps = new STOMPProtocolServer("localhost", 61613);
 
         messageService_spy = Mockito.spy(messageService);
 

@@ -3,7 +3,6 @@ package no.ntnu.okse.protocol.stomp;
 import asia.stampy.common.message.interceptor.InterceptException;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.SubscriptionService;
-import org.apache.log4j.Logger;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.testng.annotations.*;
@@ -13,8 +12,6 @@ import static org.testng.AssertJUnit.assertEquals;
 public class STOMPProtocolServerTest {
     private STOMPProtocolServer ps_spy;
     private STOMPServer server_spy;
-    private STOMPSubscriptionManager subManager_spy;
-    private Logger log;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -23,10 +20,8 @@ public class STOMPProtocolServerTest {
         STOMPSubscriptionManager subManager = new STOMPSubscriptionManager();
 
         subManager.initCoreSubscriptionService(SubscriptionService.getInstance());
-        subManager_spy = Mockito.spy(subManager);
+        STOMPSubscriptionManager subManager_spy = Mockito.spy(subManager);
         server.setSubscriptionManager(subManager_spy);
-        log = Logger.getLogger(STOMPProtocolServer.class.getName());
-
 
         server_spy = Mockito.spy(server);
 

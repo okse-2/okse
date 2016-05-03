@@ -9,15 +9,12 @@ import asia.stampy.common.message.interceptor.InterceptException;
 import asia.stampy.common.parsing.UnparseableException;
 import asia.stampy.server.message.error.ErrorMessage;
 import no.ntnu.okse.protocol.stomp.common.Gateway;
-import no.ntnu.okse.protocol.stomp.commons.STOMPChannelHandler;
 import no.ntnu.okse.protocol.stomp.commons.STOMPStampyHandlerHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.testng.AssertJUnit.assertEquals;
 
 public class STOMPStampyHandlerHelperTest {
     private STOMPStampyHandlerHelper handler_spy;
@@ -45,7 +42,7 @@ public class STOMPStampyHandlerHelperTest {
 
     private StampyMessage createStampyMessage() {
         ErrorMessage msg = new ErrorMessage("Test error handling");
-        return (StampyMessage)msg;
+        return msg;
     }
 
     @AfterMethod

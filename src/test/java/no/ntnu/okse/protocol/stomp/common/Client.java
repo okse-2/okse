@@ -18,60 +18,20 @@
  */
 package no.ntnu.okse.protocol.stomp.common;
 
-import static asia.stampy.common.message.StompMessageType.ABORT;
-import static asia.stampy.common.message.StompMessageType.ACK;
-import static asia.stampy.common.message.StompMessageType.BEGIN;
-import static asia.stampy.common.message.StompMessageType.COMMIT;
-import static asia.stampy.common.message.StompMessageType.NACK;
-import static asia.stampy.common.message.StompMessageType.SEND;
-import static asia.stampy.common.message.StompMessageType.SUBSCRIBE;
-import static asia.stampy.common.message.StompMessageType.UNSUBSCRIBE;
-
 import asia.stampy.client.message.connect.ConnectMessage;
 import asia.stampy.client.message.send.SendMessage;
 import asia.stampy.client.message.subscribe.SubscribeHeader.Ack;
 import asia.stampy.client.message.subscribe.SubscribeMessage;
 import asia.stampy.client.message.unsubscribe.UnsubscribeMessage;
 import asia.stampy.common.gateway.AbstractStampyMessageGateway;
-import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.gateway.StampyMessageListener;
-import asia.stampy.common.message.StompMessageType;
 import asia.stampy.common.message.interceptor.InterceptException;
 import asia.stampy.examples.system.client.netty.SystemNettyClientInitializer;
-import asia.stampy.server.message.error.ErrorMessage;
-import asia.stampy.server.message.receipt.ReceiptMessage;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 public class Client {
 
-    private static final String CANNOT_BE_LOGGED_IN = "cannot be logged in";
-
-    private static final String IS_ALREADY_LOGGED_IN = "is already logged in";
-
-    private static final String ONLY_STOMP_VERSION_1_2_IS_SUPPORTED = "Only STOMP version 1.2 is supported";
-
-    private static final String LOGIN_AND_PASSCODE_NOT_SPECIFIED = "login and passcode not specified";
-
-    private static final String NOT_LOGGED_IN = "Not logged in";
-
-    private static final StompMessageType[] CLIENT_TYPES = { ACK, NACK, SEND, ABORT, BEGIN, COMMIT, SUBSCRIBE,
-            UNSUBSCRIBE };
-
     private AbstractStampyMessageGateway gateway;
-
-    private ErrorMessage error;
-
-    private ReceiptMessage receipt;
-
-    private Object waiter = new Object();
-
-    private boolean connected;
-
-    private int messageCount;
-
-    private HostPort hostPort;
 
     /**
      * Inits the.
@@ -106,29 +66,10 @@ public class Client {
     }
 
 
-    /**
-     * Test login.
-     *
-     * @throws Exception
-     *           the exception
-     */
-    public void testLogin(String user) throws Exception {
-        goodConnect(user);
-    }
-
     public void testSubscription(String id, String dest) throws Exception {
         SubscribeMessage message = new SubscribeMessage(dest, id);
         message.getHeader().setAck(Ack.clientIndividual);
         gateway.broadcastMessage(message);
-    }
-
-    private void goodConnect(String user) throws InterceptException {
-        ConnectMessage message = new ConnectMessage("localhost");
-        message.getHeader().setLogin(user);
-        message.getHeader().setPasscode("pass");
-        message.getHeader().setHeartbeat(500, 1000);
-
-        getGateway().broadcastMessage(message);
     }
 
 
@@ -146,24 +87,6 @@ public class Client {
         this.gateway = gateway;
     }
 
-    /**
-     * Gets the receipt.
-     *
-     * @return the receipt
-     */
-    public ReceiptMessage getReceipt() {
-        return receipt;
-    }
-
-    /**
-     * Sets the receipt.
-     *
-     * @param receipt
-     *          the new receipt
-     */
-    public void setReceipt(ReceiptMessage receipt) {
-        this.receipt = receipt;
-    }
 
     public void testMessage(String text) throws Exception{
 //        sendMessage(StompMessageType.SEND, "Gabrielb");
@@ -179,7 +102,6 @@ public class Client {
         String id = "gabrielb";
         SendMessage message = new SendMessage("test", id);
         message.getHeader().setReceipt(id);
-//        message.getHeader().setDestination("test");
         message.getHeader().setContentType(MIMEtype);
         String test ="#" + text + "     :     " + "This is a test";
         message.setBody(test);

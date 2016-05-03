@@ -33,7 +33,7 @@ public class STOMPChannelHandlerTest {
         ps = Mockito.spy(new STOMPProtocolServer(hostPort.getHost(), hostPort.getPort()));
 
         handler.setProtocolServer(ps);
-        sessions = new ConcurrentHashMap<HostPort, Channel>();
+        sessions = new ConcurrentHashMap<>();
         sessions.put(hostPort, createChannel());
         handler.setSessions(sessions);
         heartbeatContainer = new HeartbeatContainer();
@@ -81,7 +81,7 @@ public class STOMPChannelHandlerTest {
     }
 
     private Channel createChannel(){
-        Channel channel = Mockito.spy(new Channel() {
+        return Mockito.spy(new Channel() {
             @Override
             public int compareTo(Channel o) {
                 return 0;
@@ -212,60 +212,5 @@ public class STOMPChannelHandlerTest {
 
             }
         });
-        return channel;
-    }
-    private ChannelHandlerContext createCTX(){
-        ChannelHandlerContext ctx = Mockito.spy(new ChannelHandlerContext() {
-            @Override
-            public Channel getChannel() {
-                return null;
-            }
-
-            @Override
-            public ChannelPipeline getPipeline() {
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public ChannelHandler getHandler() {
-                return null;
-            }
-
-            @Override
-            public boolean canHandleUpstream() {
-                return false;
-            }
-
-            @Override
-            public boolean canHandleDownstream() {
-                return false;
-            }
-
-            @Override
-            public void sendUpstream(ChannelEvent channelEvent) {
-
-            }
-
-            @Override
-            public void sendDownstream(ChannelEvent channelEvent) {
-
-            }
-
-            @Override
-            public Object getAttachment() {
-                return null;
-            }
-
-            @Override
-            public void setAttachment(Object o) {
-
-            }
-        });
-        return ctx;
     }
 }
