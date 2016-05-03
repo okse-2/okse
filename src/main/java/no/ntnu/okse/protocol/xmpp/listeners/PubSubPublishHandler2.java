@@ -40,6 +40,19 @@ import org.apache.vysper.xmpp.stanza.IQStanza;
 import org.apache.vysper.xmpp.stanza.IQStanzaType;
 import org.apache.vysper.xmpp.stanza.Stanza;
 import org.apache.vysper.xmpp.stanza.StanzaBuilder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.lang.reflect.Array;
+import java.util.Collections;
 
 import static no.ntnu.okse.core.Utilities.log;
 
@@ -49,6 +62,7 @@ import static no.ntnu.okse.core.Utilities.log;
  * @author The Apache MINA Project (http://mina.apache.org)
  */
 @SpecCompliant(spec = "xep-0060", section = "7.1", status = SpecCompliant.ComplianceStatus.IN_PROGRESS, coverage = SpecCompliant.ComplianceCoverage.PARTIAL)
+
 public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
 
     XMPPServer server;
@@ -89,44 +103,31 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
             @SpecCompliant(spec = "xep-0060", section = "7.1.3.5", status = SpecCompliant.ComplianceStatus.NOT_STARTED, coverage = SpecCompliant.ComplianceCoverage.UNSUPPORTED),
             @SpecCompliant(spec = "xep-0060", section = "7.1.3.6", status = SpecCompliant.ComplianceStatus.NOT_STARTED, coverage = SpecCompliant.ComplianceCoverage.UNSUPPORTED) })
     protected Stanza handleSet(IQStanza stanza, ServerRuntimeContext serverRuntimeContext, SessionContext sessionContext) {
-        System.out.println("Message received");
-
-
+        log.info("Message received on XMPP protocol");
         Entity serverJID = serviceConfiguration.getDomainJID();
         CollectionNode root = serviceConfiguration.getRootNode();
-
         Entity sender = extractSenderJID(stanza, sessionContext);
-
         StanzaBuilder sb = StanzaBuilder.createDirectReply(stanza, false, IQStanzaType.RESULT);
         sb.startInnerElement("pubsub", NamespaceURIs.XEP0060_PUBSUB);
-
         XMLElement publish = stanza.getFirstInnerElement().getFirstInnerElement(); // pubsub/publish
         String nodeName = publish.getAttributeValue("node"); // MUST
-
         XMLElement item = publish.getFirstInnerElement();
         String strID = item.getAttributeValue("id"); // MAY
-
         LeafNode node = root.find(nodeName);
 
         if (node == null) {
             // node does not exist - error condition 3 (7.1.3)
+            log.error("XMPP node does not exist - error condition 3 (7.1.3)");
             return errorStanzaGenerator.generateNoNodeErrorStanza(sender, serverJID, stanza);
         }
 
-        //Andreas ... can edit this one if we want all users to be able to publish on all topics
         if (!node.isAuthorized(sender, PubSubPrivilege.PUBLISH)) {
             // not enough privileges to publish - error condition 1 (7.1.3)
             log.info("THE XMPP publisher for current msg has no publisher rigths, the message should be refused if the standard was followed. error condition 1 (7.1.3). (overwritten in OKSE)");
             //return errorStanzaGenerator.generateInsufficientPrivilegesErrorStanza(sender, serverJID, stanza);
         }
-        //Following printlines should be deleted, for testing only
-        System.out.println("NODENAME " + nodeName);
-        System.out.println("payload " + item.getInnerText());
-        System.out.println("ID " + strID);
-        System.out.println("STANZA GET TO " + stanza.getTo());
 
-        handlePublishInOkse(nodeName, item.getInnerText(), strID);
-
+        handlePublishInOkse(nodeName, "" + new Renderer(item).getElementContent(), strID);
         StanzaRelay relay = serverRuntimeContext.getStanzaRelay();
 
         XMLElementBuilder eventItemBuilder = new XMLElementBuilder("item", NamespaceURIs.XEP0060_PUBSUB_EVENT);
@@ -145,13 +146,11 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
             }
         }
 
-        //The 2 lines below should be deleted eventualy, and are just used for imidiate testing. They originaly were here in the default handler class
+        //The 2 lines below should be deleted eventualy, and are just used for imidiate testing.
          //node.publish(sender, relay, strID, eventItemBuilder.build());
         //node.publish(null, relay, "demoID1461861614060", eventItemBuilder.build());
 
-
         buildSuccessStanza(sb, nodeName, strID);
-
         sb.endInnerElement(); // pubsub
         return new IQStanza(sb.build());
     }
@@ -166,7 +165,6 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
     private void buildSuccessStanza(StanzaBuilder sb, String node, String id) {
         sb.startInnerElement("publish", NamespaceURIs.XEP0060_PUBSUB);
         sb.addAttribute("node", node);
-
         sb.startInnerElement("item", NamespaceURIs.XEP0060_PUBSUB);
         sb.addAttribute("id", id);
         sb.endInnerElement();
@@ -174,10 +172,9 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
         sb.endInnerElement();
     }
 
-
-
-    void handlePublishInOkse(String topic, XMLText payload, String id){
-        server.sendMessageToOKSE(new Message( payload.toString(), topic, null, "XMPP"));
+    void handlePublishInOkse(String topic, String payload, String id){
+        //server.sendMessageToOKSE(new Message( payload.toString(), topic, null, "XMPP"));
+        server.sendMessageToOKSE(new Message( payload, topic, null, "XMPP"));
     }
 
     public void publishXMPPmessage(Message message, ServerRuntimeContext serverRuntimeContext){
@@ -187,14 +184,12 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
             //no xmpp clients are subscribed on the topic.
             return;
         }
-        XMLElementBuilder eventItemBuilder = new XMLElementBuilder("item", NamespaceURIs.XEP0060_PUBSUB_EVENT);
         String strID = idGenerator.create();
+        XMLElementBuilder eventItemBuilder = new XMLElementBuilder("item", NamespaceURIs.XEP0060_PUBSUB_EVENT);
         eventItemBuilder.addAttribute("id", strID);
+        eventItemBuilder.addAttribute(new Attribute("entry", message.getMessage()));
         eventItemBuilder.addText(message.getMessage());
         StanzaRelay relay = serverRuntimeContext.getStanzaRelay();
-        System.out.println("IN publishXMPPmessage function");
-        System.out.println("topic " + message.getTopic());
-        System.out.println("payload " + message.getMessage());
         node.publish(null, relay, strID, eventItemBuilder.build());
     }
 }
