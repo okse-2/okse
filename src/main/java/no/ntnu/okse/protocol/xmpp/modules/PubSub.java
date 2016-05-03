@@ -2,7 +2,6 @@ package no.ntnu.okse.protocol.xmpp.modules;
 
 //import org.apache.vysper.compliance.SpecCompliant;
 import no.ntnu.okse.protocol.xmpp.listeners.PubSubPublishHandlerOKSE;
-import no.ntnu.okse.protocol.xmpp.listeners.PubSubSubscribeHandlerOKSE;
 import org.apache.vysper.xmpp.addressing.Entity;
 import org.apache.vysper.xmpp.addressing.EntityUtils;
 import org.apache.vysper.xmpp.modules.core.base.handler.MessageHandler;
@@ -10,10 +9,7 @@ import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.NodeDiscoItemsVis
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PubSubServiceConfiguration;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PublishSubscribeModule;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.ServiceDiscoItemsVisitor;
-import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubCreateNodeHandler;
-import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubRetrieveAffiliationsHandler;
-import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubRetrieveSubscriptionsHandler;
-import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.PubSubUnsubscribeHandler;
+import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.*;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.owner.PubSubOwnerConfigureNodeHandler;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.owner.PubSubOwnerDeleteNodeHandler;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.model.CollectionNode;
@@ -241,7 +237,7 @@ public class PubSub extends PublishSubscribeModule {
      */
     private void addPubsubHandlers(ComponentStanzaProcessor dictionary) {
         ArrayList<StanzaHandler> pubsubHandlers = new ArrayList<StanzaHandler>();
-        pubsubHandlers.add(new PubSubSubscribeHandlerOKSE(serviceConfiguration));
+        pubsubHandlers.add(new PubSubSubscribeHandler(serviceConfiguration));
         pubsubHandlers.add(new PubSubUnsubscribeHandler(serviceConfiguration));
         pubSubPublishHandlerOKSE = new PubSubPublishHandlerOKSE(serviceConfiguration);
         pubsubHandlers.add(pubSubPublishHandlerOKSE);
