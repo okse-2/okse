@@ -1,8 +1,8 @@
 package no.ntnu.okse.protocol.xmpp.modules;
 
 //import org.apache.vysper.compliance.SpecCompliant;
-import no.ntnu.okse.protocol.xmpp.listeners.PubSubPublishHandler2;
-import no.ntnu.okse.protocol.xmpp.listeners.PubSubSubscribeHandler2;
+import no.ntnu.okse.protocol.xmpp.listeners.PubSubPublishHandlerOKSE;
+import no.ntnu.okse.protocol.xmpp.listeners.PubSubSubscribeHandlerOKSE;
 import org.apache.vysper.xmpp.addressing.Entity;
 import org.apache.vysper.xmpp.addressing.EntityUtils;
 import org.apache.vysper.xmpp.modules.core.base.handler.MessageHandler;
@@ -48,7 +48,7 @@ import java.util.List;
  */
 //@SpecCompliant(spec = "xep-0060", comment = "spec. version: 1.13rc", status = SpecCompliant.ComplianceStatus.IN_PROGRESS, coverage = SpecCompliant.ComplianceCoverage.PARTIAL)
 public class PubSub extends PublishSubscribeModule {
-    private PubSubPublishHandler2 pubSubPublishHandler2;
+    private PubSubPublishHandlerOKSE pubSubPublishHandlerOKSE;
 
     // The configuration of the service
     private PubSubServiceConfiguration serviceConfiguration = null;
@@ -71,8 +71,8 @@ public class PubSub extends PublishSubscribeModule {
     protected Entity fullDomain;
 
 
-    public PubSubPublishHandler2 getPubSubPublishHandler2(){
-        return pubSubPublishHandler2;
+    public PubSubPublishHandlerOKSE getPubSubPublishHandlerOKSE(){
+        return pubSubPublishHandlerOKSE;
     }
     public  ServerRuntimeContext getServerRuntimeContext(){
         return serverRuntimeContext;
@@ -236,14 +236,15 @@ public class PubSub extends PublishSubscribeModule {
 
     /**
      * Inserts the handlers for the pubsub namespace into the HandlerDictionary.
+     *  Also Added some specific modules for OKSE.
      * @param dictionary the list to which the handlers should be appended.
      */
     private void addPubsubHandlers(ComponentStanzaProcessor dictionary) {
         ArrayList<StanzaHandler> pubsubHandlers = new ArrayList<StanzaHandler>();
-        pubsubHandlers.add(new PubSubSubscribeHandler2(serviceConfiguration));
+        pubsubHandlers.add(new PubSubSubscribeHandlerOKSE(serviceConfiguration));
         pubsubHandlers.add(new PubSubUnsubscribeHandler(serviceConfiguration));
-        pubSubPublishHandler2 = new PubSubPublishHandler2(serviceConfiguration);
-        pubsubHandlers.add(pubSubPublishHandler2);
+        pubSubPublishHandlerOKSE = new PubSubPublishHandlerOKSE(serviceConfiguration);
+        pubsubHandlers.add(pubSubPublishHandlerOKSE);
 
         pubsubHandlers.add(new PubSubCreateNodeHandler(serviceConfiguration));
         pubsubHandlers.add(new PubSubRetrieveSubscriptionsHandler(serviceConfiguration));

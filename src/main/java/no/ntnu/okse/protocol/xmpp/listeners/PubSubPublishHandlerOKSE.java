@@ -63,7 +63,7 @@ import static no.ntnu.okse.core.Utilities.log;
  */
 @SpecCompliant(spec = "xep-0060", section = "7.1", status = SpecCompliant.ComplianceStatus.IN_PROGRESS, coverage = SpecCompliant.ComplianceCoverage.PARTIAL)
 
-public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
+public class PubSubPublishHandlerOKSE extends AbstractPubSubGeneralHandler {
 
     XMPPServer server;
     /**
@@ -71,7 +71,7 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
      *
      * @param serviceConfiguration
      */
-    public PubSubPublishHandler2(PubSubServiceConfiguration serviceConfiguration) {
+    public PubSubPublishHandlerOKSE(PubSubServiceConfiguration serviceConfiguration) {
         super(serviceConfiguration);
     }
     public void setXMPPServer(XMPPServer server){
@@ -172,18 +172,32 @@ public class PubSubPublishHandler2 extends AbstractPubSubGeneralHandler {
         sb.endInnerElement();
     }
 
+    /**
+     * Creates a OKSE mesage and sends it to the XMPP server to be delivered to the OKSE core
+     * @param topic pubsub topic
+     * @param payload Content of the item field in the xml/(Stanza) mesage
+     * @param id a id of the mesage
+     */
     void handlePublishInOkse(String topic, String payload, String id){
         //server.sendMessageToOKSE(new Message( payload.toString(), topic, null, "XMPP"));
         server.sendMessageToOKSE(new Message( payload, topic, null, "XMPP"));
     }
 
+    /**
+     * Takes in an OKSE message. It then searches for xmpp subscriptions on the message.topic.
+     * If it finds subscribers it publishes the messages to the subscribers.
+     * @param message OKSE message
+     * @param serverRuntimeContext takes in the serverRuntimeContext
+     */
     public void publishXMPPmessage(Message message, ServerRuntimeContext serverRuntimeContext){
         CollectionNode root = serviceConfiguration.getRootNode();
         LeafNode node = root.find(message.getTopic());
+
         if(node == null){
             //no xmpp clients are subscribed on the topic.
             return;
         }
+
         String strID = idGenerator.create();
         XMLElementBuilder eventItemBuilder = new XMLElementBuilder("item", NamespaceURIs.XEP0060_PUBSUB_EVENT);
         eventItemBuilder.addAttribute("id", strID);

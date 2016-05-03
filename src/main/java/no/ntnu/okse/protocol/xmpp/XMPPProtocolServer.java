@@ -13,6 +13,12 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
 
     private static Logger log = Logger.getLogger(XMPPProtocolServer.class.getName());
 
+    /**
+     * Constructor for the class, sets the host and port for the XMPP server.
+     * Also initiates the logger and sets the server type to stomp
+     * @param host the host to listen to
+     * @param port the port to listen to
+     */
     public XMPPProtocolServer(String host, Integer port) {
         this.host = host;
         this.port = port;
@@ -50,6 +56,10 @@ public class XMPPProtocolServer extends AbstractProtocolServer {
         server.sendMessage(message);
     }
 
+    /**
+     * returns if the XMPPserver is running
+     * @return
+     */
     public boolean isRunning() {
         return _running;
     }

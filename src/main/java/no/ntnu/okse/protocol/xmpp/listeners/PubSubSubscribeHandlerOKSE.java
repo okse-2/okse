@@ -43,14 +43,14 @@ import org.apache.vysper.compliance.SpecCompliant;
  * @author The Apache MINA Project (http://mina.apache.org)
  */
 @SpecCompliant(spec = "xep-0060", section = "6.1", status = SpecCompliant.ComplianceStatus.IN_PROGRESS, coverage = SpecCompliant.ComplianceCoverage.PARTIAL)
-public class PubSubSubscribeHandler2 extends AbstractPubSubGeneralHandler {
+public class PubSubSubscribeHandlerOKSE extends AbstractPubSubGeneralHandler {
 
     /**
      * Creates a new subscribe handler for users.
      *
      * @param serviceConfiguration
      */
-    public PubSubSubscribeHandler2(PubSubServiceConfiguration serviceConfiguration) {
+    public PubSubSubscribeHandlerOKSE(PubSubServiceConfiguration serviceConfiguration) {
         super(serviceConfiguration);
     }
 
