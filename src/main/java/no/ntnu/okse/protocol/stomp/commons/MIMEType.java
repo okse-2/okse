@@ -1,11 +1,5 @@
 package no.ntnu.okse.protocol.stomp.commons;
 
-import asia.stampy.client.message.send.SendMessage;
-import asia.stampy.common.message.StampyMessage;
-
-/**
- * Created by Ogdans3 on 30.04.2016.
- */
 public class MIMEType {
     private String contentType;
     private String charset;

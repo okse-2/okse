@@ -1,6 +1,5 @@
 package no.ntnu.okse.protocol.stomp;
 
-import asia.stampy.common.message.interceptor.InterceptException;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
