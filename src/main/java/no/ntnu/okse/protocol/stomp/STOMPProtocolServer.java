@@ -1,5 +1,6 @@
 package no.ntnu.okse.protocol.stomp;
 
+import io.moquette.spi.impl.subscriptions.Subscription;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
@@ -45,6 +46,7 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
         subscriptionManager.initCoreSubscriptionService(SubscriptionService.getInstance());
         try {
             server.setSubscriptionManager(subscriptionManager);
+            SubscriptionService.getInstance().addSubscriptionChangeListener(subscriptionManager);
             server.setProtocolServer(this);
             server.init(host, port);
         } catch (Exception e) {

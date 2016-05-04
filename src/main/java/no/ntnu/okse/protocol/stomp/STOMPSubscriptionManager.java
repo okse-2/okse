@@ -1,5 +1,7 @@
 package no.ntnu.okse.protocol.stomp;
 
+import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
@@ -14,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class handles subscribers
  * It allows us to
  */
-public class STOMPSubscriptionManager {
+public class STOMPSubscriptionManager implements SubscriptionChangeListener {
     private static Logger log;
     private SubscriptionService subscriptionService = null;
     public ConcurrentHashMap<String, Subscriber> localSubscriberMap;
@@ -81,6 +83,22 @@ public class STOMPSubscriptionManager {
     }
 
     /**
+     * Removes a subscriber based
+     * @param sub The subscriber to remove
+     */
+    public void removeSubscriber(Subscriber sub) {
+        Enumeration<String> enum_keys = localSubscriberMap.keys();
+        while(enum_keys.hasMoreElements()){
+            String key = enum_keys.nextElement();
+            Subscriber local_sub = localSubscriberMap.get(key);
+            if(local_sub.getSubscriberID().equals(sub.getSubscriberID())){
+                subscriptionService.removeSubscriber(sub);
+                localSubscriberMap.remove(key);
+            }
+        }
+    }
+
+    /**
      * Looks up if the subscriber is already in the local map
      * @param clientID the client id of the conneciton
      * @return
@@ -116,4 +134,17 @@ public class STOMPSubscriptionManager {
         return newHashMap;
     }
 
+    /**
+     * Method that is called from OKSE whenever a subscription changes
+     * @param e the subscription change event
+     */
+    @Override
+    public void subscriptionChanged(SubscriptionChangeEvent e) {
+        if (e.getData().getOriginProtocol().equals("stomp")) {
+            if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
+                log.debug("Received a UNSUBSCRIBE event");
+                removeSubscriber(e.getData());
+            }
+        }
+    }
 }

@@ -6,6 +6,7 @@ import asia.stampy.common.gateway.StampyMessageListener;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
 import no.ntnu.okse.core.subscription.Subscriber;
+import no.ntnu.okse.core.topic.TopicService;
 import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
 
 /**
@@ -39,6 +40,7 @@ public class SubscriptionListener implements StampyMessageListener {
         SubscribeMessage subMessage = (SubscribeMessage) stampyMessage;
         Subscriber sub = new Subscriber(hostPort.getHost(), hostPort.getPort(), subMessage.getHeader().getDestination(), protocol);
         subscriptionManager.addSubscriber(sub, subMessage.getHeader().getId());
+        TopicService.getInstance().addTopic(sub.getTopic());
     }
 
     /**

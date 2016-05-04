@@ -7,6 +7,7 @@ import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
+import no.ntnu.okse.core.topic.TopicService;
 import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,8 @@ public class MessageListener implements StampyMessageListener {
     public void messageReceived(StampyMessage<?> stampyMessage, HostPort hostPort) throws Exception {
         SendMessage sendMessage = (SendMessage) stampyMessage;
         String destination = sendMessage.getHeader().getDestination();
+
+        TopicService.getInstance().addTopic(destination);
 
         //TODO: Stomp uses mime types and can send any data. Needs to be handled, will send an email to FFI about this issue
         Message okseMsg = new Message((String)sendMessage.getBody(), destination, null, protocol);
