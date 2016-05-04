@@ -178,10 +178,12 @@ public class PubSubPublishHandlerOKSE extends AbstractPubSubGeneralHandler {
      */
     public void publishXMPPmessage(Message message, ServerRuntimeContext serverRuntimeContext){
         CollectionNode root = serviceConfiguration.getRootNode();
+
         LeafNode node = root.find(message.getTopic());
 
         if(node == null){
             //no xmpp clients are subscribed on the topic.
+            root.add(new LeafNode(serviceConfiguration, message.getTopic(), serviceConfiguration.getDomainJID()));
             return;
         }
 
