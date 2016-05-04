@@ -20,18 +20,18 @@
 package no.ntnu.okse.protocol.xmpp.listeners;
 
 import no.ntnu.okse.core.messaging.Message;
-import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.protocol.xmpp.XMPPServer;
-import org.apache.qpid.proton.codec.messaging.SourceType;
 import org.apache.vysper.compliance.SpecCompliance;
 import org.apache.vysper.compliance.SpecCompliant;
 import org.apache.vysper.xml.fragment.*;
 import org.apache.vysper.xmpp.addressing.Entity;
 import org.apache.vysper.xmpp.delivery.StanzaRelay;
+import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PubSubAffiliation;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PubSubPrivilege;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.PubSubServiceConfiguration;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.handler.AbstractPubSubGeneralHandler;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.model.CollectionNode;
+import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.model.LastOwnerResignedException;
 import org.apache.vysper.xmpp.modules.extension.xep0060_pubsub.model.LeafNode;
 import org.apache.vysper.xmpp.protocol.NamespaceURIs;
 import org.apache.vysper.xmpp.server.ServerRuntimeContext;
@@ -40,19 +40,6 @@ import org.apache.vysper.xmpp.stanza.IQStanza;
 import org.apache.vysper.xmpp.stanza.IQStanzaType;
 import org.apache.vysper.xmpp.stanza.Stanza;
 import org.apache.vysper.xmpp.stanza.StanzaBuilder;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.lang.reflect.Array;
-import java.util.Collections;
 
 import static no.ntnu.okse.core.Utilities.log;
 
@@ -114,6 +101,11 @@ public class PubSubPublishHandlerOKSE extends AbstractPubSubGeneralHandler {
         XMLElement item = publish.getFirstInnerElement();
         String strID = item.getAttributeValue("id"); // MAY
         LeafNode node = root.find(nodeName);
+        try {
+            node.setAffiliation(sender, PubSubAffiliation.OWNER);
+        } catch (LastOwnerResignedException e) {
+            e.printStackTrace();
+        }
 
         if (node == null) {
             // node does not exist - error condition 3 (7.1.3)
@@ -123,8 +115,8 @@ public class PubSubPublishHandlerOKSE extends AbstractPubSubGeneralHandler {
 
         if (!node.isAuthorized(sender, PubSubPrivilege.PUBLISH)) {
             // not enough privileges to publish - error condition 1 (7.1.3)
-            log.info("THE XMPP publisher for current msg has no publisher rigths, the message should be refused if the standard was followed. error condition 1 (7.1.3). (overwritten in OKSE)");
-            //return errorStanzaGenerator.generateInsufficientPrivilegesErrorStanza(sender, serverJID, stanza);
+            log.info("THE XMPP publisher for current msg has no publisher rigths, error condition 1 (7.1.3)");
+            return errorStanzaGenerator.generateInsufficientPrivilegesErrorStanza(sender, serverJID, stanza);
         }
 
         handlePublishInOkse(nodeName, "" + new Renderer(item).getElementContent(), strID);
@@ -146,10 +138,6 @@ public class PubSubPublishHandlerOKSE extends AbstractPubSubGeneralHandler {
             }
         }
 
-        //The 2 lines below should be deleted eventualy, and are just used for imidiate testing.
-         //node.publish(sender, relay, strID, eventItemBuilder.build());
-        //node.publish(null, relay, "demoID1461861614060", eventItemBuilder.build());
-
         buildSuccessStanza(sb, nodeName, strID);
         sb.endInnerElement(); // pubsub
         return new IQStanza(sb.build());
@@ -168,7 +156,6 @@ public class PubSubPublishHandlerOKSE extends AbstractPubSubGeneralHandler {
         sb.startInnerElement("item", NamespaceURIs.XEP0060_PUBSUB);
         sb.addAttribute("id", id);
         sb.endInnerElement();
-
         sb.endInnerElement();
     }
 
@@ -201,7 +188,6 @@ public class PubSubPublishHandlerOKSE extends AbstractPubSubGeneralHandler {
         String strID = idGenerator.create();
         XMLElementBuilder eventItemBuilder = new XMLElementBuilder("item", NamespaceURIs.XEP0060_PUBSUB_EVENT);
         eventItemBuilder.addAttribute("id", strID);
-        eventItemBuilder.addAttribute(new Attribute("entry", message.getMessage()));
         eventItemBuilder.addText(message.getMessage());
         StanzaRelay relay = serverRuntimeContext.getStanzaRelay();
         node.publish(null, relay, strID, eventItemBuilder.build());
