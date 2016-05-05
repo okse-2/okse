@@ -25,6 +25,7 @@
 package no.ntnu.okse.protocol.amqp;
 
 import no.ntnu.okse.core.messaging.MessageService;
+import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
@@ -334,6 +335,7 @@ public class AMQPServer extends BaseHandler {
 
                 log.debug("Received a message with queue/topic: " + address.getName());
 
+                TopicService.getInstance().addTopic(address.getName());
 
                 // Add straight to AMQP queue
                 try {
