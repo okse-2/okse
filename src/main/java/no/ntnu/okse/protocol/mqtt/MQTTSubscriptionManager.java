@@ -9,6 +9,7 @@ import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MQTTSubscriptionManager implements SubscriptionChangeListener {
@@ -59,9 +60,9 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
     }
 
     public void removeSubscribers(String clientID) {
-        ArrayList<Integer> indexes = getSubscriberIndexes(clientID);
-        for (int i = indexes.size() - 1; i >= 0; i--) {
-            int index = indexes.get(i);
+        Iterator<Integer> it = getSubscriberIndexes(clientID).iterator();
+        while(it.hasNext()){
+            int index = it.next();
             subscriptionService.removeSubscriber(subscriberList.get(index).getSubscriber());
             subscriberList.remove(index);
         }
