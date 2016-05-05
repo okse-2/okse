@@ -5,6 +5,7 @@ import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
+import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
         Subscriber sub = new Subscriber(host, port, topic, "mqtt");
         MQTTSubscriber mqttSub = new MQTTSubscriber(host, port, topic, clientID, sub);
 
+        TopicService.getInstance().addTopic(topic);
         subscriptionService.addSubscriber(sub);
         subscriberList.add(mqttSub);
     }
@@ -142,6 +144,5 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
                 removeSubscriber(e.getData());
             }
         }
-
     }
 }

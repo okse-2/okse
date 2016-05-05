@@ -64,8 +64,6 @@ public class MQTTServer extends Server {
         Channel channel = getChannelByClientId(message.getClientID());
         if (channel == null)
             return;
-        int port = getPort(channel);
-        String host = getHost(channel);
 
         //TODO: Finish discussing if we are going to pass in null instead of the publisher!
         //Publisher pub = new Publisher( message.getTopicName(), host, port, protocolServerType);
@@ -75,6 +73,8 @@ public class MQTTServer extends Server {
 
         String topic = message.getTopicName();
         String payload = getPayload(message);
+
+        TopicService.getInstance().addTopic(topic);
 
         Message msg = new Message(payload, topic, null, protocolServerType);
         msg.setAttribute("qos", String.valueOf(message.getQos().byteValue()));
