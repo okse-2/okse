@@ -27,6 +27,8 @@ public class MQTTServerTest {
     private MQTTProtocolServer ps;
     private MQTTSubscriptionManager subManagerMock;
 
+
+
     @BeforeTest
     public void setUp() {
         String host = "localhost";
@@ -102,7 +104,7 @@ public class MQTTServerTest {
         pubMsg.setQos(AbstractMessage.QOSType.LEAST_ONE);
 
 
-        InterceptPublishMessage msg = new InterceptPublishMessage(pubMsg, clientID);
+        InterceptPublishMessage msg = new InterceptPublishMessage(pubMsg, clientID,"username");
         mqtt_spy.HandlePublish(msg);
         ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
 
@@ -118,7 +120,7 @@ public class MQTTServerTest {
 
         Channel channelMock = Mockito.mock(Channel.class);
 
-        InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription("ogdans3", "testing", AbstractMessage.QOSType.LEAST_ONE));
+        InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription("ogdans3", "testing", AbstractMessage.QOSType.LEAST_ONE),"username");
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1883);
         String clientID = msg.getClientID();
@@ -139,8 +141,8 @@ public class MQTTServerTest {
 
         Channel channelMock = Mockito.mock(Channel.class);
         String clientID = "ogdans3";
-        InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription(clientID, "testing", AbstractMessage.QOSType.LEAST_ONE));
-        InterceptPublishMessage pubMsg = new InterceptPublishMessage(new PublishMessage(), clientID);
+        InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription(clientID, "testing", AbstractMessage.QOSType.LEAST_ONE),"username");
+        InterceptPublishMessage pubMsg = new InterceptPublishMessage(new PublishMessage(), clientID,"username");
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1883);
 
@@ -164,7 +166,7 @@ public class MQTTServerTest {
 
         Channel channelMock = Mockito.mock(Channel.class);
 
-        InterceptUnsubscribeMessage msg = new InterceptUnsubscribeMessage("testing", "ogdans3");
+        InterceptUnsubscribeMessage msg = new InterceptUnsubscribeMessage("testing", "ogdans3","username");
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1883);
         String clientID = msg.getClientID();
@@ -184,7 +186,7 @@ public class MQTTServerTest {
 
         Channel channelMock = Mockito.mock(Channel.class);
 
-        InterceptDisconnectMessage msg = new InterceptDisconnectMessage("ogdans3");
+        InterceptDisconnectMessage msg = new InterceptDisconnectMessage("ogdans3","username");
 
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", 1883);
         String clientID = msg.getClientID();
