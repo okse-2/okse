@@ -24,7 +24,6 @@ public class ConfigController {
     private static final String ADD_MAPPING = "/mapping/add";
     private static final String DELETE_MAPPING = "/mapping/delete/single";
     private static final String DELETE_ALL_MAPPINGS = "/mapping/delete/all";
-    private static final String CHANGE_AMQP = "/mapping/queue/change";
     private static final String ADD_RELAY = "/relay/add";
     private static final String DELETE_ALL_RELAYS = "/relay/delete/all";
     private static final String DELETE_RELAY = "/relay/delete/single";
@@ -168,23 +167,7 @@ public class ConfigController {
         return new ResponseEntity<String>("{ \"message\" :\"Deleted all mappings\" }", HttpStatus.OK);
     }
 
-    /**
-     * This method changes the boolean value of the useQueue field in AMQPProtocolServer
-     *
-     * @return A message stating the new value of the useQueue variable
-     */
-    /*
-    //TODO: Do this per instance
-    @RequestMapping(method = RequestMethod.POST, value = CHANGE_AMQP)
-    public
-    @ResponseBody
-    ResponseEntity<String> changeAMQPqueue() {
-        AMQProtocolServer.getInstance().useQueue = (AMQProtocolServer.getInstance().useQueue ? false : true);
-        log.debug("Value of AMQP queue is now " + AMQProtocolServer.getInstance().useQueue);
-        return new ResponseEntity<String>("{ \"value\": " + AMQProtocolServer.getInstance().useQueue + ", " +
-                "\"message\" :\"Successfully changed the useQueue variable to " + AMQProtocolServer.getInstance().useQueue + "\"}", HttpStatus.OK);
-    }
-    */
+
 
     /**
      * This method takes in a relay and a topic (not required) and sets up a relay
