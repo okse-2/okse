@@ -4,6 +4,7 @@ import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
+import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
 import org.ow2.joram.mom.amqp.AMQPMessageListener;
 import org.ow2.joram.mom.amqp.messages.*;
@@ -80,6 +81,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         String protocolServerType = amqpProtocolServer.getProtocolServerType();
 
         MessageService.getInstance().distributeMessage(new Message(message, topic, null, protocolServerType));
+        TopicService.getInstance().addTopic(topic);
         amqpProtocolServer.incrementTotalMessagesReceived();
         amqpProtocolServer.incrementTotalRequests();
     }
@@ -102,6 +104,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         );
         subscriberMap.putSubscriber(subscriber);
         subscriptionService.addSubscriber(subscriber);
+        TopicService.getInstance().addTopic(topic);
         amqpProtocolServer.incrementTotalRequests();
     }
 
