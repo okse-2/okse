@@ -64,8 +64,6 @@ public class MQTTServer extends Server {
         Channel channel = getChannelByClientId(message.getClientID());
         if (channel == null)
             return;
-        int port = getPort(channel);
-        String host = getHost(channel);
 
         //TODO: Finish discussing if we are going to pass in null instead of the publisher!
         //Publisher pub = new Publisher( message.getTopicName(), host, port, protocolServerType);
@@ -75,6 +73,8 @@ public class MQTTServer extends Server {
 
         String topic = message.getTopicName();
         String payload = getPayload(message);
+
+        TopicService.getInstance().addTopic(topic);
 
         Message msg = new Message(payload, topic, null, protocolServerType);
         msg.setAttribute("qos", String.valueOf(message.getQos().byteValue()));
@@ -94,6 +94,7 @@ public class MQTTServer extends Server {
         try {
             startServer(config, interceptHandlers);
         } catch (IOException e) {
+            ps.incrementTotalErrors();
             e.printStackTrace();
         }
     }
@@ -155,8 +156,6 @@ public class MQTTServer extends Server {
         Properties properties = new Properties();
         properties.setProperty(BrokerConstants.HOST_PROPERTY_NAME, host);
         properties.setProperty(BrokerConstants.PORT_PROPERTY_NAME, "" + port);
-        // Set random port for websockets instead of 8080
-        properties.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, "25342");
         // Disable automatic publishing (handled by the broker instead)
         properties.setProperty(BrokerConstants.PUBLISH_TO_CONSUMERS, "false");
         return properties;
