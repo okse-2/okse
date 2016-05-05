@@ -163,6 +163,11 @@
             <artifactId>jndi-server</artifactId>
             <version>5.11.0-okse</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.0.2</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -223,6 +228,10 @@
             <id>okse-jenkins</id>
             <url>http://okse.badjokecounter.press:8081/jenkins/plugin/repository/everything/</url>
         </repository>
+            <repository>
+                <id>Eclipse Paho Repo</id>
+                <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+            </repository>
     </repositories>
 
     <pluginRepositories>
