@@ -155,8 +155,6 @@ public class MQTTServer extends Server {
         Properties properties = new Properties();
         properties.setProperty(BrokerConstants.HOST_PROPERTY_NAME, host);
         properties.setProperty(BrokerConstants.PORT_PROPERTY_NAME, "" + port);
-        // Set random port for websockets instead of 8080
-        properties.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, "25342");
         // Disable automatic publishing (handled by the broker instead)
         properties.setProperty(BrokerConstants.PUBLISH_TO_CONSUMERS, "false");
         return properties;
