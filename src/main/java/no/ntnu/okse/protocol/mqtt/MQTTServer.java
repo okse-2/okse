@@ -94,6 +94,7 @@ public class MQTTServer extends Server {
         try {
             startServer(config, interceptHandlers);
         } catch (IOException e) {
+            ps.incrementTotalErrors();
             e.printStackTrace();
         }
     }
