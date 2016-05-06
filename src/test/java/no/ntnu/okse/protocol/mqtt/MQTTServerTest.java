@@ -120,7 +120,7 @@ public class MQTTServerTest {
         MQTTServer.MQTTListener listenerClass = mqtt_spy.createListeners();
 
 
-        InterceptPublishMessage msg = new InterceptPublishMessage(new PublishMessage(), "testID");
+        InterceptPublishMessage msg = new InterceptPublishMessage(new PublishMessage(), "testID", "username");
         listenerClass.onPublish(msg);
 
         Mockito.when(mqtt_spy.createListeners()).thenReturn(listenerClass);
@@ -134,7 +134,7 @@ public class MQTTServerTest {
 
         MQTTServer.MQTTListener listenerClass = mqtt_spy.createListeners();
 
-        InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription("testID", "testTopic", AbstractMessage.QOSType.EXACTLY_ONCE));
+        InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription("testID", "testTopic", AbstractMessage.QOSType.EXACTLY_ONCE), "username");
         listenerClass.onSubscribe(msg);
 
         Mockito.when(mqtt_spy.createListeners()).thenReturn(listenerClass);
@@ -150,7 +150,7 @@ public class MQTTServerTest {
 
         MQTTServer.MQTTListener listenerClass = mqtt_spy.createListeners();
 
-        InterceptUnsubscribeMessage msg = new InterceptUnsubscribeMessage("testTopic", "testID");
+        InterceptUnsubscribeMessage msg = new InterceptUnsubscribeMessage("testTopic", "testID", "username");
         Mockito.doAnswer(new Answer<Void>(){
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
@@ -172,7 +172,7 @@ public class MQTTServerTest {
 
         MQTTServer.MQTTListener listenerClass = mqtt_spy.createListeners();
 
-        InterceptDisconnectMessage msg = new InterceptDisconnectMessage("testID");
+        InterceptDisconnectMessage msg = new InterceptDisconnectMessage("testID", "username");
         listenerClass.onDisconnect(msg);
 
         Mockito.when(mqtt_spy.createListeners()).thenReturn(listenerClass);
