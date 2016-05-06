@@ -5,6 +5,9 @@ import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 
+/**
+ *
+ */
 public class MQTTProtocolServer extends AbstractProtocolServer {
     protected static final String SERVERTYPE = "mqtt";
 
@@ -12,6 +15,11 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
     private MQTTServer server;
 
+    /**
+     * Constructor, sets the host and port to be used
+     * @param host the host to listen to
+     * @param port the port to listen to
+     */
     public MQTTProtocolServer(String host, Integer port) {
         this.host = host;
         this.port = port;
@@ -59,6 +67,10 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
     }
 
+    /**
+     * Method for determining if the server is running
+     * @return
+     */
     public boolean isRunning() {
         return _running;
     }
