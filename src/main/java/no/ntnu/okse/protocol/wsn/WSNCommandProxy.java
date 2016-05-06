@@ -333,28 +333,28 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
 
                     log.debug("Message topic extracted: " + topicName);
 
-                    // If the topic exists in the OKSE TopicService
-                    if (topicService.topicExists(topicName)) {
-                        log.debug("Topic existed, generating OKSE Message for distribution");
-                        // Extract the content
-                        String content = WSNTools.extractRawXmlContentFromDomNode((ElementNSImpl) messageHolderType.getMessage().getAny());
-                        log.debug("Messace object: " + messageHolderType.getMessage().toString());
-                        log.debug("Message content: " + content);
+                    // Create topic
+                    topicService.addTopic(topicName);
 
-                        // Generate the message
-                        message = new Message(content, topicName, null, _protocolserver.getProtocolServerType());
-                        log.debug("OKSE Message generated");
-                        // Extract the endpoint reference from publisher
-                        W3CEndpointReference publisherReference = messageHolderType.getProducerReference();
-                        // If we have a publisherReference, add it to the message
-                        if (publisherReference != null) {
-                            log.debug("We had a publisher-reference, updating OKSE Message");
-                            message.setAttribute(WSNSubscriptionManager.WSN_ENDPOINT_TOKEN, ServiceUtilities.getAddress(publisherReference));
-                        }
+                    log.debug("Generating OKSE Message for distribution");
+                    // Extract the content
+                    String content = WSNTools.extractRawXmlContentFromDomNode((ElementNSImpl) messageHolderType.getMessage().getAny());
+                    log.debug("Message object: " + messageHolderType.getMessage().toString());
+                    log.debug("Message content: " + content);
 
-                        // Add the message to the message queue for dispatch
-                        messageService.distributeMessage(message);
+                    // Generate the message
+                    message = new Message(content, topicName, null, _protocolserver.getProtocolServerType());
+                    log.debug("OKSE Message generated");
+                    // Extract the endpoint reference from publisher
+                    W3CEndpointReference publisherReference = messageHolderType.getProducerReference();
+                    // If we have a publisherReference, add it to the message
+                    if (publisherReference != null) {
+                        log.debug("We had a publisher-reference, updating OKSE Message");
+                        message.setAttribute(WSNSubscriptionManager.WSN_ENDPOINT_TOKEN, ServiceUtilities.getAddress(publisherReference));
                     }
+
+                    // Add the message to the message queue for dispatch
+                    messageService.distributeMessage(message);
 
                 } catch (InvalidTopicExpressionFault invalidTopicExpressionFault) {
                     log.warn("Tried to send a topic with an invalid expression");

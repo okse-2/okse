@@ -261,24 +261,6 @@ var Config = (function($) {
                 }
             });
 
-            $('#AMQP-topic-config').on('click', function(e) {
-                e.preventDefault()
-
-                Main.ajax({
-                    url: 'config/mapping/queue/change',
-                    type: 'POST',
-                    success: function(data) {
-                        $.okseDebug.logPrint("[Debug][Config] Callback from server; AMQP useQueue value changed")
-                        $.okseDebug.logPrint("[Debug][Config] AMPQ useQueue is now" + data.value)
-                        $(e.target).prop('checked', data.value)
-                    },
-                    error: function(xhr, status, error) {
-                        var data = JSON.parse(xhr.responseText)
-                        Main.error(xhr, status, error)
-                        Main.displayMessage(data.message)
-                    }
-                })
-            });
 
             $('#wsn-instance').on('change', function(e) {
                 updateRelays(currentWsnInstance());
