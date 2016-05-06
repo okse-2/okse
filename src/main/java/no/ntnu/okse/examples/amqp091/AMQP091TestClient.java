@@ -1,6 +1,7 @@
 package no.ntnu.okse.examples.amqp091;
 
 import com.rabbitmq.client.*;
+import no.ntnu.okse.examples.TestClient;
 import no.ntnu.okse.examples.mqtt.MQTTTestClient;
 import org.apache.log4j.Logger;
 
@@ -10,13 +11,14 @@ import java.util.concurrent.TimeoutException;
 /**
  * AMQP 0.9.1 Test Client
  */
-public class AMQP091TestClient {
+public class AMQP091TestClient implements TestClient {
     private static Logger log = Logger.getLogger(MQTTTestClient.class);
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 56720;
     private Channel channel;
     private Consumer consumer;
     private ConnectionFactory factory;
+    private String queueName;
 
     /**
      * Create an instance of test client with default configuration
@@ -53,6 +55,15 @@ public class AMQP091TestClient {
         }
     }
 
+    @Override
+    public void disconnect() {
+        try {
+            channel.close();
+        } catch (TimeoutException | IOException e) {
+            log.error("Failed to disconnect", e);
+        }
+    }
+
     /**
      * Subscribe to topic
      *
@@ -65,12 +76,23 @@ public class AMQP091TestClient {
         }
         try {
             channel.exchangeDeclare(topic, "fanout");
-            String queueName = channel.queueDeclare().getQueue();
+            queueName = channel.queueDeclare().getQueue();
             channel.queueBind(queueName, topic, "");
             System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
             channel.basicConsume(queueName, true, consumer);
         } catch (IOException e) {
             log.error("Unable to subscribe to topic", e);
+        }
+    }
+
+    @Override
+    public void unsubscribe(String topic) {
+        if(queueName != null) {
+            try {
+                channel.basicCancel(queueName);
+            } catch (IOException e) {
+                log.error("Failed to unsubscribe", e);
+            }
         }
     }
 

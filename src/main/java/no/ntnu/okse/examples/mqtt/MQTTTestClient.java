@@ -1,5 +1,6 @@
 package no.ntnu.okse.examples.mqtt;
 
+import no.ntnu.okse.examples.TestClient;
 import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -8,7 +9,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 /**
  * Test client for MQTT
  */
-public class MQTTTestClient {
+public class MQTTTestClient implements TestClient {
 
     private static Logger log;
     private MqttClient mqttClient;
@@ -42,9 +43,7 @@ public class MQTTTestClient {
         this(DEFAULT_HOST, DEFAULT_PORT);
     }
 
-    /**
-     * Connect to broker
-     */
+    @Override
     public void connect() {
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
@@ -57,9 +56,7 @@ public class MQTTTestClient {
         log.debug("Connected");
     }
 
-    /**
-     * Disconnect from broker
-     */
+    @Override
     public void disconnect() {
         try {
             mqttClient.disconnect();
@@ -70,7 +67,7 @@ public class MQTTTestClient {
     }
 
     /**
-     * Publish to broker
+     * Publish to broker with Quality of Service level
      *
      * @param topic topic
      * @param content message content
@@ -88,16 +85,12 @@ public class MQTTTestClient {
         log.debug("Message published");
     }
 
-    /**
-     * Publish to broker
-     *
-     * @param topic topic
-     * @param content message content
-     */
+    @Override
     public void publish(String topic, String content) {
         publish(topic, content, DEFAULT_QOS);
     }
 
+    @Override
     public void subscribe(String topic) {
         log.debug("Subscribing to topic: " + topic);
         try {
@@ -106,6 +99,15 @@ public class MQTTTestClient {
             log.error("Failed to subscribe", e);
         }
         log.debug("Subscribed to topic: " + topic);
+    }
+
+    @Override
+    public void unsubscribe(String topic) {
+        try {
+            mqttClient.unsubscribe(topic);
+        } catch (MqttException e) {
+            log.error("Failed to unsubscribe", e);
+        }
     }
 
     /**
