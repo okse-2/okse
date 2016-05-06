@@ -58,7 +58,6 @@ public class MQTTServer extends Server {
         public void onDisconnect(InterceptDisconnectMessage message) {
             HandleDisconnect(message);
         }
-
     }
 
     /**
@@ -72,7 +71,7 @@ public class MQTTServer extends Server {
         this.ps = ps;
         protocolServerType = "mqtt";
         interceptHandlers = new ArrayList<>();
-        interceptHandlers.add(new MQTTListener());
+        interceptHandlers.add(createListeners());
         config = new MemoryConfig(getConfig(host, port));
     }
 
@@ -113,7 +112,7 @@ public class MQTTServer extends Server {
      * Method to handle an unsubscribe message from Moquette.
      * @param message the unsubscribe message that was sent to Moquette from a client
      */
-    void HandleUnsubscribe(InterceptUnsubscribeMessage message) {
+    public void HandleUnsubscribe(InterceptUnsubscribeMessage message) {
         log.info("Client unsubscribed from: " + message.getTopicFilter() + "   ID: " + message.getClientID());
         Channel channel = getChannelByClientId(message.getClientID());
 
@@ -240,6 +239,7 @@ public class MQTTServer extends Server {
      * @param message The OKSE message to use when creating MQTT message
      */
     protected PublishMessage createMQTTMessage(@NotNull Message message) {
+        System.out.println(message);
         PublishMessage msg = new PublishMessage();
         ByteBuffer payload = ByteBuffer.wrap(message.getMessage().getBytes());
 
@@ -252,5 +252,9 @@ public class MQTTServer extends Server {
         else
             msg.setQos(AbstractMessage.QOSType.valueOf(Byte.valueOf(message.getAttribute("qos"))));
         return msg;
+    }
+
+    public MQTTListener createListeners(){
+        return new MQTTListener();
     }
 }

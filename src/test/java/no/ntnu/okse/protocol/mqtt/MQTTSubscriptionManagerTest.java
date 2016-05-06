@@ -72,6 +72,8 @@ public class MQTTSubscriptionManagerTest {
         assertEquals(true, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
         subscriptionHandler_spy.removeSubscriber(subscriptionHandler_spy.getSubscriber("127.0.0.1", 1883, "testing").getSubscriber());
         assertEquals(false, subscriptionHandler_spy.containsSubscriber("127.0.0.1", 1883, "testing"));
+
+        subscriptionHandler_spy.removeSubscriber(new Subscriber("localhost", 12555, "test", "mqtt"));
     }
 
     @Test
