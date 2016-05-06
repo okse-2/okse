@@ -97,11 +97,16 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
      * @param clientID the clientID, used to remove subscribers
      */
     public void removeSubscribers(String clientID) {
-        Iterator<Integer> it = getSubscriberIndexes(clientID).iterator();
-        while(it.hasNext()){
-            int index = it.next();
-            subscriptionService.removeSubscriber(subscriberList.get(index).getSubscriber());
-            subscriberList.remove(index);
+        ArrayList<Integer> list = getSubscriberIndexes(clientID);
+        int count = 0;
+        for(int i = 0; i < list.size(); i++){
+            int index = list.get(i);
+            //Each time we delete from the lists we also have to subtract 1 from all the indexes
+            //We achieve this easiest by counting the number of the removed subscribers and simply subsctracting
+            //that number from the currect index.
+            subscriptionService.removeSubscriber(subscriberList.get(index - count).getSubscriber());
+            subscriberList.remove(index - count);
+            count ++;
         }
     }
 
