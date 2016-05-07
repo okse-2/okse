@@ -81,6 +81,14 @@ public class AMQPClient implements TestClient {
         }
     }
 
+    public Message getMessage() {
+        messenger.recv();
+        if(messenger.incoming() > 0) {
+            return messenger.get();
+        }
+        return null;
+    }
+
     private Message createMessage(String topic, String content) {
         Message message = Message.Factory.create();
         message.setAddress(createAddress(topic));

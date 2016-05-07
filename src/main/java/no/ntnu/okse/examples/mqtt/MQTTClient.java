@@ -129,6 +129,7 @@ public class MQTTClient implements TestClient {
         client.connect();
         client.setCallback(new ExampleCallback());
         client.subscribe("example");
+        client.publish("example", "lol");
     }
 
     /**
@@ -142,7 +143,7 @@ public class MQTTClient implements TestClient {
         }
 
         @Override
-        public void messageArrived(String topic, MqttMessage message) throws Exception {
+        public void messageArrived(String topic, MqttMessage message) {
             System.out.println(String.format("Message arrived on topic %s with content %s", topic, message));
         }
 
