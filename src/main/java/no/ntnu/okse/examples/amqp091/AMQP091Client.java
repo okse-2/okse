@@ -2,7 +2,6 @@ package no.ntnu.okse.examples.amqp091;
 
 import com.rabbitmq.client.*;
 import no.ntnu.okse.examples.TestClient;
-import no.ntnu.okse.examples.mqtt.MQTTTestClient;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -11,8 +10,8 @@ import java.util.concurrent.TimeoutException;
 /**
  * AMQP 0.9.1 Test Client
  */
-public class AMQP091TestClient implements TestClient {
-    private static Logger log = Logger.getLogger(MQTTTestClient.class);
+public class AMQP091Client implements TestClient {
+    private static Logger log = Logger.getLogger(AMQP091Client.class);
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 56720;
     private Channel channel;
@@ -23,7 +22,7 @@ public class AMQP091TestClient implements TestClient {
     /**
      * Create an instance of test client with default configuration
      */
-    public AMQP091TestClient() {
+    public AMQP091Client() {
         this(DEFAULT_HOST, DEFAULT_PORT);
     }
 
@@ -33,7 +32,7 @@ public class AMQP091TestClient implements TestClient {
      * @param host host
      * @param port port
      */
-    public AMQP091TestClient(String host, int port) {
+    public AMQP091Client(String host, int port) {
 
         factory = new ConnectionFactory();
         factory.setHost(host);
@@ -134,7 +133,7 @@ public class AMQP091TestClient implements TestClient {
      * @param args
      */
     public static void main(String[] args) {
-        AMQP091TestClient client = new AMQP091TestClient();
+        AMQP091Client client = new AMQP091Client();
         client.connect();
         // Callback
         client.setConsumer(new ExampleConsumer(client.getChannel()));

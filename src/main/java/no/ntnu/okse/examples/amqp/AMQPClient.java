@@ -12,8 +12,8 @@ import java.io.IOException;
 /**
  * AMQP 1.0 Test Client
  */
-public class AMQPTestClient implements TestClient {
-    private static Logger log = Logger.getLogger(AMQPTestClient.class);
+public class AMQPClient implements TestClient {
+    private static Logger log = Logger.getLogger(AMQPClient.class);
     private boolean verbose = false;
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 5672;
@@ -27,7 +27,7 @@ public class AMQPTestClient implements TestClient {
      * @param host hostname
      * @param port port
      */
-    public AMQPTestClient(String host, int port) {
+    public AMQPClient(String host, int port) {
         this.host = host;
         this.port = port;
         messenger = Messenger.Factory.create();
@@ -36,7 +36,7 @@ public class AMQPTestClient implements TestClient {
     /**
      * Create an instance of test client with default configuration
      */
-    public AMQPTestClient() {
+    public AMQPClient() {
         this(DEFAULT_HOST, DEFAULT_PORT);
     }
 
@@ -119,7 +119,7 @@ public class AMQPTestClient implements TestClient {
     }
 
     public static void main(String args[]) {
-        AMQPTestClient client = new AMQPTestClient();
+        AMQPClient client = new AMQPClient();
         client.connect();
         client.subscribe("example");
         client.publish("example", "Hello, World");

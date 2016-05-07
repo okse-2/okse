@@ -9,7 +9,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 /**
  * Test client for MQTT
  */
-public class MQTTTestClient implements TestClient {
+public class MQTTClient implements TestClient {
 
     private static Logger log;
     private MqttClient mqttClient;
@@ -24,8 +24,8 @@ public class MQTTTestClient implements TestClient {
      * @param port port
      * @param clientId client id
      */
-    public MQTTTestClient(String host, int port, String clientId) {
-        log = Logger.getLogger(MQTTTestClient.class);
+    public MQTTClient(String host, int port, String clientId) {
+        log = Logger.getLogger(MQTTClient.class);
         String broker = String.format("tcp://%s:%d", host, port);
         MemoryPersistence persistence = new MemoryPersistence();
         try {
@@ -35,11 +35,11 @@ public class MQTTTestClient implements TestClient {
         }
     }
 
-    public MQTTTestClient(String host, int port) {
+    public MQTTClient(String host, int port) {
         this(host, port, "MQTTTestClient");
     }
 
-    public MQTTTestClient() {
+    public MQTTClient() {
         this(DEFAULT_HOST, DEFAULT_PORT);
     }
 
@@ -125,7 +125,7 @@ public class MQTTTestClient implements TestClient {
      * @param args
      */
     public static void main(String[] args) {
-        MQTTTestClient client = new MQTTTestClient();
+        MQTTClient client = new MQTTClient();
         client.connect();
         client.setCallback(new ExampleCallback());
         client.subscribe("example");
