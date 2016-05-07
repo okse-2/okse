@@ -37,6 +37,7 @@ public final class WSNClient implements TestClient {
     private TestNotificationBroker notificationBroker;
     private Map<String, Subscription> subscriptions;
     private Map<String, Consumer> consumers;
+    private Consumer.Callback callback;
 
 
     public WSNClient() {
@@ -47,6 +48,7 @@ public final class WSNClient implements TestClient {
         subscriptions = new HashMap<>();
         consumers = new HashMap<>();
         notificationBroker = new TestNotificationBroker(String.format("http://%s:%d", host, port));
+        callback = new ExampleConsumer();
     }
 
     public static void main(String[] args) throws Exception {
@@ -74,7 +76,7 @@ public final class WSNClient implements TestClient {
     }
 
     public void subscribe(String topic, String host, int port) {
-        Consumer consumer = new Consumer(new ExampleConsumer(),
+        Consumer consumer = new Consumer(callback,
                 String.format("http://%s:%d/MyConsumer", host, port));
         consumers.put(topic, consumer);
         try {
@@ -107,6 +109,10 @@ public final class WSNClient implements TestClient {
         notificationBroker.notify(topic, new JAXBElement<>(
                 new QName("string"), String.class, content));
 
+    }
+
+    public void setCallback(Consumer.Callback callback) {
+        this.callback = callback;
     }
 
     private class ExampleConsumer implements Consumer.Callback {
