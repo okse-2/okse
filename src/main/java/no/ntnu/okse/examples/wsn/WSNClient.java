@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class WSNClient implements TestClient {
-    private static Logger log;
+    private static Logger log = Logger.getLogger(WSNClient.class);
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 61000;
     private TestNotificationBroker notificationBroker;
@@ -76,11 +76,13 @@ public final class WSNClient implements TestClient {
     }
 
     public void subscribe(String topic, String host, int port) {
+        log.debug("Subscribing to topic: " + topic);
         Consumer consumer = new Consumer(callback,
                 String.format("http://%s:%d/MyConsumer", host, port));
         consumers.put(topic, consumer);
         try {
             subscriptions.put(topic, notificationBroker.subscribe(consumer, topic));
+            log.debug("Subscribed to topic: " + topic);
         }
         catch (Exception e) {
             log.error("Failed to subscribe", e);
@@ -89,26 +91,34 @@ public final class WSNClient implements TestClient {
 
     @Override
     public void unsubscribe(String topic) {
+        log.debug("Unsubscribing from topic: " + topic);
         if(subscriptions.containsKey(topic)) {
             try {
                 Subscription subscription = subscriptions.get(topic);
                 subscription.unsubscribe();
-            } catch (UnableToDestroySubscriptionFault | ResourceUnknownFault unableToDestroySubscriptionFault) {
-                unableToDestroySubscriptionFault.printStackTrace();
+                log.debug("Unsubscribed from topic: " + topic);
+            } catch (UnableToDestroySubscriptionFault | ResourceUnknownFault e) {
+                log.error("Failed to unsubscribe", e);
             }
         }
+        else {
+            log.debug("Topic not found");
+        }
         if(consumers.containsKey(topic)) {
+            log.debug("Stopping consumer for topic: " + topic);
             Consumer consumer = consumers.get(topic);
             consumer.stop();
+            log.debug("Consumer stopped");
         }
     }
 
     @Override
     public void publish(String topic, String content) {
+        log.debug(String.format("Publishing to topic %s with content %s", topic, content));
         // TODO: Try to get rid of JAXB element wrapping
         notificationBroker.notify(topic, new JAXBElement<>(
                 new QName("string"), String.class, content));
-
+        log.debug("Published message successfully");
     }
 
     public void setCallback(Consumer.Callback callback) {

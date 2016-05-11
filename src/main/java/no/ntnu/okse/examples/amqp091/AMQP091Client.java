@@ -45,10 +45,10 @@ public class AMQP091Client implements TestClient {
      */
     public void connect() {
         try {
-            log.debug("Connecting to broker");
+            log.debug("Connecting");
             Connection connection = factory.newConnection();
             channel = connection.createChannel();
-            log.debug("Connected to broker");
+            log.debug("Connected");
         } catch (IOException | TimeoutException e) {
             log.error("Unable to connect to broker", e);
         }
@@ -57,7 +57,9 @@ public class AMQP091Client implements TestClient {
     @Override
     public void disconnect() {
         try {
+            log.debug("Disconnecting");
             channel.close();
+            log.debug("Disconnected");
         } catch (TimeoutException | IOException e) {
             log.error("Failed to disconnect", e);
         }
@@ -74,11 +76,12 @@ public class AMQP091Client implements TestClient {
             return;
         }
         try {
+            log.debug("Subscribing to topic: " + topic);
             channel.exchangeDeclare(topic, "fanout");
             queueName = channel.queueDeclare().getQueue();
             channel.queueBind(queueName, topic, "");
-            System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
             channel.basicConsume(queueName, true, consumer);
+            log.debug("Subscribed to topic: " + topic);
         } catch (IOException e) {
             log.error("Unable to subscribe to topic", e);
         }
@@ -86,12 +89,17 @@ public class AMQP091Client implements TestClient {
 
     @Override
     public void unsubscribe(String topic) {
+        log.debug("Unsubscribing from topic: " + topic);
         if(queueName != null) {
             try {
                 channel.basicCancel(queueName);
+                log.debug("Unsubscribed from topic: " + topic);
             } catch (IOException e) {
                 log.error("Failed to unsubscribe", e);
             }
+        }
+        else {
+            log.warn("Queue name not found, failed to unsubscribe");
         }
     }
 
@@ -120,8 +128,10 @@ public class AMQP091Client implements TestClient {
      * @param content message content
      */
     public void publish(String topic, String content) {
+        log.debug(String.format("Publishing to topic %s with content %s", topic, content));
         try {
             channel.basicPublish(topic, "", null, content.getBytes("UTF-8"));
+            log.debug("Published message");
         } catch (IOException e) {
             log.error("Failed to publish", e);
         }

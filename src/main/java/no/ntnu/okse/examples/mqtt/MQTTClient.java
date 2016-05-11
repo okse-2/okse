@@ -11,7 +11,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
  */
 public class MQTTClient implements TestClient {
 
-    private static Logger log;
+    private static Logger log = Logger.getLogger(MQTTClient.class);
     private MqttClient mqttClient;
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 1883;
@@ -25,7 +25,6 @@ public class MQTTClient implements TestClient {
      * @param clientId client id
      */
     public MQTTClient(String host, int port, String clientId) {
-        log = Logger.getLogger(MQTTClient.class);
         String broker = String.format("tcp://%s:%d", host, port);
         MemoryPersistence persistence = new MemoryPersistence();
         try {
@@ -47,7 +46,7 @@ public class MQTTClient implements TestClient {
     public void connect() {
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
-        log.debug("Connecting to broker");
+        log.debug("Connecting");
         try {
             mqttClient.connect(connOpts);
         } catch (MqttException e) {
@@ -59,6 +58,7 @@ public class MQTTClient implements TestClient {
     @Override
     public void disconnect() {
         try {
+            log.debug("Disconnecting");
             mqttClient.disconnect();
             log.debug("Disconnected");
         } catch (MqttException e) {
@@ -104,14 +104,16 @@ public class MQTTClient implements TestClient {
     @Override
     public void unsubscribe(String topic) {
         try {
+            log.debug("Unsubscribing from topic: " + topic);
             mqttClient.unsubscribe(topic);
+            log.debug("Unsubscribed");
         } catch (MqttException e) {
             log.error("Failed to unsubscribe", e);
         }
     }
 
     /**
-     * Sett Paho MQTT callback
+     * Set Paho MQTT callback
      *
      * @param callback callback instance
      */
@@ -129,7 +131,7 @@ public class MQTTClient implements TestClient {
         client.connect();
         client.setCallback(new ExampleCallback());
         client.subscribe("example");
-        client.publish("example", "lol");
+        client.publish("example", "Text content");
     }
 
     /**
