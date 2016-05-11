@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 
 
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
 
 @Test(singleThreaded = true)
 public class MessageSendingTest {
@@ -41,9 +40,9 @@ public class MessageSendingTest {
 
         publisher.publish("mqtt", "Text content");
         Thread.sleep(2000);
-        verify(callback).messageArrived(anyString(), any(MqttMessage.class));
         subscriber.disconnect();
         publisher.disconnect();
+        verify(callback).messageArrived(anyString(), any(MqttMessage.class));
     }
 
     public void amqpToAmqp() throws Exception {
@@ -55,13 +54,15 @@ public class MessageSendingTest {
         subscriber.setCallback(callback);
         subscriber.subscribe("amqp");
 
+        // Allow subscriber time to complete subscription
+        Thread.sleep(200);
+
         publisher.publish("amqp", "Text content");
+        publisher.disconnect();
         Thread.sleep(2000);
-        // Check if message was received
+        subscriber.disconnect();
         // TODO: Remove times(2) when duplicate message bug is fixed
         verify(callback, times(2)).onReceive(any());
-        subscriber.disconnect();
-        publisher.disconnect();
     }
 
     public void amqp091ToAmqp091() throws Exception {
@@ -75,9 +76,9 @@ public class MessageSendingTest {
 
         publisher.publish("amqp091", "Text content");
         Thread.sleep(2000);
-        verify(consumer).handleDelivery(any(), any(), any(), any());
         subscriber.disconnect();
         publisher.disconnect();
+        verify(consumer).handleDelivery(any(), any(), any(), any());
     }
 
     public void wsnToWsn() throws InterruptedException {
@@ -90,51 +91,68 @@ public class MessageSendingTest {
 
         publisher.publish("wsn", "Text content");
         Thread.sleep(2000);
-        verify(callback).notify(any());
         subscriber.unsubscribe("wsn");
+        verify(callback).notify(any());
     }
 
     public void allToAll() throws Exception {
+        int numberOfProtocols = 4;
+        // WSN
         WSNClient wsnClient = new WSNClient();
-        MQTTClient mqttClient = new MQTTClient("localhost", 1883, "clientAll");
-        AMQP091Client amqp091Client = new AMQP091Client();
-        AMQPClient amqpClient = new AMQPClient();
-        mqttClient.connect();
-        amqp091Client.connect();
-        amqpClient.connect();
-
         Consumer.Callback wsnCallback = mock(Consumer.Callback.class);
         wsnClient.setCallback(wsnCallback);
+
+        // MQTT
+        MQTTClient mqttClient = new MQTTClient("localhost", 1883, "clientAll");
         MqttCallback mqttCallback = mock(MqttCallback.class);
         mqttClient.setCallback(mqttCallback);
+
+        // AMQP 0.9.1
+        AMQP091Client amqp091Client = new AMQP091Client();
         DefaultConsumer amqp091Callback = mock(DefaultConsumer.class);
         amqp091Client.setConsumer(amqp091Callback);
+
+        // AMQP 1.0
+        AMQPClient amqpClient = new AMQPClient();
+        // AMQP test client is unable to receive and send messages at the same time
+        AMQPClient amqpSender = new AMQPClient();
         AMQPCallback amqpCallback = mock(AMQPCallback.class);
         amqpClient.setCallback(amqpCallback);
 
+        // Connecting
+        mqttClient.connect();
+        amqp091Client.connect();
+        amqpClient.connect();
+        amqpSender.connect();
+
+
+        // Subscribing
         wsnClient.subscribe("all", "localhost", 9002);
         mqttClient.subscribe("all");
         amqp091Client.subscribe("all");
         amqpClient.subscribe("all");
 
+        // Publishing
+        wsnClient.publish("all", "WSN");
         mqttClient.publish("all", "MQTT");
         amqp091Client.publish("all", "AMQP 0.9.1");
-        amqpClient.publish("all", "AMQP 1.0");
-        wsnClient.publish("all", "WSN");
+        amqpSender.publish("all", "AMQP 1.0");
 
         // Wait for messages to arrive
         Thread.sleep(2000);
 
-        // TODO: Subtract 1 from AMQP 1.0 when duplicate message bug is fixed
-        verify(amqpCallback, times(5)).onReceive(any());
-        verify(mqttCallback, times(4)).messageArrived(anyString(), any(MqttMessage.class));
-        verify(amqp091Callback, times(4)).handleDelivery(any(), any(), any(), any());
-        verify(wsnCallback, times(4)).notify(any());
-
-
+        // Unsubscribing/disconnecting
         wsnClient.unsubscribe("all");
         mqttClient.disconnect();
         amqp091Client.disconnect();
         amqpClient.disconnect();
+        amqpSender.disconnect();
+
+        // Verifying that all messages were sent
+        // TODO: Subtract 1 from AMQP 1.0 when duplicate message bug is fixed
+        verify(amqpCallback, times(numberOfProtocols + 1)).onReceive(any());
+        verify(mqttCallback, times(numberOfProtocols)).messageArrived(anyString(), any(MqttMessage.class));
+        verify(amqp091Callback, times(numberOfProtocols)).handleDelivery(any(), any(), any(), any());
+        verify(wsnCallback, times(numberOfProtocols)).notify(any());
     }
 }
