@@ -14,12 +14,13 @@ import java.io.IOException;
  */
 public class AMQPClient implements TestClient {
     private static Logger log = Logger.getLogger(AMQPClient.class);
-    private boolean verbose = false;
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 5672;
     private Messenger messenger;
     private String host;
     private int port;
+    private AMQPCallback callback;
+    private AMQPClientListener listener;
 
     /**
      * Create an instance of test client
@@ -31,6 +32,7 @@ public class AMQPClient implements TestClient {
         this.host = host;
         this.port = port;
         messenger = Messenger.Factory.create();
+        messenger.setTimeout(10000);
     }
 
     /**
@@ -43,7 +45,9 @@ public class AMQPClient implements TestClient {
     @Override
     public void connect() {
         try {
+            log.debug("Connecting to broker");
             messenger.start();
+            log.debug("Connected to broker");
         } catch (IOException e) {
             log.error("Failed to start client", e);
         }
@@ -51,12 +55,23 @@ public class AMQPClient implements TestClient {
 
     @Override
     public void disconnect() {
+        log.debug("Disconnecting");
+        if(listener != null) {
+            listener.stopListener();
+        }
         messenger.stop();
+        log.debug("Disconnected");
     }
 
     @Override
     public void subscribe(String topic) {
+        log.debug("Subscribing to topic: " + topic);
         messenger.subscribe(createAddress(topic));
+        log.debug("Subscribed to topic: " + topic);
+        if(listener == null) {
+            listener = new AMQPClientListener();
+            listener.start();
+        }
     }
 
     @Override
@@ -66,27 +81,14 @@ public class AMQPClient implements TestClient {
 
     @Override
     public void publish(String topic, String content) {
+        log.debug(String.format("Publishing to topic %s with content %s", topic, content));
         messenger.put(createMessage(topic, content));
+        messenger.send();
+        log.debug("Successfully published");
     }
 
-    public void listen() {
-        int counter = 0;
-        while(true) {
-            messenger.recv();
-            while (messenger.incoming() > 0) {
-                counter++;
-                Message message = messenger.get();
-                print(counter, message);
-            }
-        }
-    }
-
-    public Message getMessage() {
-        messenger.recv();
-        if(messenger.incoming() > 0) {
-            return messenger.get();
-        }
-        return null;
+    public void setCallback(AMQPCallback callback) {
+        this.callback = callback;
     }
 
     private Message createMessage(String topic, String content) {
@@ -106,7 +108,7 @@ public class AMQPClient implements TestClient {
         return String.valueOf(o);
     }
 
-    private void print(int i, Message msg) {
+    private static void print(int i, Message msg, boolean verbose) {
         StringBuilder b = new StringBuilder("message: ");
         b.append(i).append("\n");
         b.append("Address: ").append(msg.getAddress()).append("\n");
@@ -129,8 +131,37 @@ public class AMQPClient implements TestClient {
     public static void main(String args[]) {
         AMQPClient client = new AMQPClient();
         client.connect();
+        client.setCallback(new ExampleCallback());
         client.subscribe("example");
         client.publish("example", "Hello, World");
-        client.listen();
+    }
+
+    private static class ExampleCallback implements AMQPCallback {
+        private boolean verbose = false;
+        private int counter = 0;
+
+        @Override
+        public void onReceive(Message message) {
+            counter++;
+            print(counter, message, verbose);
+        }
+    }
+
+    private class AMQPClientListener extends Thread {
+        private boolean running = true;
+
+        @Override
+        public void run() {
+            while(running) {
+                messenger.recv();
+                while (messenger.incoming() > 0) {
+                    callback.onReceive(messenger.get());
+                }
+            }
+        }
+
+        public void stopListener() {
+            running = false;
+        }
     }
 }
