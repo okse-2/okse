@@ -33,6 +33,7 @@ public class AMQPClient implements TestClient {
         this.port = port;
         messenger = Messenger.Factory.create();
         messenger.setTimeout(10000);
+        listener = new AMQPClientListener();
     }
 
     /**
@@ -56,9 +57,7 @@ public class AMQPClient implements TestClient {
     @Override
     public void disconnect() {
         log.debug("Disconnecting");
-        if(listener != null) {
-            listener.stopListener();
-        }
+        listener.stopListener();
         messenger.stop();
         log.debug("Disconnected");
     }
@@ -67,11 +66,8 @@ public class AMQPClient implements TestClient {
     public void subscribe(String topic) {
         log.debug("Subscribing to topic: " + topic);
         messenger.subscribe(createAddress(topic));
+        listener.start();
         log.debug("Subscribed to topic: " + topic);
-        if(listener == null) {
-            listener = new AMQPClientListener();
-            listener.start();
-        }
     }
 
     @Override
@@ -148,13 +144,14 @@ public class AMQPClient implements TestClient {
     }
 
     private class AMQPClientListener extends Thread {
-        private boolean running = true;
+        private boolean running = false;
 
         @Override
         public void run() {
+            running = true;
             while(running) {
                 messenger.recv();
-                while (messenger.incoming() > 0) {
+                while(messenger.incoming() > 0) {
                     callback.onReceive(messenger.get());
                 }
             }
