@@ -61,8 +61,7 @@ public class MessageSendingTest {
         publisher.disconnect();
         Thread.sleep(2000);
         subscriber.disconnect();
-        // TODO: Remove times(2) when duplicate message bug is fixed
-        verify(callback, times(2)).onReceive(any());
+        verify(callback).onReceive(any());
     }
 
     public void amqp091ToAmqp091() throws Exception {
@@ -149,8 +148,7 @@ public class MessageSendingTest {
         amqpSender.disconnect();
 
         // Verifying that all messages were sent
-        // TODO: Subtract 1 from AMQP 1.0 when duplicate message bug is fixed
-        verify(amqpCallback, times(numberOfProtocols + 1)).onReceive(any());
+        verify(amqpCallback, times(numberOfProtocols)).onReceive(any());
         verify(mqttCallback, times(numberOfProtocols)).messageArrived(anyString(), any(MqttMessage.class));
         verify(amqp091Callback, times(numberOfProtocols)).handleDelivery(any(), any(), any(), any());
         verify(wsnCallback, times(numberOfProtocols)).notify(any());
