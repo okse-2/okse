@@ -2,7 +2,9 @@ package no.ntnu.okse.protocol;
 
 import com.rabbitmq.client.DefaultConsumer;
 import no.ntnu.okse.core.CoreService;
+import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.messaging.MessageService;
+import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.examples.amqp.AMQPCallback;
 import no.ntnu.okse.examples.amqp.AMQPClient;
 import no.ntnu.okse.examples.amqp091.AMQP091Client;
@@ -11,24 +13,40 @@ import no.ntnu.okse.examples.wsn.WSNClient;
 import org.apache.cxf.wsn.client.Consumer;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 
 import static org.mockito.Mockito.*;
 
-@Test(singleThreaded = true)
 public class MessageSendingTest {
+    private SubscriptionChangeListener subscriptionMock;
+    private SubscriptionService subscriptionService = SubscriptionService.getInstance();
+
     @BeforeClass
-    public void setUp() throws InterruptedException {
+    public void classSetUp() throws InterruptedException {
         CoreService cs = CoreService.getInstance();
+
         cs.registerService(MessageService.getInstance());
+        cs.registerService(subscriptionService);
         cs.bootProtocolServers();
         cs.boot();
+
         // Make sure servers have booted properly
         Thread.sleep(3000);
     }
 
+    @BeforeMethod
+    public void setUp() {
+        subscriptionMock = mock(SubscriptionChangeListener.class);
+        subscriptionService.addSubscriptionChangeListener(subscriptionMock);
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        subscriptionService.removeAllListeners();
+    }
+
+    @Test
     public void mqttToMqtt() throws Exception {
         MQTTClient subscriber = new MQTTClient("localhost", 1883, "client1");
         MQTTClient publisher = new MQTTClient("localhost", 1883, "client2");
@@ -38,6 +56,8 @@ public class MessageSendingTest {
         publisher.connect();
         subscriber.subscribe("mqtt");
 
+        verify(subscriptionMock, timeout(500)).subscriptionChanged(any());
+
         publisher.publish("mqtt", "Text content");
         Thread.sleep(2000);
         subscriber.disconnect();
@@ -45,6 +65,7 @@ public class MessageSendingTest {
         verify(callback).messageArrived(anyString(), any(MqttMessage.class));
     }
 
+    @Test
     public void amqpToAmqp() throws Exception {
         AMQPClient publisher = new AMQPClient();
         AMQPClient subscriber = new AMQPClient();
@@ -54,8 +75,7 @@ public class MessageSendingTest {
         subscriber.setCallback(callback);
         subscriber.subscribe("amqp");
 
-        // Allow subscriber time to complete subscription
-        Thread.sleep(200);
+        verify(subscriptionMock, timeout(500)).subscriptionChanged(any());
 
         publisher.publish("amqp", "Text content");
         publisher.disconnect();
@@ -64,6 +84,7 @@ public class MessageSendingTest {
         verify(callback).onReceive(any());
     }
 
+    @Test
     public void amqp091ToAmqp091() throws Exception {
         AMQP091Client subscriber = new AMQP091Client();
         AMQP091Client publisher = new AMQP091Client();
@@ -73,6 +94,8 @@ public class MessageSendingTest {
         subscriber.setConsumer(consumer);
         subscriber.subscribe("amqp091");
 
+        verify(subscriptionMock, timeout(500)).subscriptionChanged(any());
+
         publisher.publish("amqp091", "Text content");
         Thread.sleep(2000);
         subscriber.disconnect();
@@ -80,6 +103,7 @@ public class MessageSendingTest {
         verify(consumer).handleDelivery(any(), any(), any(), any());
     }
 
+    @Test
     public void wsnToWsn() throws InterruptedException {
         WSNClient subscriber = new WSNClient();
         WSNClient publisher = new WSNClient();
@@ -87,6 +111,7 @@ public class MessageSendingTest {
         subscriber.setCallback(callback);
         subscriber.subscribe("wsn");
 
+        verify(subscriptionMock, timeout(1000).atLeastOnce()).subscriptionChanged(any());
 
         publisher.publish("wsn", "Text content");
         Thread.sleep(2000);
@@ -94,6 +119,7 @@ public class MessageSendingTest {
         verify(callback).notify(any());
     }
 
+    @Test
     public void allToAll() throws Exception {
         int numberOfProtocols = 4;
         // WSN
@@ -130,6 +156,8 @@ public class MessageSendingTest {
         mqttClient.subscribe("all");
         amqp091Client.subscribe("all");
         amqpClient.subscribe("all");
+
+        verify(subscriptionMock, timeout(500).times(numberOfProtocols)).subscriptionChanged(any());
 
         // Publishing
         wsnClient.publish("all", "WSN");

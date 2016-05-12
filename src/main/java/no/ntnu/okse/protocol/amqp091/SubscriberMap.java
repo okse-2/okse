@@ -69,6 +69,18 @@ public class SubscriberMap {
         subscribers.add(subscriber);
     }
 
+    public void removeSubscriber(Subscriber subscriber) {
+        // Remove subscriber from topics
+        Client topicClient = new Client(subscriber);
+        topicSubscriberMap.remove(topicClient);
+        // Remove subscriber from subscribersMap
+        Client client = new Client(subscriber.getHost(), subscriber.getPort());
+        if(subscribersMap.containsKey(client)) {
+            List<Subscriber> subscribers = subscribersMap.get(client);
+            subscribers.remove(subscriber);
+        }
+    }
+
     /**
      * Get subscriber based on host, port and topic
      *
