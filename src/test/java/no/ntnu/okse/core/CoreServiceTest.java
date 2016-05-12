@@ -33,6 +33,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -55,7 +56,8 @@ public class CoreServiceTest {
         ArrayList<ProtocolServer> ps = (ArrayList<ProtocolServer>)field.get(cs);
         ps.clear();
         cs.protocolServersBooted = false;
-        cs.bootProtocolServers();
+        InputStream resourceAsStream = CoreService.class.getResourceAsStream("/config/protocolservers.xml");
+        cs.bootProtocolServers(resourceAsStream);
     }
 
     @BeforeMethod

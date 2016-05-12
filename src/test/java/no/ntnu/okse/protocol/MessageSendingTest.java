@@ -15,15 +15,21 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.URL;
+
 import static org.mockito.Mockito.*;
 
 @Test(singleThreaded = true)
 public class MessageSendingTest {
     @BeforeClass
-    public void setUp() throws InterruptedException {
+    public void setUp() throws InterruptedException, FileNotFoundException {
         CoreService cs = CoreService.getInstance();
         cs.registerService(MessageService.getInstance());
-        cs.bootProtocolServers();
+        InputStream resourceAsStream = CoreService.class.getResourceAsStream("/config/protocolservers.xml");
+        cs.bootProtocolServers(resourceAsStream);
         cs.boot();
         // Make sure servers have booted properly
         Thread.sleep(3000);
