@@ -1,15 +1,33 @@
-# Okse
+# Okse (Overordnet KommunikasjonsSystem for Etteretning)
 [![Build Status](https://travis-ci.org/okse-2/okse.svg?branch=master)](https://travis-ci.org/okse-2/okse)
 [![Coverage Status](https://coveralls.io/repos/github/okse-2/okse/badge.svg?branch=master)](https://coveralls.io/github/okse-2/okse?branch=master)
-## (Overordnet KommunikasjonsSystem for Etteretning)
 
-Bachelors degree project for FFI (Norwegian Defence Research Establishment)
+This software has been developed for [FFI](http://www.ffi.no/) by two separate
+teams as Bachelor's degree projects at [NTNU](https://www.ntnu.edu/), first
+during the spring of 2015 and then during the spring of 2016. For specific
+credits, see the AUTHORS file at the base of the project.
 
-OKSE is a publish-subscribe message broker with support for WS-Notification and AMQP (MQTT support is flagged as upcoming in later release).
+OKSE is a polyglot topic-based publish-subscribe message broker written in
+Java. OKSE functions as a protocol agnostic communication relay between clients
+of its supported protocols. Our broker additionally sports a topic mapping
+system. Through its configuration interface, the broker can be configured to
+distribute messages inbound on a given topic to a different one. Lastly, the
+broker contains support for registering as a subscriber on a remote
+WS-Notification broker and relaying messages to local subscribers.
 
-OKSE functions as a completely protocol agnostic communication relay, allowing messages published on a WS-Notification topic to be relayed to the corresponding AMQP queue.
+Currently supported protocols and libraries used to implement them are as
+follows:
 
-The main components of the OKSE brokering system are its CoreService, MessageService, TopicService and SubscriptionService. Extending the application with additional services is done with ease by extending the appropriate abstract class and registering it in `Application.java`. All services adhere to the singleton pattern using static references, so some of the fields and getInstance methods must be implemented manually for each new service.
+* WS-Notification ([WS-Nu](https://github.com/tOgg1/WS-Nu))
+* AMQP 1.0 ([Apache Qpid Proton](https://qpid.apache.org/proton/))
+* AMQP 0.9.1 ([Joram](http://joram.ow2.org/))
+* MQTT ([Moquette](https://github.com/andsel/moquette))
+* STOMP ([Stampy](https://github.com/mrstampy/Stampy))
 
-Extending with additional protocols is also possible, by extending the appropriate abstract class and implementing the needed static fields and invocation methods. Then its just a matter of registering the new protocol in `Application.java`
+The OKSE message broker has been written with extensibility in mind. Every
+protocol is integrated independently, only communicating with the core layer of
+OKSE. Implementing support for a new protocol comes down to implementing a
+shared protocol server interface and hooking the protocol server up to
+necessary functionality in the OKSE core.
 
+For further information, please consult our user manual and developer guide.
