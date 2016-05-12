@@ -136,7 +136,7 @@
         <dependency>
             <groupId>io.moquette</groupId>
             <artifactId>moquette-broker</artifactId>
-            <version>0.9-okse</version>
+            <version>0.9-okse2</version>
         </dependency>
         <dependency>
             <groupId>org.ntnunotif.wsnu</groupId>
