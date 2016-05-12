@@ -60,7 +60,7 @@ public class MessageSendingTest {
         publisher.connect();
         subscriber.subscribe("mqtt");
 
-        verify(subscriptionMock, timeout(500)).subscriptionChanged(any());
+        verify(subscriptionMock, timeout(500).atLeastOnce()).subscriptionChanged(any());
 
         publisher.publish("mqtt", "Text content");
         Thread.sleep(2000);
@@ -79,7 +79,7 @@ public class MessageSendingTest {
         subscriber.setCallback(callback);
         subscriber.subscribe("amqp");
 
-        verify(subscriptionMock, timeout(500)).subscriptionChanged(any());
+        verify(subscriptionMock, timeout(500).atLeastOnce()).subscriptionChanged(any());
 
         publisher.publish("amqp", "Text content");
         publisher.disconnect();
@@ -99,7 +99,7 @@ public class MessageSendingTest {
         subscriber.setConsumer(consumer);
         subscriber.subscribe("amqp091");
 
-        verify(subscriptionMock, timeout(500)).subscriptionChanged(any());
+        verify(subscriptionMock, timeout(500).atLeastOnce()).subscriptionChanged(any());
 
         publisher.publish("amqp091", "Text content");
         Thread.sleep(2000);
@@ -162,7 +162,7 @@ public class MessageSendingTest {
         amqp091Client.subscribe("all");
         amqpClient.subscribe("all");
 
-        verify(subscriptionMock, timeout(500).times(numberOfProtocols)).subscriptionChanged(any());
+        verify(subscriptionMock, timeout(500).atLeast(numberOfProtocols)).subscriptionChanged(any());
 
         // Publishing
         wsnClient.publish("all", "WSN");
