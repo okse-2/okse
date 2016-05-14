@@ -4,4 +4,5 @@
     <server type="amqp091" port="56720" />
     <server type="mqtt" />
     <server type="wsn" />
+    <server type="stomp" />
 </servers>
