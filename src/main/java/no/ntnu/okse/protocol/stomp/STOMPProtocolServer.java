@@ -1,16 +1,11 @@
 package no.ntnu.okse.protocol.stomp;
 
-import io.moquette.spi.impl.subscriptions.Subscription;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 
 public class STOMPProtocolServer extends AbstractProtocolServer {
-
-    private static final String DEFAULT_HOST = "0.0.0.0";
-    private static final Integer DEFAULT_PORT = 61613;
-
     private STOMPServer server;
 
     /**

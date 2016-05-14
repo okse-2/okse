@@ -12,15 +12,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * This class handles subscribers
- * It allows us to
- */
 public class STOMPSubscriptionManager implements SubscriptionChangeListener {
     private static Logger log;
     private SubscriptionService subscriptionService = null;
     public ConcurrentHashMap<String, Subscriber> localSubscriberMap;
-    private ConcurrentHashMap<String, Publisher> localPublisherMap;
 
     /**
      * Setup of variables
@@ -28,7 +23,6 @@ public class STOMPSubscriptionManager implements SubscriptionChangeListener {
     public STOMPSubscriptionManager () {
         log = Logger.getLogger(SubscriptionManager.class.getName());
         localSubscriberMap = new ConcurrentHashMap<>();
-        localPublisherMap= new ConcurrentHashMap<>();
     }
 
     /**

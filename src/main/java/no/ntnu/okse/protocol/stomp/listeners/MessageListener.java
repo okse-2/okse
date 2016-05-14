@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,22 +55,23 @@ public class MessageListener implements StampyMessageListener {
 
         TopicService.getInstance().addTopic(destination);
 
-        //TODO: Stomp uses mime types and can send any data. Needs to be handled, will send an email to FFI about this issue
         Message okseMsg = new Message((String)sendMessage.getBody(), destination, null, protocol);
 
-        Map<String, String> headers = sendMessage.getHeader().getHeaders();
+        Map<String, List<String>> headers = sendMessage.getHeader().getHeaders();
         Iterator it = headers.entrySet().iterator();
         while(it.hasNext()){
             Map.Entry pair = (Map.Entry) it.next();
             String key = (String) pair.getKey();
             //Skip the headers that are in the STOMP specification
+            //We do not skip content-type and content-length as we want to send these
+            //with the message when it comes back from OKSE
             switch(key){
                 case "destination":
                 case "receipt":
                 case "transaction":
                     break;
                 default:
-                    okseMsg.setAttribute(key, headers.get(key));
+                    okseMsg.setAttribute(key, String.join(",", headers.get(key)));
                     break;
             }
         }
