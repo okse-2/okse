@@ -46,4 +46,8 @@ public class MIMETypeTest {
         assertEquals(mediaType, mime.getMediaType());
     }
 
+    @Test
+    public void isValid(){
+        assertEquals(true, mime.isValid());
+    }
 }

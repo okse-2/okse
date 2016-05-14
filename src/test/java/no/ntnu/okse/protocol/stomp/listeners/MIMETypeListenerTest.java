@@ -5,7 +5,7 @@ import asia.stampy.common.gateway.AbstractStampyMessageGateway;
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
-import no.ntnu.okse.protocol.stomp.commons.CharsetException;
+import no.ntnu.okse.protocol.stomp.commons.MIMETypeException;
 import org.mockito.Mockito;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -52,7 +52,7 @@ public class MIMETypeListenerTest {
         try{
             listener.messageReceived(msg, hostPort);
             assertEquals(true, false);
-        }catch(CharsetException e){
+        }catch(MIMETypeException e){
             assertEquals(true, true);
         }
 
@@ -60,7 +60,7 @@ public class MIMETypeListenerTest {
         try{
             listener.messageReceived(validMsg, hostPort);
             assertEquals(true, true);
-        }catch(CharsetException e){
+        }catch(MIMETypeException e){
             assertEquals(true, false);
         }
 
@@ -68,7 +68,7 @@ public class MIMETypeListenerTest {
         try{
             listener.messageReceived(nullCharset, hostPort);
             assertEquals(true, true);
-        }catch(CharsetException e){
+        }catch(MIMETypeException e){
             assertEquals(true, false);
         }
     }

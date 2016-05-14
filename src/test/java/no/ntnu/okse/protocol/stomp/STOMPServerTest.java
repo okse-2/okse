@@ -3,10 +3,10 @@ package no.ntnu.okse.protocol.stomp;
 import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.interceptor.InterceptException;
+import asia.stampy.server.netty.ServerNettyMessageGateway;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
-import no.ntnu.okse.protocol.stomp.commons.STOMPGateway;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import static org.testng.AssertJUnit.assertEquals;
@@ -20,7 +20,7 @@ public class STOMPServerTest {
 
     private STOMPServer server_spy;
     private STOMPProtocolServer ps_spy;
-    private STOMPGateway gateway;
+    private ServerNettyMessageGateway gateway;
     private STOMPSubscriptionManager subManager_spy;
     private int port = 61634;
     private String host = "localhost";
@@ -29,6 +29,7 @@ public class STOMPServerTest {
     @BeforeMethod
     public void setUp() throws Exception {
         STOMPServer server = new STOMPServer();
+        port ++;
         STOMPProtocolServer ps = new STOMPProtocolServer(host, port);
         STOMPSubscriptionManager subManager = new STOMPSubscriptionManager();
 
