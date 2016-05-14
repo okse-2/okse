@@ -1,6 +1,6 @@
 package no.ntnu.okse.protocol.stomp;
 
-import asia.stampy.common.gateway.HostPort;
+import asia.stampy.common.gateway.*;
 import asia.stampy.common.heartbeat.HeartbeatContainer;
 import asia.stampy.common.heartbeat.StampyHeartbeatContainer;
 import asia.stampy.common.message.StampyMessage;
@@ -9,6 +9,7 @@ import asia.stampy.examples.system.server.SystemAcknowledgementHandler;
 import asia.stampy.server.listener.validate.ServerMessageValidationListener;
 import asia.stampy.server.listener.version.VersionListener;
 import asia.stampy.server.message.message.MessageMessage;
+import asia.stampy.server.netty.ServerNettyChannelHandler;
 import asia.stampy.server.netty.ServerNettyMessageGateway;
 import asia.stampy.server.netty.connect.NettyConnectResponseListener;
 import asia.stampy.server.netty.connect.NettyConnectStateListener;
@@ -20,9 +21,8 @@ import io.moquette.server.Server;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Subscriber;
-import no.ntnu.okse.protocol.stomp.commons.STOMPChannelHandler;
-import no.ntnu.okse.protocol.stomp.commons.STOMPGateway;
 import no.ntnu.okse.protocol.stomp.listeners.*;
+import no.ntnu.okse.protocol.stomp.listeners.ErrorInterceptor;
 import no.ntnu.okse.protocol.stomp.listeners.MessageListener;
 import org.apache.log4j.Logger;
 
@@ -31,7 +31,7 @@ import java.util.*;
 
 public class STOMPServer extends Server {
     private static STOMPSubscriptionManager subscriptionManager;
-    public STOMPGateway gateway;
+    public ServerNettyMessageGateway gateway;
     private static STOMPProtocolServer ps;
     private Logger log;
 
@@ -57,19 +57,20 @@ public class STOMPServer extends Server {
      * @param port the port to bind to
      * @return the gateway object
      */
-    private STOMPGateway initialize(String host, int port) {
+    private ServerNettyMessageGateway initialize(String host, int port) {
         StampyHeartbeatContainer heartbeatContainer = new HeartbeatContainer();
 
-//        ServerNettyMessageGateway gateway = new ServerNettyMessageGateway();
-        STOMPGateway gateway = new STOMPGateway();
+        ServerNettyMessageGateway gateway = new ServerNettyMessageGateway();
         gateway.setPort(port);
         gateway.setHost(host);
         gateway.setHeartbeat(1000);
         gateway.setAutoShutdown(true);
 
-//        ServerNettyChannelHandler channelHandler = new ServerNettyChannelHandler();
-        STOMPChannelHandler channelHandler = new STOMPChannelHandler();
-        channelHandler.setProtocolServer(ps);
+        ServerNettyChannelHandler channelHandler = new ServerNettyChannelHandler();
+        ErrorInterceptor errorInterceptor = new ErrorInterceptor();
+        channelHandler.setErrorInterceptor(errorInterceptor);
+        errorInterceptor.setProtocolServer(ps);
+
         channelHandler.setGateway(gateway);
         channelHandler.setHeartbeatContainer(heartbeatContainer);
 
@@ -189,7 +190,6 @@ public class STOMPServer extends Server {
 
         HashMap<String, Subscriber> subs = subscriptionManager.getAllSubscribersForTopic(message.getTopic());
 
-        Object[] keys = subs.keySet().toArray();
         Iterator it = subs.entrySet().iterator();
         while(it.hasNext()){
             Map.Entry pair = (Map.Entry) it.next();
@@ -247,7 +247,7 @@ public class STOMPServer extends Server {
         }
     }
 
-    public STOMPGateway getGateway() {
+    public ServerNettyMessageGateway getGateway() {
         return gateway;
     }
 }
