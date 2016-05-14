@@ -140,8 +140,18 @@
         </dependency>
         <dependency>
             <groupId>asia.stampy</groupId>
-            <artifactId>stampy-all</artifactId>
-            <version>1.0-RELEASE</version>
+            <artifactId>stampy-core</artifactId>
+            <version>1.1-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-NETTY-client-server-RI</artifactId>
+            <version>1.1-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-examples</artifactId>
+            <version>1.1-okse</version>
         </dependency>
         <dependency>
             <groupId>org.ntnunotif.wsnu</groupId>
@@ -167,12 +177,6 @@
             <groupId>org.ow2.joram</groupId>
             <artifactId>jndi-server</artifactId>
             <version>5.11.0-okse</version>
-        </dependency>
-
-        <dependency>
-            <groupId>asia.stampy</groupId>
-            <artifactId>stampy-core</artifactId>
-            <version>1.0-RELEASE</version>
         </dependency>
 
     </dependencies>
