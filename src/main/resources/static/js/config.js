@@ -43,6 +43,9 @@ var Config = (function($) {
             success: function(data) {
                 if(Object.keys(data).length > 0) $('#relays-table').html(createTableForAllRelays(data))
                 else $('#relays-table').html('<tr class="danger"><td colspan="2"><h4 class="text-center">No relays returned from ConfigController</h4></td></tr>')
+
+                unBindButtons();
+                bindButtons();
             },
             error: function(xhr, status, error) {
                 var data = JSON.parse(xhr.responseText)
@@ -91,10 +94,10 @@ var Config = (function($) {
 
     var unBindButtons = function() {
         $('.delete-mapping').off('click')
+        $('.delete-relay').off('click')
     }
 
     var bindButtons = function() {
-
         $('.delete-mapping').on('click', function(e) {
             e.preventDefault();
 
@@ -140,6 +143,7 @@ var Config = (function($) {
                     type: 'DELETE',
                     success: function(data) {
                         $.okseDebug.logPrint("[Debug][Config] Callback from server; relay deleted")
+                        updateRelays(currentWsnInstance())
                     },
                     error: function(xhr, status, error) {
                         $.okseDebug.logPrint("[Debug][Config] Unable to remove relay: " + relay)
@@ -149,11 +153,11 @@ var Config = (function($) {
                         var data = JSON.parse(xhr.responseText)
                         Main.error(xhr, status, error)
                         Main.displayMessage(data.message)
+                        updateRelays(currentWsnInstance())
                     }
                 });
             }
 
-            updateRelays(currentWsnInstance())
         });
 
     }
