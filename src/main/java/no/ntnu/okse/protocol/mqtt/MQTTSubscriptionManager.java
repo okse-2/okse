@@ -23,8 +23,7 @@ public class MQTTSubscriptionManager implements SubscriptionChangeListener {
     /**
      * Constructor
      * Instantiates the log
-     * Instantiates the local publisher map
-     * Instantiates the local subscriber map
+     * Instantiates the local subscriber list
      */
     public MQTTSubscriptionManager() {
         log = Logger.getLogger(MQTTSubscriptionManager.class.getName());

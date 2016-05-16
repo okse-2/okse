@@ -3,7 +3,7 @@ package no.ntnu.okse.protocol.mqtt;
 import no.ntnu.okse.core.subscription.Subscriber;
 
 /**
- * This class is used as a subscriber for MQTT
+ * This class is represents a subscriber for MQTT
  */
 public class MQTTSubscriber {
     String host;

@@ -238,7 +238,6 @@ public class MQTTServer extends Server {
      * @param message The OKSE message to use when creating MQTT message
      */
     protected PublishMessage createMQTTMessage(@NotNull Message message) {
-        System.out.println(message);
         PublishMessage msg = new PublishMessage();
         ByteBuffer payload = ByteBuffer.wrap(message.getMessage().getBytes());
 

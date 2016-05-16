@@ -5,9 +5,6 @@ import no.ntnu.okse.core.subscription.SubscriptionService;
 import no.ntnu.okse.protocol.AbstractProtocolServer;
 import org.apache.log4j.Logger;
 
-/**
- *
- */
 public class MQTTProtocolServer extends AbstractProtocolServer {
     protected static final String SERVERTYPE = "mqtt";
 
