@@ -1,9 +1,12 @@
 package no.ntnu.okse.protocol.amqp091;
 
+import no.ntnu.okse.core.event.SubscriptionChangeEvent;
+import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
+import no.ntnu.okse.core.topic.TopicService;
 import org.apache.log4j.Logger;
 import org.ow2.joram.mom.amqp.AMQPMessageListener;
 import org.ow2.joram.mom.amqp.messages.*;
@@ -13,7 +16,7 @@ import java.util.List;
 /**
  * AMQP 0.9.1 message listener
  */
-public class AMQP091MessageListener implements AMQPMessageListener {
+public class AMQP091MessageListener implements AMQPMessageListener, SubscriptionChangeListener {
 
     private static Logger log = Logger.getLogger(AMQP091MessageListener.class);
 
@@ -80,6 +83,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         String protocolServerType = amqpProtocolServer.getProtocolServerType();
 
         MessageService.getInstance().distributeMessage(new Message(message, topic, null, protocolServerType));
+        TopicService.getInstance().addTopic(topic);
         amqpProtocolServer.incrementTotalMessagesReceived();
         amqpProtocolServer.incrementTotalRequests();
     }
@@ -102,6 +106,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         );
         subscriberMap.putSubscriber(subscriber);
         subscriptionService.addSubscriber(subscriber);
+        TopicService.getInstance().addTopic(topic);
         amqpProtocolServer.incrementTotalRequests();
     }
 
@@ -120,6 +125,7 @@ public class AMQP091MessageListener implements AMQPMessageListener {
         String topic = unsubscribeMessage.getExchange();
 
         Subscriber subscriber = subscriberMap.getSubscriber(host, port, topic);
+        subscriberMap.removeSubscriber(subscriber);
         subscriptionService.removeSubscriber(subscriber);
         amqpProtocolServer.incrementTotalRequests();
     }
@@ -140,5 +146,14 @@ public class AMQP091MessageListener implements AMQPMessageListener {
      */
     public void setSubscriptionService(SubscriptionService subscriptionService) {
         this.subscriptionService = subscriptionService;
+    }
+
+    @Override
+    public void subscriptionChanged(SubscriptionChangeEvent e) {
+        if (e.getData().getOriginProtocol().equals(amqpProtocolServer.getProtocolServerType())) {
+            if (e.getType().equals(SubscriptionChangeEvent.Type.UNSUBSCRIBE)) {
+                subscriberMap.removeSubscriber(e.getData());
+            }
+        }
     }
 }
