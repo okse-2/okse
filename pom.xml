@@ -121,7 +121,7 @@
         <dependency>
             <groupId>org.apache.qpid</groupId>
             <artifactId>proton-j</artifactId>
-            <version>0.9.1</version>
+            <version>0.12.1</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -136,7 +136,7 @@
         <dependency>
             <groupId>io.moquette</groupId>
             <artifactId>moquette-broker</artifactId>
-            <version>0.9-okse</version>
+            <version>0.9-okse2</version>
         </dependency>
         <dependency>
             <groupId>org.ntnunotif.wsnu</groupId>
@@ -162,6 +162,31 @@
             <groupId>org.ow2.joram</groupId>
             <artifactId>jndi-server</artifactId>
             <version>5.11.0-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+            <version>3.1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http-jetty</artifactId>
+            <version>3.1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf.services.wsn</groupId>
+            <artifactId>cxf-services-wsn-core</artifactId>
+            <version>3.1.6</version>
         </dependency>
     </dependencies>
 
@@ -221,8 +246,12 @@
     <repositories>
         <repository>
             <id>okse-jenkins</id>
-            <url>http://okse.badjokecounter.press:8081/jenkins/plugin/repository/everything/</url>
+            <url>http://okse.kappa.me:8081/jenkins/plugin/repository/everything/</url>
         </repository>
+            <repository>
+                <id>Eclipse Paho Repo</id>
+                <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+            </repository>
     </repositories>
 
     <pluginRepositories>

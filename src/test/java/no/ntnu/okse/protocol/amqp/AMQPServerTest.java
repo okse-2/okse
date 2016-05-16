@@ -25,6 +25,7 @@
 package no.ntnu.okse.protocol.amqp;
 
 import no.ntnu.okse.core.messaging.Message;
+import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.amqp.transport.*;
@@ -37,6 +38,7 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.Map;
 
 import static org.testng.Assert.*;
 
@@ -163,6 +165,11 @@ public class AMQPServerTest {
 
         Delivery dlv = new Delivery() {
             @Override
+            public Record attachments() {
+                return null;
+            }
+
+            @Override
             public byte[] getTag() {
                 return new byte[0];
             }
@@ -170,6 +177,11 @@ public class AMQPServerTest {
             @Override
             public Link getLink() {
                 return new Link() {
+                    @Override
+                    public Record attachments() {
+                        return null;
+                    }
+
                     @Override
                     public String getName() {
                         return null;
@@ -211,6 +223,11 @@ public class AMQPServerTest {
                             @Override
                             public String getAddress() {
                                 return topic;
+                            }
+
+                            @Override
+                            public Target copy() {
+                                return null;
                             }
                         };
                     }
@@ -296,6 +313,21 @@ public class AMQPServerTest {
                     }
 
                     @Override
+                    public Map<Symbol, Object> getProperties() {
+                        return null;
+                    }
+
+                    @Override
+                    public void setProperties(Map<Symbol, Object> map) {
+
+                    }
+
+                    @Override
+                    public Map<Symbol, Object> getRemoteProperties() {
+                        return null;
+                    }
+
+                    @Override
                     public int drained() {
                         return 0;
                     }
@@ -313,6 +345,11 @@ public class AMQPServerTest {
                     @Override
                     public void detach() {
 
+                    }
+
+                    @Override
+                    public boolean detached() {
+                        return false;
                     }
 
                     @Override
@@ -460,6 +497,21 @@ public class AMQPServerTest {
             @Override
             public boolean isBuffered() {
                 return false;
+            }
+
+            @Override
+            public void setDefaultDeliveryState(DeliveryState deliveryState) {
+
+            }
+
+            @Override
+            public DeliveryState getDefaultDeliveryState() {
+                return null;
+            }
+
+            @Override
+            public void setMessageFormat(int i) {
+
             }
         };
 
@@ -671,6 +723,21 @@ public class AMQPServerTest {
             }
 
             @Override
+            public Map<Symbol, Object> getProperties() {
+                return null;
+            }
+
+            @Override
+            public void setProperties(Map<Symbol, Object> map) {
+
+            }
+
+            @Override
+            public Map<Symbol, Object> getRemoteProperties() {
+                return null;
+            }
+
+            @Override
             public int drained() {
                 return 0;
             }
@@ -688,6 +755,11 @@ public class AMQPServerTest {
             @Override
             public void detach() {
 
+            }
+
+            @Override
+            public boolean detached() {
+                return false;
             }
 
             @Override
@@ -737,6 +809,11 @@ public class AMQPServerTest {
 
             @Override
             public Object getContext() {
+                return null;
+            }
+
+            @Override
+            public Record attachments() {
                 return null;
             }
         }
@@ -833,6 +910,11 @@ public class AMQPServerTest {
                     public String getAddress() {
                         return address;
                     }
+
+                    @Override
+                    public Source copy() {
+                        return null;
+                    }
                 };
             }
 
@@ -842,6 +924,11 @@ public class AMQPServerTest {
                     @Override
                     public String getAddress() {
                         return address;
+                    }
+
+                    @Override
+                    public Target copy() {
+                        return null;
                     }
                 };
             }
@@ -927,6 +1014,21 @@ public class AMQPServerTest {
             }
 
             @Override
+            public Map<Symbol, Object> getProperties() {
+                return null;
+            }
+
+            @Override
+            public void setProperties(Map<Symbol, Object> map) {
+
+            }
+
+            @Override
+            public Map<Symbol, Object> getRemoteProperties() {
+                return null;
+            }
+
+            @Override
             public int drained() {
                 return 0;
             }
@@ -944,6 +1046,11 @@ public class AMQPServerTest {
             @Override
             public void detach() {
 
+            }
+
+            @Override
+            public boolean detached() {
+                return false;
             }
 
             @Override
@@ -993,6 +1100,11 @@ public class AMQPServerTest {
 
             @Override
             public Object getContext() {
+                return null;
+            }
+
+            @Override
+            public Record attachments() {
                 return null;
             }
         }
@@ -1061,6 +1173,11 @@ public class AMQPServerTest {
                     public String getAddress() {
                         return address;
                     }
+
+                    @Override
+                    public Target copy() {
+                        return null;
+                    }
                 };
             }
 
@@ -1145,6 +1262,21 @@ public class AMQPServerTest {
             }
 
             @Override
+            public Map<Symbol, Object> getProperties() {
+                return null;
+            }
+
+            @Override
+            public void setProperties(Map<Symbol, Object> map) {
+
+            }
+
+            @Override
+            public Map<Symbol, Object> getRemoteProperties() {
+                return null;
+            }
+
+            @Override
             public int drained() {
                 return 0;
             }
@@ -1162,6 +1294,11 @@ public class AMQPServerTest {
             @Override
             public void detach() {
 
+            }
+
+            @Override
+            public boolean detached() {
+                return false;
             }
 
             @Override
@@ -1221,6 +1358,11 @@ public class AMQPServerTest {
 
             @Override
             public Object getContext() {
+                return null;
+            }
+
+            @Override
+            public Record attachments() {
                 return null;
             }
         }
