@@ -5,7 +5,6 @@ import asia.stampy.common.gateway.HostPort;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.StompMessageType;
 import no.ntnu.okse.core.subscription.SubscriptionService;
-import no.ntnu.okse.protocol.stomp.STOMPProtocolServer;
 import no.ntnu.okse.protocol.stomp.STOMPSubscriptionManager;
 import org.mockito.Mockito;
 import org.testng.annotations.AfterTest;

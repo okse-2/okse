@@ -2,7 +2,6 @@ package no.ntnu.okse.protocol.stomp;
 
 import no.ntnu.okse.core.event.SubscriptionChangeEvent;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
-import no.ntnu.okse.core.subscription.Publisher;
 import no.ntnu.okse.core.subscription.Subscriber;
 import no.ntnu.okse.core.subscription.SubscriptionService;
 import org.apache.log4j.Logger;
