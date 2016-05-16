@@ -12,6 +12,11 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
     private MQTTServer server;
 
+    /**
+     * Constructor, sets the host and port to be used
+     * @param host the host to listen to
+     * @param port the port to listen to
+     */
     public MQTTProtocolServer(String host, Integer port) {
         this.host = host;
         this.port = port;
@@ -59,6 +64,10 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
 
     }
 
+    /**
+     * Method for determining if the server is running
+     * @return
+     */
     public boolean isRunning() {
         return _running;
     }

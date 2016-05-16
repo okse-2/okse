@@ -35,6 +35,9 @@ public class MQTTServer extends Server {
     private List<InterceptHandler> interceptHandlers;
     private MQTTSubscriptionManager subscriptionManager;
 
+    /**
+     * Class for the interceptors to be used in Moquette
+     */
     protected class MQTTListener extends AbstractInterceptHandler {
         @Override
         public void onPublish(InterceptPublishMessage message) {
@@ -55,26 +58,50 @@ public class MQTTServer extends Server {
         public void onDisconnect(InterceptDisconnectMessage message) {
             HandleDisconnect(message);
         }
-
     }
 
+    /**
+     * Constructor, sets the protocolServer and instantiates and adds the interceptors for Moquette messages.
+     * Also sets the host and port for the server to listen to
+     * @param ps the MQTTprotocolserver instance
+     * @param host the host to listen to
+     * @param port the port to listen to
+     */
+    public MQTTServer(MQTTProtocolServer ps, String host, int port) {
+        this.ps = ps;
+        protocolServerType = "mqtt";
+        interceptHandlers = new ArrayList<>();
+        interceptHandlers.add(createListeners());
+        config = new MemoryConfig(getConfig(host, port));
+    }
+
+    /**
+     * Starts the server
+     */
+    public void start() {
+        try {
+            startServer(config, interceptHandlers);
+        } catch (IOException e) {
+            ps.incrementTotalErrors();
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Method to handle a published message, one that comes from Moquette and should be forwarded to OKSE
+     * @param message the message to forward to OKSE
+     */
     void HandlePublish(InterceptPublishMessage message) {
         log.info("MQTT message received on topic: " + message.getTopicName() + " from ID: " + message.getClientID());
 
         Channel channel = getChannelByClientId(message.getClientID());
         if (channel == null)
             return;
-        int port = getPort(channel);
-        String host = getHost(channel);
-
-        //TODO: Finish discussing if we are going to pass in null instead of the publisher!
-        //Publisher pub = new Publisher( message.getTopicName(), host, port, protocolServerType);
-
-        //Adds the publisher to the subscriptionManager, if it is already added the subscription manager will not add it
-        //subscriptionManager.addPublisher(pub, message.getClientID());
 
         String topic = message.getTopicName();
         String payload = getPayload(message);
+
+        TopicService.getInstance().addTopic(topic);
 
         Message msg = new Message(payload, topic, null, protocolServerType);
         msg.setAttribute("qos", String.valueOf(message.getQos().byteValue()));
@@ -82,23 +109,11 @@ public class MQTTServer extends Server {
         ps.incrementTotalMessagesReceived();
     }
 
-    public MQTTServer(MQTTProtocolServer ps, String host, int port) {
-        this.ps = ps;
-        protocolServerType = "mqtt";
-        interceptHandlers = new ArrayList<>();
-        interceptHandlers.add(new MQTTListener());
-        config = new MemoryConfig(getConfig(host, port));
-    }
-
-    public void start() {
-        try {
-            startServer(config, interceptHandlers);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    void HandleUnsubscribe(InterceptUnsubscribeMessage message) {
+    /**
+     * Method to handle an unsubscribe message from Moquette.
+     * @param message the unsubscribe message that was sent to Moquette from a client
+     */
+    public void HandleUnsubscribe(InterceptUnsubscribeMessage message) {
         log.info("Client unsubscribed from: " + message.getTopicFilter() + "   ID: " + message.getClientID());
         Channel channel = getChannelByClientId(message.getClientID());
 
@@ -108,6 +123,10 @@ public class MQTTServer extends Server {
         subscriptionManager.removeSubscriber(host, port, topic);
     }
 
+    /**
+     * Handles a disconnect message
+     * @param message the disconnect message that was sent to Moquette from a client
+     */
     void HandleDisconnect(InterceptDisconnectMessage message) {
         log.info("Client disconnected ID: " + message.getClientID());
         String clientID = message.getClientID();
@@ -115,6 +134,10 @@ public class MQTTServer extends Server {
         subscriptionManager.removeSubscribers(clientID);
     }
 
+    /**
+     * Handles the subscribe message
+     * @param message the subscribe message that was sent to Moquette from a client
+     */
     void HandleSubscribe(InterceptSubscribeMessage message) {
         log.info("Client subscribed to: " + message.getTopicFilter() + "   ID: " + message.getClientID());
 
@@ -129,34 +152,61 @@ public class MQTTServer extends Server {
         subscriptionManager.addSubscriber(host, port, message.getTopicFilter(), message.getClientID());
     }
 
+    /**
+     * Sends a message into the OKSE core
+     * @param msg the OKSE message to send into the core
+     */
     public void sendMessageToOKSE(Message msg) {
         MessageService.getInstance().distributeMessage(msg);
     }
 
+    /**
+     * This method returns the payload of a publish message
+     * @param message the publish message that was sent to Moquette from, a client.
+     * @return the payload of the message
+     */
     private String getPayload(InterceptPublishMessage message) {
         ByteBuffer buffer = message.getPayload();
         String payload = new String(buffer.array(), buffer.position(), buffer.limit());
         return payload;
     }
 
+    /**
+     * This method returns the port from a channel
+     * @param channel the channel to return the port for
+     * @return the port number of the channel
+     */
     private int getPort(Channel channel) {
         return ((InetSocketAddress) channel.remoteAddress()).getPort();
     }
 
+    /**
+     * This method returns the host from a channel
+     * @param channel the channel to return the host for
+     * @return the host of the channel
+     */
     private String getHost(Channel channel) {
         return ((InetSocketAddress) channel.remoteAddress()).getHostString();
     }
 
+    /**
+     * Sets the subscription manager
+     * @param subscriptionManager the MQTT subscription manager instance
+     */
     public void setSubscriptionManager(MQTTSubscriptionManager subscriptionManager) {
         this.subscriptionManager = subscriptionManager;
     }
 
+    /**
+     * Returns the config of the server
+     * @param host the host of the server
+     * @param port the port of the server
+     * @return returns a Proprties object of the config of the server
+     */
     private Properties getConfig(String host, int port) {
         Properties properties = new Properties();
         properties.setProperty(BrokerConstants.HOST_PROPERTY_NAME, host);
         properties.setProperty(BrokerConstants.PORT_PROPERTY_NAME, "" + port);
-        // Set random port for websockets instead of 8080
-        properties.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, "25342");
         // Disable automatic publishing (handled by the broker instead)
         properties.setProperty(BrokerConstants.PUBLISH_TO_CONSUMERS, "false");
         return properties;
@@ -200,5 +250,9 @@ public class MQTTServer extends Server {
         else
             msg.setQos(AbstractMessage.QOSType.valueOf(Byte.valueOf(message.getAttribute("qos"))));
         return msg;
+    }
+
+    public MQTTListener createListeners(){
+        return new MQTTListener();
     }
 }
