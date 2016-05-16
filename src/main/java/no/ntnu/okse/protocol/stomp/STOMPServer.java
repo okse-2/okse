@@ -9,6 +9,7 @@ import asia.stampy.examples.system.server.SystemAcknowledgementHandler;
 import asia.stampy.server.listener.validate.ServerMessageValidationListener;
 import asia.stampy.server.listener.version.VersionListener;
 import asia.stampy.server.message.message.MessageMessage;
+import asia.stampy.server.netty.Boilerplate;
 import asia.stampy.server.netty.ServerNettyChannelHandler;
 import asia.stampy.server.netty.ServerNettyMessageGateway;
 import asia.stampy.server.netty.connect.NettyConnectResponseListener;
@@ -58,68 +59,21 @@ public class STOMPServer extends Server {
      * @return the gateway object
      */
     private ServerNettyMessageGateway initialize(String host, int port) {
-        StampyHeartbeatContainer heartbeatContainer = new HeartbeatContainer();
-
         ServerNettyMessageGateway gateway = new ServerNettyMessageGateway();
-        gateway.setPort(port);
-        gateway.setHost(host);
-        gateway.setHeartbeat(1000);
-        gateway.setAutoShutdown(true);
 
-        ServerNettyChannelHandler channelHandler = new ServerNettyChannelHandler();
         ErrorInterceptor errorInterceptor = new ErrorInterceptor();
-        channelHandler.setErrorInterceptor(errorInterceptor);
         errorInterceptor.setProtocolServer(ps);
 
-        channelHandler.setGateway(gateway);
-        channelHandler.setHeartbeatContainer(heartbeatContainer);
-
-        gateway.addMessageListener(new IDontNeedSecurity());
-
-        gateway.addMessageListener(new ServerMessageValidationListener());
-
-        gateway.addMessageListener(new VersionListener());
-
-        //It seems that this listener needs to be placed here for some odd reason
-        //TODO: Investigate further, want to move this to the addGatewayListenersAndHandlers method
         DisconnectListener disconnectListener = new DisconnectListener();
-
         disconnectListener.setSubscriptionManager(subscriptionManager);
         disconnectListener.setGateway(gateway);
-        gateway.addMessageListener(disconnectListener);
-
-
-        NettyConnectStateListener connect = new NettyConnectStateListener();
-        connect.setGateway(gateway);
-        gateway.addMessageListener(connect);
-
-        NettyHeartbeatListener heartbeat = new NettyHeartbeatListener();
-        heartbeat.setHeartbeatContainer(heartbeatContainer);
-        heartbeat.setGateway(gateway);
-        gateway.addMessageListener(heartbeat);
-
-        NettyTransactionListener transaction = new NettyTransactionListener();
-        transaction.setGateway(gateway);
-        gateway.addMessageListener(transaction);
 
         SystemAcknowledgementHandler sys = new SystemAcknowledgementHandler();
 
-        NettyAcknowledgementListenerAndInterceptor acknowledgement = new NettyAcknowledgementListenerAndInterceptor();
-        acknowledgement.setGateway(gateway);
-        acknowledgement.setAckTimeoutMillis(200);
-        gateway.addMessageListener(acknowledgement);
-        gateway.addOutgoingMessageInterceptor(acknowledgement);
+        gateway.addMessageListener(new IDontNeedSecurity());
 
-        NettyReceiptListener receipt = new NettyReceiptListener();
-        receipt.setGateway(gateway);
-        gateway.addMessageListener(receipt);
-
-        NettyConnectResponseListener connectResponse = new NettyConnectResponseListener();
-        connectResponse.setGateway(gateway);
-        gateway.addMessageListener(connectResponse);
-
-        acknowledgement.setHandler(sys);
-        gateway.setHandler(channelHandler);
+        Boilerplate b = new Boilerplate();
+        b.init(gateway, host, port, errorInterceptor, disconnectListener, sys);
 
         addGatewayListenersAndHandlers(gateway);
 
