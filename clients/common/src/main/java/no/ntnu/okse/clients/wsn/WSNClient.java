@@ -25,6 +25,7 @@ import org.apache.cxf.wsn.client.Consumer;
 import org.apache.cxf.wsn.client.Subscription;
 import org.oasis_open.docs.wsn.b_2.NotificationMessageHolderType;
 
+import javax.wsdl.Service;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import java.util.HashMap;
