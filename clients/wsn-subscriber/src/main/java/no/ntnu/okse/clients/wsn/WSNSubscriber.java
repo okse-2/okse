@@ -30,7 +30,6 @@ public class WSNSubscriber extends SubscribeClient {
 
     protected void listen() {
         client.setCallback(new WSNConsumer());
-        System.out.println("Listening for messages...");
     }
 
     private class WSNConsumer implements Consumer.Callback {

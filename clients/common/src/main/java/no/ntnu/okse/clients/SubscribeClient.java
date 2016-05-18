@@ -14,6 +14,7 @@ public abstract class SubscribeClient extends CommandClient {
                 client.disconnect();
             }
         });
+        System.out.println("Listening for messages...");
         listen();
     }
 

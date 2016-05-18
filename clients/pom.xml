@@ -10,6 +10,8 @@
         <module>wsn-publisher</module>
         <module>common</module>
         <module>wsn-subscriber</module>
+        <module>mqtt-subscribe</module>
+        <module>mqtt-publisher</module>
     </modules>
     <packaging>pom</packaging>
 
