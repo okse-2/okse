@@ -78,7 +78,7 @@ public final class WSNClient implements TestClient {
     public void subscribe(String topic, String host, int port) {
         log.debug("Subscribing to topic: " + topic);
         Consumer consumer = new Consumer(callback,
-                String.format("http://%s:%d/MyConsumer", host, port));
+                String.format("http://%s:%d/Consume/%s", host, port, topic));
         consumers.put(topic, consumer);
         try {
             subscriptions.put(topic, notificationBroker.subscribe(consumer, topic));

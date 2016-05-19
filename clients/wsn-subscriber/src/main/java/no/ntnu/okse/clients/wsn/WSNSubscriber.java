@@ -12,6 +12,12 @@ public class WSNSubscriber extends SubscribeClient {
     @Parameter(names = {"--port", "-p"}, description = "Port")
     public int port = 61000;
 
+    @Parameter(names = {"--client-host", "-ch"}, description = "Client Port")
+    public String clientHost = "localhost";
+
+    @Parameter(names = {"--client-port", "-cp"}, description = "Client Port")
+    public int clientPort = 9000;
+
     private WSNClient client;
 
     public static void main(String[] args) {
@@ -27,6 +33,10 @@ public class WSNSubscriber extends SubscribeClient {
 
     protected TestClient getClient() {
         return client;
+    }
+
+    public void subscribe(String topic) {
+        client.subscribe(topic, clientHost, clientPort);
     }
 
     private class WSNConsumer implements Consumer.Callback {
