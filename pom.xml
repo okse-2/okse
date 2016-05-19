@@ -8,7 +8,7 @@
     <version>1.0.0</version>
     <modules>
         <module>clients</module>
-        <module>okse</module>
+        <module>broker</module>
     </modules>
     <packaging>pom</packaging>
 

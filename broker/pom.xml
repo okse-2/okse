@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>no.ntnu</groupId>
-    <artifactId>okse</artifactId>
+    <artifactId>okse-broker</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>okse</name>
+    <name>OKSE Broker</name>
     <description>Web server for the okse project</description>
 
     <parent>
