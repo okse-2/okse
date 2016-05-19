@@ -115,34 +115,4 @@ public class MQTTClient implements TestClient {
     public void setCallback(MqttCallback callback) {
         mqttClient.setCallback(callback);
     }
-
-    /**
-     * Start an MQTT client which subscribes to "example" topic
-     *
-     * @param args
-     */
-    public static void main(String[] args) {
-        MQTTClient client = new MQTTClient();
-        client.connect();
-        client.setCallback(new ExampleCallback());
-        client.subscribe("example");
-        client.publish("example", "Text content");
-    }
-
-    /**
-     * Example callback class
-     */
-    private static class ExampleCallback implements MqttCallback {
-        public void connectionLost(Throwable throwable) {
-            log.warn("Connection lost", throwable);
-        }
-
-        public void messageArrived(String topic, MqttMessage message) {
-            System.out.println(String.format("Message arrived on topic %s with content %s", topic, message));
-        }
-
-        public void deliveryComplete(IMqttDeliveryToken token) {
-            log.debug("Message delivered");
-        }
-    }
 }

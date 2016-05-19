@@ -49,7 +49,6 @@ public final class WSNClient implements TestClient {
         subscriptions = new HashMap<>();
         consumers = new HashMap<>();
         notificationBroker = new TestNotificationBroker(String.format("http://%s:%d", host, port));
-        callback = new ExampleConsumer();
     }
 
     public static void main(String[] args) throws Exception {
@@ -124,15 +123,5 @@ public final class WSNClient implements TestClient {
 
     public void setCallback(Consumer.Callback callback) {
         this.callback = callback;
-    }
-
-    private class ExampleConsumer implements Consumer.Callback {
-        public void notify(NotificationMessageHolderType message) {
-            Object o = message.getMessage().getAny();
-            System.out.println(message.getMessage().getAny());
-            if (o instanceof Element) {
-                System.out.println(((Element)o).getTextContent());
-            }
-        }
     }
 }

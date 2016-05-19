@@ -136,34 +136,4 @@ public class AMQP091Client implements TestClient {
             log.error("Failed to publish", e);
         }
     }
-
-    /**
-     * Create a simple test client subscribing to "example" topic
-     *
-     * @param args
-     */
-    public static void main(String[] args) {
-        AMQP091Client client = new AMQP091Client();
-        client.connect();
-        // Callback
-        client.setConsumer(new ExampleConsumer(client.getChannel()));
-        client.subscribe("example");
-        client.publish("example", "Hello, World");
-    }
-
-    /**
-     * Example consumer class
-     */
-    private static class ExampleConsumer extends DefaultConsumer {
-        public ExampleConsumer(Channel channel) {
-            super(channel);
-        }
-
-        @Override
-        public void handleDelivery(String consumerTag, Envelope envelope,
-                AMQP.BasicProperties properties, byte[] body) throws IOException {
-            String message = new String(body, "UTF-8");
-            System.out.println(" [x] Received '" + message + "'");
-        }
-    }
 }
