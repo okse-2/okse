@@ -75,7 +75,7 @@ okse.db
 #OKSE
 logs/
 *.log
-config/
+broker/config/
 
 #Moquette
 moquette_store.*
