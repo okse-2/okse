@@ -66,6 +66,8 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import javax.xml.ws.wsaddressing.W3CEndpointReferenceBuilder;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 @WebService(targetNamespace = "http://docs.oasis-open.org/wsn/brw-2", name = "NotificationBroker")
@@ -509,17 +511,12 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
 
         String requestAddress = "";
         Integer port = 80;
-        String stripped = endpointReference.replace("http://", "").replace("https://", "");
-        if (stripped.contains(":")) {
-            String[] components = stripped.split(":");
-            try {
-                port = Integer.parseInt(components[components.length - 1]);
-                requestAddress = components[components.length - 2];
-            } catch (Exception e) {
-                log.error("Failed to parse endpointReference");
-            }
-        } else {
-            requestAddress = stripped;
+        try {
+            URL url  = new URL(endpointReference);
+            requestAddress = url.getHost();
+            port = url.getPort();
+        } catch (MalformedURLException e) {
+            log.error("Failed to parse endpointReference");
         }
 
         FilterType filters = subscribeRequest.getFilter();
@@ -753,17 +750,12 @@ public class WSNCommandProxy extends AbstractNotificationBroker {
 
         String requestAddress = "";
         Integer port = 80;
-        String stripped = endpointReference.replace("http://", "").replace("https://", "");
-        if (stripped.contains(":")) {
-            String[] components = stripped.split(":");
-            try {
-                port = Integer.parseInt(components[components.length - 1]);
-                requestAddress = components[components.length - 2];
-            } catch (Exception e) {
-                log.error("Failed to parse endpointReference");
-            }
-        } else {
-            requestAddress = stripped;
+        try {
+            URL url  = new URL(endpointReference);
+            requestAddress = url.getHost();
+            port = url.getPort();
+        } catch (MalformedURLException e) {
+            log.error("Failed to parse endpointReference");
         }
 
         List<TopicExpressionType> topics = registerPublisherRequest.getTopic();
