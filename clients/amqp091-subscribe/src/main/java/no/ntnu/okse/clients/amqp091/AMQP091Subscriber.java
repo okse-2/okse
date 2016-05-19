@@ -23,9 +23,6 @@ public class AMQP091Subscriber extends SubscribeClient {
         client.run();
     }
 
-    protected void listen() {
-    }
-
     protected void createClient() {
         client = new AMQP091Client(host, port);
         client.setConsumer(new Callback(client.getChannel()));

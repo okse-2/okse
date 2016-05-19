@@ -22,14 +22,11 @@ public class WSNSubscriber extends SubscribeClient {
 
     protected void createClient() {
         client = new WSNClient(host, port);
+        client.setCallback(new WSNConsumer());
     }
 
     protected TestClient getClient() {
         return client;
-    }
-
-    protected void listen() {
-        client.setCallback(new WSNConsumer());
     }
 
     private class WSNConsumer implements Consumer.Callback {

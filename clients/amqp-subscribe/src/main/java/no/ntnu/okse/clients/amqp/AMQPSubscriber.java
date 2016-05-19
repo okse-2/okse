@@ -19,14 +19,11 @@ public class AMQPSubscriber extends SubscribeClient {
         client.run();
     }
 
-    protected void listen() {
-        client.setCallback(new Callback());
-    }
-
     protected void createClient() {
         client = new AMQPClient();
         // Prevent subscriber from timing out
         client.setTimeout(-1L);
+        client.setCallback(new Callback());
     }
 
     protected TestClient getClient() {

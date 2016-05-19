@@ -15,8 +15,5 @@ public abstract class SubscribeClient extends CommandClient {
             }
         });
         System.out.println("Listening for messages...");
-        listen();
     }
-
-    protected abstract void listen();
 }

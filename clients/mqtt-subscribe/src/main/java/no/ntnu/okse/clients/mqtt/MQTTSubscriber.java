@@ -24,13 +24,9 @@ public class MQTTSubscriber extends SubscribeClient {
         client.run();
     }
 
-
-    protected void listen() {
-        client.setCallback(new Callback());
-    }
-
     protected void createClient() {
         client = new MQTTClient(host, port, "MQTTSubscriber");
+        client.setCallback(new Callback());
     }
 
     protected TestClient getClient() {
