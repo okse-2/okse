@@ -12,6 +12,8 @@
         <module>wsn-subscriber</module>
         <module>mqtt-subscribe</module>
         <module>mqtt-publisher</module>
+        <module>amqp091-subscribe</module>
+        <module>amqp091-publisher</module>
     </modules>
     <packaging>pom</packaging>
 
