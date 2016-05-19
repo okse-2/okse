@@ -153,6 +153,21 @@
             <artifactId>clients-common</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-core</artifactId>
+            <version>1.1-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-NETTY-client-server-RI</artifactId>
+            <version>1.1-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-examples</artifactId>
+            <version>1.1-okse</version>
+        </dependency>
     </dependencies>
 
     <build>
