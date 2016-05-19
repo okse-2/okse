@@ -97,13 +97,7 @@ public class Application {
         cs.registerService(TopicService.getInstance());
         cs.registerService(MessageService.getInstance());
         cs.registerService(SubscriptionService.getInstance());
-
-        /* REGISTER PROTOCOL SERVERS HERE */
-//        cs.addProtocolServer(WSNotificationServer.getInstance());
-        //cs.addProtocolServer(DummyProtocolServer.getInstance());    // Example ProtocolServer
-//        cs.addProtocolServer(AMQProtocolServer.getInstance());
-//        cs.addProtocolServer(MQTTProtocolServer.getInstance());
-
+        
         // Start the admin console
         webserver.run();
 
