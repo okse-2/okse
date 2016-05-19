@@ -25,6 +25,8 @@ public class AMQPSubscriber extends SubscribeClient {
 
     protected void createClient() {
         client = new AMQPClient();
+        // Prevent subscriber from timing out
+        client.setTimeout(-1L);
     }
 
     protected TestClient getClient() {

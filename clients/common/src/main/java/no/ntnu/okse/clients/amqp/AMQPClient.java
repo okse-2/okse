@@ -32,7 +32,7 @@ public class AMQPClient implements TestClient {
         this.host = host;
         this.port = port;
         messenger = Messenger.Factory.create();
-        messenger.setTimeout(10000);
+        setTimeout(10000);
         listener = new AMQPClientListener();
     }
 
@@ -85,6 +85,10 @@ public class AMQPClient implements TestClient {
 
     public void setCallback(AMQPCallback callback) {
         this.callback = callback;
+    }
+
+    public void setTimeout(long timeout) {
+        messenger.setTimeout(timeout);
     }
 
     private Message createMessage(String topic, String content) {
