@@ -1,23 +1,12 @@
 package no.ntnu.okse.protocol.stomp;
 
 import asia.stampy.common.gateway.*;
-import asia.stampy.common.heartbeat.HeartbeatContainer;
-import asia.stampy.common.heartbeat.StampyHeartbeatContainer;
 import asia.stampy.common.message.StampyMessage;
 import asia.stampy.common.message.interceptor.InterceptException;
 import asia.stampy.examples.system.server.SystemAcknowledgementHandler;
-import asia.stampy.server.listener.validate.ServerMessageValidationListener;
-import asia.stampy.server.listener.version.VersionListener;
 import asia.stampy.server.message.message.MessageMessage;
 import asia.stampy.server.netty.Boilerplate;
-import asia.stampy.server.netty.ServerNettyChannelHandler;
 import asia.stampy.server.netty.ServerNettyMessageGateway;
-import asia.stampy.server.netty.connect.NettyConnectResponseListener;
-import asia.stampy.server.netty.connect.NettyConnectStateListener;
-import asia.stampy.server.netty.heartbeat.NettyHeartbeatListener;
-import asia.stampy.server.netty.receipt.NettyReceiptListener;
-import asia.stampy.server.netty.subscription.NettyAcknowledgementListenerAndInterceptor;
-import asia.stampy.server.netty.transaction.NettyTransactionListener;
 import io.moquette.server.Server;
 import no.ntnu.okse.core.messaging.Message;
 import no.ntnu.okse.core.messaging.MessageService;
