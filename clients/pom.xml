@@ -10,11 +10,11 @@
         <module>wsn-publisher</module>
         <module>common</module>
         <module>wsn-subscriber</module>
-        <module>mqtt-subscribe</module>
+        <module>mqtt-subscriber</module>
         <module>mqtt-publisher</module>
         <module>amqp-publisher</module>
-        <module>amqp-subscribe</module>
-        <module>amqp091-subscribe</module>
+        <module>amqp-subscriber</module>
+        <module>amqp091-subscriber</module>
         <module>amqp091-publisher</module>
     </modules>
     <packaging>pom</packaging>
