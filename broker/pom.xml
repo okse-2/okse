@@ -149,6 +149,21 @@
             <version>0.4-okse</version>
         </dependency>
         <dependency>
+            <groupId>org.ow2.joram</groupId>
+            <artifactId>joram-mom-amqp</artifactId>
+            <version>5.11.0-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.joram</groupId>
+            <artifactId>joram-mom-core</artifactId>
+            <version>5.11.0-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.joram</groupId>
+            <artifactId>jndi-server</artifactId>
+            <version>5.11.0-okse</version>
+        </dependency>
+        <dependency>
             <groupId>no.ntnu</groupId>
             <artifactId>clients-common</artifactId>
             <version>1.0.0</version>
