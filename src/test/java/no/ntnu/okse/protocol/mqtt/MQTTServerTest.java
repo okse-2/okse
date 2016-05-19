@@ -1,5 +1,6 @@
 package no.ntnu.okse.protocol.mqtt;
 
+import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
@@ -10,7 +11,11 @@ import io.moquette.spi.impl.subscriptions.Subscription;
 import io.netty.channel.Channel;
 import no.ntnu.okse.core.messaging.Message;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.OngoingStubbing;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -82,6 +87,100 @@ public class MQTTServerTest {
         assertEquals(expectedMsg.getPayload(), actualMsg.getPayload());
         assertEquals(expectedMsg.getTopicName(), actualMsg.getTopicName());
     }
+
+    @Test
+    public void createMQTTMessageQoSNotNullTest() {
+        MQTTServer mqtt = getInstance();
+        Message message = new Message("Payload", "testing", null, "MQTT");
+        message.setAttribute("qos", "2");
+
+        PublishMessage expectedMsg = new PublishMessage();
+        ByteBuffer payload = ByteBuffer.wrap("Payload".getBytes());
+        expectedMsg.setPayload(payload);
+        expectedMsg.setTopicName("testing");
+        expectedMsg.setQos(AbstractMessage.QOSType.MOST_ONE);
+
+        PublishMessage actualMsg = mqtt.createMQTTMessage(message);
+        assertEquals(expectedMsg.getPayload(), actualMsg.getPayload());
+        assertEquals(expectedMsg.getTopicName(), actualMsg.getTopicName());
+    }
+
+    @Test
+    public void createListeners(){
+        MQTTServer mqtt = getInstance();
+        MQTTServer mqtt_spy = Mockito.spy(mqtt);
+
+        MQTTServer.MQTTListener listenerClass = mqtt_spy.createListeners();
+        assertEquals(true, AbstractInterceptHandler.class.isAssignableFrom(listenerClass.getClass()));
+    }
+
+    @Test
+    public void testListenerPublish(){
+        MQTTServer mqtt = getInstance();
+        MQTTServer mqtt_spy = Mockito.spy(mqtt);
+
+        MQTTServer.MQTTListener listenerClass = mqtt_spy.createListeners();
+
+
+        InterceptPublishMessage msg = new InterceptPublishMessage(new PublishMessage(), "testID", "username");
+        listenerClass.onPublish(msg);
+
+        Mockito.when(mqtt_spy.createListeners()).thenReturn(listenerClass);
+        Mockito.verify(mqtt_spy).HandlePublish(msg);
+    }
+
+    @Test
+    public void testListenerSubscribe(){
+        MQTTServer mqtt = getInstance();
+        MQTTServer mqtt_spy = Mockito.spy(mqtt);
+
+        MQTTServer.MQTTListener listenerClass = mqtt_spy.createListeners();
+
+        InterceptSubscribeMessage msg = new InterceptSubscribeMessage(new Subscription("testID", "testTopic", AbstractMessage.QOSType.EXACTLY_ONCE), "username");
+        listenerClass.onSubscribe(msg);
+
+        Mockito.when(mqtt_spy.createListeners()).thenReturn(listenerClass);
+        Mockito.verify(mqtt_spy).HandleSubscribe(msg);
+    }
+
+    @Test
+    public void testListenerUnsubscribe(){
+        MQTTServer mqtt = getInstance();
+        MQTTServer mqtt_spy = Mockito.spy(mqtt);
+
+
+
+        MQTTServer.MQTTListener listenerClass = mqtt_spy.createListeners();
+
+        InterceptUnsubscribeMessage msg = new InterceptUnsubscribeMessage("testTopic", "testID", "username");
+        Mockito.doAnswer(new Answer<Void>(){
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                return null;
+            }
+        }).when(mqtt_spy).HandleUnsubscribe(msg);
+
+        listenerClass.onUnsubscribe(msg);
+
+
+        Mockito.when(mqtt_spy.createListeners()).thenReturn(listenerClass);
+        Mockito.verify(mqtt_spy).HandleUnsubscribe(msg);
+    }
+
+    @Test
+    public void testListenerDisconnect(){
+        MQTTServer mqtt = getInstance();
+        MQTTServer mqtt_spy = Mockito.spy(mqtt);
+
+        MQTTServer.MQTTListener listenerClass = mqtt_spy.createListeners();
+
+        InterceptDisconnectMessage msg = new InterceptDisconnectMessage("testID", "username");
+        listenerClass.onDisconnect(msg);
+
+        Mockito.when(mqtt_spy.createListeners()).thenReturn(listenerClass);
+        Mockito.verify(mqtt_spy).HandleDisconnect(msg);
+    }
+
 
     @Test
     public void HandlePublish() {
