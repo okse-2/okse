@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Properties;
 
 public class MQTTServer extends Server {
-
     private static Logger log = Logger.getLogger(Server.class);
     private static String protocolServerType;
     private MQTTProtocolServer ps;

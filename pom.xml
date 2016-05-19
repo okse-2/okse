@@ -139,6 +139,21 @@
             <version>0.9-okse2</version>
         </dependency>
         <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-core</artifactId>
+            <version>1.1-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-NETTY-client-server-RI</artifactId>
+            <version>1.1-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-examples</artifactId>
+            <version>1.1-okse</version>
+        </dependency>
+        <dependency>
             <groupId>org.ntnunotif.wsnu</groupId>
             <artifactId>wsnu-base</artifactId>
             <version>0.4-okse</version>

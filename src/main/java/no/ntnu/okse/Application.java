@@ -97,7 +97,7 @@ public class Application {
         cs.registerService(TopicService.getInstance());
         cs.registerService(MessageService.getInstance());
         cs.registerService(SubscriptionService.getInstance());
-
+        
         // Start the admin console
         webserver.run();
 
