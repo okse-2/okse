@@ -1,6 +1,5 @@
 package no.ntnu.okse.clients.mqtt;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import no.ntnu.okse.clients.SubscribeClient;
 import no.ntnu.okse.clients.TestClient;
@@ -19,9 +18,7 @@ public class MQTTSubscriber extends SubscribeClient {
     private static Logger log = Logger.getLogger(MQTTSubscriber.class);
 
     public static void main(String[] args) {
-        MQTTSubscriber client = new MQTTSubscriber();
-        new JCommander(client, args);
-        client.run();
+        launch(new MQTTSubscriber(), args);
     }
 
     protected void createClient() {

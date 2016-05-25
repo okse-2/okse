@@ -1,6 +1,5 @@
 package no.ntnu.okse.clients.amqp091;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -18,9 +17,7 @@ public class AMQP091Subscriber extends SubscribeClient {
     private AMQP091Client client;
 
     public static void main(String[] args) {
-        AMQP091Subscriber client = new AMQP091Subscriber();
-        new JCommander(client, args);
-        client.run();
+        launch(new AMQP091Subscriber(), args);
     }
 
     protected void createClient() {
