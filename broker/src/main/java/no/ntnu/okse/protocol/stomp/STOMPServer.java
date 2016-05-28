@@ -18,18 +18,25 @@ import org.apache.log4j.Logger;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class STOMPServer extends Server {
     private static STOMPSubscriptionManager subscriptionManager;
     public ServerNettyMessageGateway gateway;
     private static STOMPProtocolServer ps;
     private Logger log;
+    private LinkedBlockingQueue<Message> messageQueue;
+    private Thread messageSenderThread;
+    private AtomicBoolean running;
 
     /**
      * Sets up the logger when we create a new instance of this class
      */
     public STOMPServer(){
         log = Logger.getLogger(STOMPProtocolServer.class.getName());
+        messageQueue = new LinkedBlockingQueue<>();
+        running = new AtomicBoolean(false);
     }
 
     /**
@@ -112,8 +119,24 @@ public class STOMPServer extends Server {
      * @throws Exception
      */
     public void init(String host, int port) throws Exception {
+        if(!running.compareAndSet(false, true))
+            return;
+
         gateway = initialize(host, port);
         gateway.connect();
+
+        messageSenderThread = new Thread(() -> {
+            while(running.get()) {
+                try {
+                    Message message = messageQueue.take();
+                    sendMessage(message);
+                } catch (InterruptedException e) {
+                    log.info("STOMP message queue interrupted, stopping?");
+                }
+
+            }
+        });
+        messageSenderThread.start();
     }
 
     /**
@@ -125,12 +148,18 @@ public class STOMPServer extends Server {
     }
 
     /**
+     * Add a message to the message queue
+     * @param message Message to queue
+     */
+    public void queueMessage(@NotNull Message message) {
+        messageQueue.add(message);
+    }
+
+    /**
      * Sends the message to any subscriber that is subscribed to the topic that the message was sent to
      * @param message is the message that is sent from OKSE core
      * */
     public void sendMessage(@NotNull Message message) {
-        log.debug("OKSE has received a message, please redistribute!");
-
         HashMap<String, Subscriber> subs = subscriptionManager.getAllSubscribersForTopic(message.getTopic());
 
         Iterator it = subs.entrySet().iterator();
@@ -185,6 +214,8 @@ public class STOMPServer extends Server {
         try {
             gateway.shutdown();
             gateway = null;
+            running.set(false);
+            messageSenderThread.interrupt();
         } catch (Exception e) {
             log.error("Exception when trying to shutdown the server", e);
         }

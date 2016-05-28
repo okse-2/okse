@@ -66,7 +66,7 @@ public class STOMPProtocolServer extends AbstractProtocolServer {
     @Override
     public void sendMessage(Message message) {
         log.info("Received message on topic " + message.getTopic() );
-        server.sendMessage(message);
+        server.queueMessage(message);
     }
 
     /**

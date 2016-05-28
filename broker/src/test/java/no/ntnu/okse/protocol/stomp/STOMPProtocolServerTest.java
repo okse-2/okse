@@ -24,6 +24,7 @@ public class STOMPProtocolServerTest {
         server.setSubscriptionManager(subManager_spy);
 
         server_spy = Mockito.spy(server);
+        server_spy.init("localhost", 0);
 
         ps_spy = Mockito.spy(ps);
         ps_spy.setServer(server_spy);
@@ -55,7 +56,7 @@ public class STOMPProtocolServerTest {
         ps_spy.sendMessage(msg);
 
         ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
-        Mockito.verify(server_spy).sendMessage(messageArgument.capture());
+        Mockito.verify(server_spy).queueMessage(messageArgument.capture());
         assertEquals(msg, messageArgument.getValue());
     }
 
