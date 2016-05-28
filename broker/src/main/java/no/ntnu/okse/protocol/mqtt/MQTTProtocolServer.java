@@ -46,6 +46,7 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
     @Override
     public void stopServer() {
         log.info("Stopping MQTTProtocolServer");
+        server.stopMessageThread();
         server.stopServer();
         _running = false;
         server = null;
@@ -60,7 +61,7 @@ public class MQTTProtocolServer extends AbstractProtocolServer {
     @Override
     public void sendMessage(Message message) {
         log.info("Received message on topic " + message.getMessage());
-        server.sendMessage(message);
+        server.queueMessage(message);
 
     }
 
