@@ -18,11 +18,13 @@ WS-Notification broker and relaying messages to local subscribers.
 Currently supported protocols and libraries used to implement them are as
 follows:
 
-* WS-Notification ([WS-Nu](https://github.com/tOgg1/WS-Nu)) ([Customised fork](https://github.com/okse-2/WS-Nu))
-* AMQP 1.0 ([Apache Qpid Proton](https://qpid.apache.org/proton/))
-* AMQP 0.9.1 ([Joram](http://joram.ow2.org/)) ([Customised fork](https://github.com/okse-2/joram))
-* MQTT ([Moquette](https://github.com/andsel/moquette)) ([Customised fork](https://github.com/okse-2/moquette))
-* STOMP ([Stampy](https://github.com/mrstampy/Stampy)) ([Customised fork](https://github.com/okse-2/Stampy))
+| Protocol | Upstream | Fork |
+|-----------------|---|---|
+| AMQP 0.9.1      | [Apache Qpid Proton](https://qpid.apache.org/proton/) | N/A |
+| AMQP 1.0        | [Joram](http://joram.ow2.org/)                        | [Customised fork](https://github.com/okse-2/joram)    |
+| MQTT            | [Moquette](https://github.com/andsel/moquette)        | [Customised fork](https://github.com/okse-2/moquette) |
+| STOMP           | [Stampy](https://github.com/mrstampy/Stampy)          | [Customised fork](https://github.com/okse-2/Stampy)   |
+| WS-Notification | [WS-Nu](https://github.com/tOgg1/WS-Nu)               | [Customised fork](https://github.com/okse-2/WS-Nu)    |
 
 The OKSE message broker has been written with extensibility in mind. Every
 protocol is integrated independently, only communicating with the core layer of
