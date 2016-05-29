@@ -1,6 +1,8 @@
 package no.ntnu.okse.clients;
 
+import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -18,9 +20,33 @@ abstract class CommandClient {
     @Parameter(names = {"--verbose", "-v"}, description = "Verbose")
     public boolean verbose = false;
 
+    @Parameter(names = {"--help", "-h"}, help = true, hidden = true)
+    public boolean help;
+
+    protected static void launch(CommandClient client, String[] args) {
+        JCommander jCommander = new JCommander(client);
+        try {
+            jCommander.parse(args);
+        }
+        catch (ParameterException e) {
+            // Required parameter missing
+            System.out.println(e.getMessage());
+            jCommander.usage();
+            return;
+        }
+        // Show usage when help parameter is specified
+        if(client.help) {
+            jCommander.usage();
+            return;
+        }
+        client.run();
+    }
+
     protected abstract void createClient();
 
     protected abstract TestClient getClient();
+
+    public abstract void run();
 
     void initLogger() {
         PatternLayout layout = new PatternLayout("%d{yyyy-MM-dd - HH:mm:ss.SSS} [%p] (%t) %c: - %m%n");

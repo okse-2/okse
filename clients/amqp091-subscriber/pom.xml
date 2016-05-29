@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>amqp091-subscribe</artifactId>
+    <artifactId>amqp091-subscriber</artifactId>
 
     <build>
         <plugins>

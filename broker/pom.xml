@@ -183,6 +183,11 @@
             <artifactId>stampy-examples</artifactId>
             <version>1.1-okse</version>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.netty</groupId>
+            <artifactId>netty</artifactId>
+            <version>3.2.7.Final</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -243,10 +248,6 @@
             <id>okse-jenkins</id>
             <url>http://okse.kappa.me:8081/jenkins/plugin/repository/everything/</url>
         </repository>
-            <repository>
-                <id>Eclipse Paho Repo</id>
-                <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-            </repository>
     </repositories>
 
     <pluginRepositories>
@@ -255,5 +256,4 @@
             <url>https://repo.spring.io/libs-release</url>
         </pluginRepository>
     </pluginRepositories>
-
 </project>

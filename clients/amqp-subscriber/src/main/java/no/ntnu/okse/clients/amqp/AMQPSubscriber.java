@@ -1,6 +1,5 @@
 package no.ntnu.okse.clients.amqp;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import no.ntnu.okse.clients.SubscribeClient;
 import no.ntnu.okse.clients.TestClient;
@@ -14,9 +13,7 @@ public class AMQPSubscriber extends SubscribeClient {
     private AMQPClient client;
 
     public static void main(String[] args) {
-        AMQPSubscriber client = new AMQPSubscriber();
-        new JCommander(client, args);
-        client.run();
+        launch(new AMQPSubscriber(), args);
     }
 
     protected void createClient() {

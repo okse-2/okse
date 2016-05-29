@@ -1,21 +1,21 @@
-package no.ntnu.okse.clients.amqp;
+package no.ntnu.okse.clients.stomp;
 
 import com.beust.jcommander.Parameter;
 import no.ntnu.okse.clients.PublishClient;
 import no.ntnu.okse.clients.TestClient;
 
-public class AMQPPublisher extends PublishClient {
+public class STOMPPublisher extends PublishClient {
     @Parameter(names = {"--port", "-p"}, description = "Port")
-    public int port = 5672;
+    public int port = 61613;
 
-    private AMQPClient client;
+    private StompClient client;
 
     public static void main(String[] args) {
-        launch(new AMQPPublisher (), args);
+        launch(new STOMPPublisher(), args);
     }
 
     protected void createClient() {
-        client = new AMQPClient(host, port);
+        client = new StompClient(host, port);
     }
 
     protected TestClient getClient() {

@@ -57,5 +57,42 @@
             <artifactId>proton-j</artifactId>
             <version>0.12.1</version>
         </dependency>
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-client-server</artifactId>
+            <version>1.1-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-core</artifactId>
+            <version>1.1-okse</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>asia.stampy</groupId>
+            <artifactId>stampy-MINA-client-server-RI</artifactId>
+            <version>RELEASE</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>okse-jenkins</id>
+            <url>http://okse.kappa.me:8081/jenkins/plugin/repository/everything/</url>
+        </repository>
+    </repositories>
 </project>

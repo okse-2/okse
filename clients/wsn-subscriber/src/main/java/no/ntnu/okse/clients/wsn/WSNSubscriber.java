@@ -1,6 +1,5 @@
 package no.ntnu.okse.clients.wsn;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import no.ntnu.okse.clients.SubscribeClient;
 import no.ntnu.okse.clients.TestClient;
@@ -21,9 +20,7 @@ public class WSNSubscriber extends SubscribeClient {
     private WSNClient client;
 
     public static void main(String[] args) {
-        WSNSubscriber client = new WSNSubscriber();
-        new JCommander(client, args);
-        client.run();
+        launch(new WSNSubscriber(), args);
     }
 
     protected void createClient() {
