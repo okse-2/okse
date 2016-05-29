@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * AMQP 0.9.1 wrapper for AMQPService
@@ -21,6 +23,9 @@ public class AMQP091Service {
     private static Logger log = Logger.getLogger(AMQP091Service.class.getName());
     private AMQP091MessageListener messageListener;
     private AMQP091ProtocolServer protocolServer;
+    private LinkedBlockingQueue<Message> messageQueue;
+    private Thread messageSenderThread;
+    private AtomicBoolean running;
 
     /**
      * Dependency injection constructor for protocol server
@@ -32,12 +37,17 @@ public class AMQP091Service {
         this.host = amqp091ProtocolServer.getHost();
         this.port = amqp091ProtocolServer.getPort();
         messageListener = new AMQP091MessageListener(amqp091ProtocolServer);
+        messageQueue = new LinkedBlockingQueue<>();
+        running = new AtomicBoolean(false);
     }
 
     /**
      * Start server
      */
     public void start() {
+        if(!running.compareAndSet(false, true))
+            return;
+
         log.debug("AMQP 0.9.1 service is starting");
         try {
             AgentServer.init((short) 0, createAgentFolder(), null);
@@ -53,6 +63,20 @@ public class AMQP091Service {
         }
         AMQPService.addMessageListener(messageListener);
         AMQPService.setPublishing(false);
+
+        messageSenderThread = new Thread(() -> {
+            while(running.get()) {
+                try {
+                    Message message = messageQueue.take();
+                    AMQPService.internalPublish(message.getTopic(), "", message.getMessage().getBytes(StandardCharsets.UTF_8));
+                } catch (InterruptedException e) {
+                    log.info("AMQP 0.9.1 message queue interrupted, stopping?");
+                }
+
+            }
+        });
+        messageSenderThread.start();
+
         log.debug("AMQP 0.9.1 service started successfully");
     }
 
@@ -63,6 +87,8 @@ public class AMQP091Service {
         log.debug("AMQP 0.9.1 service is stopping");
         AMQPService.stopService();
         AgentServer.stop();
+        running.set(false);
+        messageSenderThread.interrupt();
         log.debug("AMQP 0.9.1 service stopped");
     }
 
@@ -101,6 +127,6 @@ public class AMQP091Service {
      * @param message message
      */
     public void sendMessage(Message message) {
-        AMQPService.internalPublish(message.getTopic(), "", message.getMessage().getBytes(StandardCharsets.UTF_8));
+        messageQueue.add(message);
     }
 }

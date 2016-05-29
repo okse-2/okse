@@ -48,7 +48,7 @@ public class MQTTProtocolServerTest {
     public void sendMessage() {
         Message message = createMessage();
         mqtt.sendMessage(message);
-        Mockito.verify(mqttServerSpy).sendMessage(message);
+        Mockito.verify(mqttServerSpy).queueMessage(message);
     }
 
     private Message createMessage() {

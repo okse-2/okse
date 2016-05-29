@@ -25,6 +25,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MQTTServer extends Server {
     private static Logger log = Logger.getLogger(Server.class);
@@ -33,6 +35,9 @@ public class MQTTServer extends Server {
     private final IConfig config;
     private List<InterceptHandler> interceptHandlers;
     private MQTTSubscriptionManager subscriptionManager;
+    private LinkedBlockingQueue<Message> messageQueue;
+    private Thread messageSenderThread;
+    private AtomicBoolean running;
 
     /**
      * Class for the interceptors to be used in Moquette
@@ -72,6 +77,8 @@ public class MQTTServer extends Server {
         interceptHandlers = new ArrayList<>();
         interceptHandlers.add(createListeners());
         config = new MemoryConfig(getConfig(host, port));
+        messageQueue = new LinkedBlockingQueue<>();
+        running = new AtomicBoolean(false);
     }
 
     /**
@@ -79,11 +86,35 @@ public class MQTTServer extends Server {
      */
     public void start() {
         try {
+            if(!running.compareAndSet(false, true))
+                return;
+
+            messageSenderThread = new Thread(() -> {
+                while(running.get()) {
+                    try {
+                        Message message = messageQueue.take();
+                        sendMessage(message);
+                    } catch (InterruptedException e) {
+                        log.info("MQTT message queue interrupted, stopping?");
+                    }
+
+                }
+            });
+
+            messageSenderThread.start();
             startServer(config, interceptHandlers);
         } catch (IOException e) {
             ps.incrementTotalErrors();
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Stops the message thread
+     */
+    void stopMessageThread() {
+        running.set(false);
+        messageSenderThread.interrupt();
     }
 
     /**
@@ -212,10 +243,18 @@ public class MQTTServer extends Server {
     }
 
     /**
-     * Sends the message to any subscriber that is subscribed to the topic that the message was sent to
-     *
-     * @param message is the message that is sent from OKSE core
+     * Add a message to the message queue
+     * @param message Message to queue
      */
+    public void queueMessage(@NotNull Message message) {
+        messageQueue.add(message);
+    }
+
+        /**
+         * Sends the message to any subscriber that is subscribed to the topic that the message was sent to
+         *
+         * @param message is the message that is sent from OKSE core
+         */
     public void sendMessage(@NotNull Message message) {
         log.debug("Byte size of message, assuming ascii: " + message.getMessage().length() * 8);
 
