@@ -5,7 +5,7 @@
     <parent>
         <artifactId>okse-clients</artifactId>
         <groupId>no.ntnu</groupId>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>no.ntnu</groupId>
             <artifactId>clients-common</artifactId>
-            <version>1.0.0</version>
+            <version>2.0.0</version>
         </dependency>
     </dependencies>
 </project>
