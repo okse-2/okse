@@ -16,6 +16,8 @@
         <module>amqp-subscriber</module>
         <module>amqp091-subscriber</module>
         <module>amqp091-publisher</module>
+        <module>stomp-subscriber</module>
+        <module>stomp-publisher</module>
     </modules>
     <packaging>pom</packaging>
 
