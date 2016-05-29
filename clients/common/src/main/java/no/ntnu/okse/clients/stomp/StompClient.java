@@ -52,10 +52,18 @@ public class StompClient implements TestClient {
     }
 
     private void initialize() {
+        addHandler();
+        addMessageListeners();
+    }
+
+    private void addHandler() {
         RawClientMinaHandler handler = new RawClientMinaHandler();
         handler.setHeartbeatContainer(heartbeatContainer);
         handler.setGateway(gateway);
+        gateway.setHandler(handler);
+    }
 
+    private void addMessageListeners() {
         gateway.addMessageListener(new DummySecurityListener());
         gateway.addMessageListener(new ClientMessageValidationListener());
 
@@ -69,8 +77,6 @@ public class StompClient implements TestClient {
         gateway.addMessageListener(disconnect);
         gateway.addOutgoingMessageInterceptor(disconnect);
         disconnect.setGateway(gateway);
-
-        gateway.setHandler(handler);
     }
 
     @Override
@@ -80,16 +86,9 @@ public class StompClient implements TestClient {
 
             @Override
             public void messageReceived(StampyMessage<?> message, HostPort hostPort) {
-                if(message.getMessageType().equals(StompMessageType.MESSAGE)) {
-                    MessageMessage messageMessage = (MessageMessage) message;
-                    AckMessage ack = new AckMessage(messageMessage.getHeader().getAck());
-                    callback.messageReceived(messageMessage);
-                    try {
-                        broadcast(ack);
-                    } catch (InterceptException e) {
-                        e.printStackTrace();
-                    }
-                }
+                MessageMessage messageMessage = (MessageMessage) message;
+                callback.messageReceived(messageMessage);
+                sendAck(messageMessage);
             }
 
             @Override
@@ -99,7 +98,7 @@ public class StompClient implements TestClient {
 
             @Override
             public StompMessageType[] getMessageTypes() {
-                return StompMessageType.values();
+                return new StompMessageType[]{StompMessageType.MESSAGE};
             }
         });
         try {
@@ -112,6 +111,15 @@ public class StompClient implements TestClient {
         try {
             broadcast(message);
         } catch (Exception e) {
+            log.error("Failed to connect", e);
+        }
+    }
+
+    private void sendAck(MessageMessage message) {
+        AckMessage ack = new AckMessage(message.getHeader().getAck());
+        try {
+            broadcast(ack);
+        } catch (InterceptException e) {
             e.printStackTrace();
         }
     }
