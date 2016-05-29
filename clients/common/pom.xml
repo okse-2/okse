@@ -88,4 +88,11 @@
             <version>RELEASE</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>okse-jenkins</id>
+            <url>http://okse.kappa.me:8081/jenkins/plugin/repository/everything/</url>
+        </repository>
+    </repositories>
 </project>
