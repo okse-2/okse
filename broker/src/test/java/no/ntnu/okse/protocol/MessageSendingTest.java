@@ -1,6 +1,8 @@
 package no.ntnu.okse.protocol;
 
 import com.rabbitmq.client.DefaultConsumer;
+import no.ntnu.okse.clients.stomp.StompCallback;
+import no.ntnu.okse.clients.stomp.StompClient;
 import no.ntnu.okse.core.CoreService;
 import no.ntnu.okse.core.event.listeners.SubscriptionChangeListener;
 import no.ntnu.okse.core.messaging.MessageService;
@@ -124,8 +126,28 @@ public class MessageSendingTest {
     }
 
     @Test
+    public void stompToStomp() throws InterruptedException {
+        StompClient subscriber = new StompClient();
+        StompClient publisher = new StompClient();
+        subscriber.connect();
+        publisher.connect();
+        StompCallback callback = mock(StompCallback.class);
+        subscriber.setCallback(callback);
+        subscriber.subscribe("stomp");
+
+        verify(subscriptionMock, timeout(1000).atLeastOnce()).subscriptionChanged(any());
+
+        publisher.publish("stomp", "Text content");
+        Thread.sleep(2000);
+        subscriber.unsubscribe("stomp");
+        subscriber.disconnect();
+        publisher.disconnect();
+        verify(callback).messageReceived(any());
+    }
+
+    @Test
     public void allToAll() throws Exception {
-        int numberOfProtocols = 4;
+        int numberOfProtocols = 5;
         // WSN
         WSNClient wsnClient = new WSNClient();
         Consumer.Callback wsnCallback = mock(Consumer.Callback.class);
@@ -148,11 +170,17 @@ public class MessageSendingTest {
         AMQPCallback amqpCallback = mock(AMQPCallback.class);
         amqpClient.setCallback(amqpCallback);
 
+        // Stomp
+        StompClient stompClient = new StompClient();
+        StompCallback stompCallback = mock(StompCallback.class);
+        stompClient.setCallback(stompCallback);
+
         // Connecting
         mqttClient.connect();
         amqp091Client.connect();
         amqpClient.connect();
         amqpSender.connect();
+        stompClient.connect();
 
 
         // Subscribing
@@ -160,6 +188,7 @@ public class MessageSendingTest {
         mqttClient.subscribe("all");
         amqp091Client.subscribe("all");
         amqpClient.subscribe("all");
+        stompClient.subscribe("all");
 
         verify(subscriptionMock, timeout(500).atLeast(numberOfProtocols)).subscriptionChanged(any());
 
@@ -168,6 +197,7 @@ public class MessageSendingTest {
         mqttClient.publish("all", "MQTT");
         amqp091Client.publish("all", "AMQP 0.9.1");
         amqpSender.publish("all", "AMQP 1.0");
+        stompClient.publish("all", "STOMP");
 
         // Wait for messages to arrive
         Thread.sleep(2000);
@@ -178,11 +208,13 @@ public class MessageSendingTest {
         amqp091Client.disconnect();
         amqpClient.disconnect();
         amqpSender.disconnect();
+        stompClient.disconnect();
 
         // Verifying that all messages were sent
         verify(amqpCallback, times(numberOfProtocols)).onReceive(any());
         verify(mqttCallback, times(numberOfProtocols)).messageArrived(anyString(), any(MqttMessage.class));
         verify(amqp091Callback, times(numberOfProtocols)).handleDelivery(any(), any(), any(), any());
         verify(wsnCallback, times(numberOfProtocols)).notify(any());
+        verify(stompCallback, times(numberOfProtocols)).messageReceived(any());
     }
 }
