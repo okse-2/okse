@@ -15,9 +15,10 @@ public class AMQP091Client implements TestClient {
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 56720;
     private Channel channel;
-    private Consumer consumer;
     private ConnectionFactory factory;
     private String queueName;
+    private Connection connection;
+    private AMQP091Callback callback;
 
     /**
      * Create an instance of test client with default configuration
@@ -46,7 +47,7 @@ public class AMQP091Client implements TestClient {
     public void connect() {
         try {
             log.debug("Connecting");
-            Connection connection = factory.newConnection();
+            connection = factory.newConnection();
             channel = connection.createChannel();
             log.debug("Connected");
         } catch (IOException | TimeoutException e) {
@@ -59,6 +60,7 @@ public class AMQP091Client implements TestClient {
         try {
             log.debug("Disconnecting");
             channel.close();
+            connection.close();
             log.debug("Disconnected");
         } catch (TimeoutException | IOException e) {
             log.error("Failed to disconnect", e);
@@ -71,8 +73,8 @@ public class AMQP091Client implements TestClient {
      * @param topic topic
      */
     public void subscribe(String topic) {
-        if(consumer == null) {
-            log.error("Consumer not set");
+        if(callback == null) {
+            log.error("Callback not set");
             return;
         }
         try {
@@ -80,6 +82,7 @@ public class AMQP091Client implements TestClient {
             channel.exchangeDeclare(topic, "fanout");
             queueName = channel.queueDeclare().getQueue();
             channel.queueBind(queueName, topic, "");
+            Consumer consumer = new PrivateConsumer(channel, callback);
             channel.basicConsume(queueName, true, consumer);
             log.debug("Subscribed to topic: " + topic);
         } catch (IOException e) {
@@ -104,21 +107,12 @@ public class AMQP091Client implements TestClient {
     }
 
     /**
-     * Set consumer to handle callbacks
+     * Set callback to handle delivery callbacks
      *
-     * @param consumer consumer
+     * @param callback callback
      */
-    public void setConsumer(Consumer consumer) {
-        this.consumer = consumer;
-    }
-
-    /**
-     * Get channel
-     *
-     * @return channel
-     */
-    public Channel getChannel() {
-        return channel;
+    public void setCallback(AMQP091Callback callback) {
+        this.callback = callback;
     }
 
     /**
@@ -134,6 +128,22 @@ public class AMQP091Client implements TestClient {
             log.debug("Published message");
         } catch (IOException e) {
             log.error("Failed to publish", e);
+        }
+    }
+
+    private static class PrivateConsumer extends DefaultConsumer {
+        private final AMQP091Callback callback;
+
+        public PrivateConsumer(Channel channel, AMQP091Callback callback) {
+            super(channel);
+            this.callback = callback;
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope,
+                                   AMQP.BasicProperties properties, byte[] body) throws IOException {
+            String message = new String(body, "UTF-8");
+            callback.messageReceived("", message);
         }
     }
 }
