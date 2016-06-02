@@ -27,7 +27,7 @@ public class AMQP091Subscriber extends SubscribeClient {
         private int messagesReceived = 0;
 
         public void messageReceived(String topic, String message) {
-            System.out.println(String.format("%d [%s] %s", ++messagesReceived, topic, message));
+            System.out.println(String.format("#%d [%s] %s", ++messagesReceived, topic, message));
         }
     }
 }

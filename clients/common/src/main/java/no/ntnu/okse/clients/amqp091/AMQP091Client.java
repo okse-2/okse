@@ -5,6 +5,8 @@ import no.ntnu.okse.clients.TestClient;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -19,6 +21,7 @@ public class AMQP091Client implements TestClient {
     private String queueName;
     private Connection connection;
     private AMQP091Callback callback;
+    private Map<String, String> topicToQueue;
 
     /**
      * Create an instance of test client with default configuration
@@ -34,11 +37,10 @@ public class AMQP091Client implements TestClient {
      * @param port port
      */
     public AMQP091Client(String host, int port) {
-
         factory = new ConnectionFactory();
         factory.setHost(host);
         factory.setPort(port);
-
+        topicToQueue = new HashMap<>();
     }
 
     /**
@@ -83,7 +85,8 @@ public class AMQP091Client implements TestClient {
             queueName = channel.queueDeclare().getQueue();
             channel.queueBind(queueName, topic, "");
             Consumer consumer = new PrivateConsumer(channel, callback);
-            channel.basicConsume(queueName, true, consumer);
+            String tag = channel.basicConsume(queueName, true, consumer);
+            topicToQueue.put(topic, tag);
             log.debug("Subscribed to topic: " + topic);
         } catch (IOException e) {
             log.error("Unable to subscribe to topic", e);
@@ -93,9 +96,10 @@ public class AMQP091Client implements TestClient {
     @Override
     public void unsubscribe(String topic) {
         log.debug("Unsubscribing from topic: " + topic);
-        if(queueName != null) {
+        if(topicToQueue.containsKey(topic)) {
             try {
-                channel.basicCancel(queueName);
+                String queueTag = topicToQueue.remove(topic);
+                channel.basicCancel(queueTag);
                 log.debug("Unsubscribed from topic: " + topic);
             } catch (IOException e) {
                 log.error("Failed to unsubscribe", e);
