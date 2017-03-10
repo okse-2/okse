@@ -1,6 +1,6 @@
 package no.ntnu.okse.protocol;
 
-import com.rabbitmq.client.DefaultConsumer;
+import no.ntnu.okse.clients.amqp091.AMQP091Callback;
 import no.ntnu.okse.clients.stomp.StompCallback;
 import no.ntnu.okse.clients.stomp.StompClient;
 import no.ntnu.okse.core.CoreService;
@@ -96,8 +96,8 @@ public class MessageSendingTest {
         AMQP091Client publisher = new AMQP091Client();
         subscriber.connect();
         publisher.connect();
-        DefaultConsumer consumer = mock(DefaultConsumer.class);
-        subscriber.setConsumer(consumer);
+        AMQP091Callback callback = mock(AMQP091Callback.class);
+        subscriber.setCallback(callback);
         subscriber.subscribe("amqp091");
 
         verify(subscriptionMock, timeout(500).atLeastOnce()).subscriptionChanged(any());
@@ -106,7 +106,7 @@ public class MessageSendingTest {
         Thread.sleep(2000);
         subscriber.disconnect();
         publisher.disconnect();
-        verify(consumer).handleDelivery(any(), any(), any(), any());
+        verify(callback).messageReceived(anyString(), anyString());
     }
 
     @Test
@@ -160,8 +160,8 @@ public class MessageSendingTest {
 
         // AMQP 0.9.1
         AMQP091Client amqp091Client = new AMQP091Client();
-        DefaultConsumer amqp091Callback = mock(DefaultConsumer.class);
-        amqp091Client.setConsumer(amqp091Callback);
+        AMQP091Callback amqp091Callback = mock(AMQP091Callback.class);
+        amqp091Client.setCallback(amqp091Callback);
 
         // AMQP 1.0
         AMQPClient amqpClient = new AMQPClient();
@@ -213,7 +213,7 @@ public class MessageSendingTest {
         // Verifying that all messages were sent
         verify(amqpCallback, times(numberOfProtocols)).onReceive(any());
         verify(mqttCallback, times(numberOfProtocols)).messageArrived(anyString(), any(MqttMessage.class));
-        verify(amqp091Callback, times(numberOfProtocols)).handleDelivery(any(), any(), any(), any());
+        verify(amqp091Callback, times(numberOfProtocols)).messageReceived(any(), any());
         verify(wsnCallback, times(numberOfProtocols)).notify(any());
         verify(stompCallback, times(numberOfProtocols)).messageReceived(any());
     }
